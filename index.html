@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculadora de Exportación - Versión Pro</title>
+    <title>Calculadora de Exportación - Análisis Neto vs Bruto</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
@@ -11,199 +11,122 @@
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
         .card { background-color: white; border-radius: 0.75rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); padding: 1.5rem; margin-bottom: 1.5rem; }
-        .btn { display: inline-block; padding: 0.625rem 1.25rem; border-radius: 0.375rem; font-weight: 500; text-align: center; transition: all 0.2s; cursor: pointer; }
+        .btn { display: inline-block; padding: 0.625rem 1.25rem; border-radius: 0.375rem; font-weight: 500; text-align: center; cursor: pointer; }
         .btn-primary { background-color: #4f46e5; color: white; }
-        .btn-secondary { background-color: #e5e7eb; color: #374151; }
         .btn-success { background-color: #10b981; color: white; }
-        .btn-danger { background-color: #ef4444; color: white; }
         input, select { width: 100%; padding: 0.5rem; border-radius: 0.375rem; border: 1px solid #d1d5db; }
-        label { font-size: 0.875rem; font-weight: 500; color: #374151; margin-bottom: 0.25rem; display: block; }
-        .price-box { background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 0.5rem; padding: 1rem; text-align: center; }
-        .calc-base-bg { background-color: #eef2ff; border: 1px solid #c7d2fe; }
+        label { font-size: 0.825rem; font-weight: 600; color: #374151; margin-bottom: 0.2rem; display: block; }
+        .price-box { background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 0.5rem; padding: 0.75rem; text-align: center; }
+        .neto-badge { background-color: #dcfce7; color: #166534; font-size: 0.7rem; padding: 1px 4px; rounded: 4px; font-weight: bold; }
     </style>
 </head>
 <body class="p-4 sm:p-8">
 
     <div class="max-w-6xl mx-auto">
-        <header class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
-            <div>
-                <h1 class="text-3xl font-bold text-gray-900 tracking-tight">Calculadora de Exportación</h1>
-                <p class="text-gray-600">Manual, Marítimo y Aéreo con Multidivisa.</p>
-            </div>
-            <div class="bg-white p-4 rounded-lg shadow-sm border border-indigo-100 flex items-center gap-4">
+        <header class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+            <h1 class="text-2xl font-bold text-gray-900">Calculadora de Exportación <span class="text-indigo-600">v2.1</span></h1>
+            <div class="bg-white p-3 rounded-lg shadow-sm border border-indigo-100 flex items-center gap-4">
                 <div>
-                    <label class="text-[10px] uppercase text-indigo-600 font-bold">Ver en:</label>
-                    <select id="display-currency" class="font-bold py-1">
-                        <option value="USD">USD ($)</option>
-                        <option value="EUR">EUR (€)</option>
-                    </select>
+                    <label class="text-[10px] uppercase text-indigo-600 font-bold">Moneda</label>
+                    <select id="display-currency" class="font-bold py-1 text-sm"><option value="USD">USD ($)</option><option value="EUR">EUR (€)</option></select>
                 </div>
                 <div>
-                    <label class="text-[10px] uppercase text-indigo-600 font-bold">1 USD a EUR</label>
-                    <input type="number" id="exchange-rate" value="0.92" step="0.001" class="font-bold py-1 w-20">
+                    <label class="text-[10px] uppercase text-indigo-600 font-bold">Tasa USD/EUR</label>
+                    <input type="number" id="exchange-rate" value="0.92" step="0.001" class="font-bold py-1 w-16 text-sm">
                 </div>
             </div>
         </header>
 
         <main>
             <div class="card">
-                <div class="mb-6">
-                    <label>Tipo de Envío</label>
-                    <select id="shipping-type">
-                        <option value="maritime">Marítimo (FCL)</option>
-                        <option value="air">Aéreo</option>
-                    </select>
-                </div>
-
-                <div class="p-4 calc-base-bg rounded-lg mb-6">
-                    <label class="mb-3">Punto de Partida del Cálculo</label>
-                    <div class="flex flex-wrap gap-4">
-                        <label class="flex items-center space-x-2 cursor-pointer bg-white px-3 py-2 rounded-full border shadow-sm">
-                            <input type="radio" name="calculation-base" value="proveedor_fob" checked>
-                            <span class="text-sm">FOB Proveedor (+)</span>
-                        </label>
-                        <label class="flex items-center space-x-2 cursor-pointer bg-white px-3 py-2 rounded-full border shadow-sm">
-                            <input type="radio" name="calculation-base" value="proveedor_cif">
-                            <span class="text-sm">CIF Proveedor (+)</span>
-                        </label>
-                        <label class="flex items-center space-x-2 cursor-pointer bg-white px-3 py-2 rounded-full border shadow-sm">
-                            <input type="radio" name="calculation-base" value="cliente_cif">
-                            <span class="text-sm">CIF Cliente (-)</span>
-                        </label>
-                    </div>
-                </div>
-
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div>
-                        <h3 class="text-lg font-bold border-b pb-2 mb-4">Producto y Costos</h3>
-                        <div class="flex gap-4 mb-4">
-                            <div class="w-1/2">
-                                <label>Especie</label>
-                                <select id="species"></select>
-                            </div>
-                            <div class="w-1/2" id="format-select-wrapper">
-                                <label>Formato</label>
-                                <select id="format"></select>
-                            </div>
+                    <div class="space-y-4">
+                        <h3 class="text-md font-bold border-b pb-2 mb-2 uppercase text-gray-500">Datos del Producto</h3>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div><label>Especie</label><select id="species"></select></div>
+                            <div id="format-select-wrapper"><label>Formato</label><select id="format"></select></div>
                         </div>
 
-                        <div id="manual-product-wrapper" class="hidden p-4 border rounded-lg bg-gray-50 mb-4 space-y-3">
-                            <p class="text-xs font-bold text-gray-500 uppercase">Datos Manuales</p>
-                            <div class="grid grid-cols-2 gap-2">
-                                <input type="text" id="manual-species-name" placeholder="Especie Manual">
-                                <input type="text" id="manual-format-name" placeholder="Formato Manual">
-                            </div>
-                            <div id="manual-maritime-fields">
-                                <label class="text-xs">Cajas por FCL</label>
-                                <input type="number" id="manual-boxes-fcl" placeholder="Ej: 2200">
+                        <div class="grid grid-cols-2 gap-3 p-3 bg-gray-50 rounded-lg border">
+                            <div>
+                                <label class="text-indigo-600">Peso NETO (Kg/Caja)</label>
+                                <input type="number" id="weight-net" step="0.001" placeholder="Ej: 1.5">
                             </div>
                             <div>
-                                <label class="text-xs">Peso Bruto/Caja (Kg)</label>
-                                <input type="number" id="manual-weight" step="0.01" placeholder="Ej: 8.19">
+                                <label class="text-orange-600">Peso BRUTO (Kg/Caja)</label>
+                                <input type="number" id="weight-gross" step="0.001" placeholder="Ej: 2.01">
                             </div>
                         </div>
 
-                        <div id="price-inputs" class="space-y-4">
-                            <div id="input-fob-proveedor-wrapper">
-                                <label>Costo Proveedor FOB (USD/Caja)</label>
-                                <input type="number" id="fob-proveedor-cost" step="0.01">
-                            </div>
-                            <div id="input-cif-proveedor-wrapper" class="hidden">
-                                <label>Costo Proveedor CIF (USD/Caja)</label>
-                                <input type="number" id="cif-proveedor-cost" step="0.01">
-                            </div>
-                            <div id="input-cif-cliente-wrapper" class="hidden">
-                                <label>Precio Cliente CIF (USD/Caja)</label>
-                                <input type="number" id="cif-cliente-price" step="0.01">
-                            </div>
+                        <div id="manual-product-wrapper" class="hidden p-3 border rounded-lg bg-indigo-50 space-y-2">
+                            <input type="text" id="manual-species-name" placeholder="Especie Manual" class="text-sm">
+                            <input type="text" id="manual-format-name" placeholder="Formato Manual" class="text-sm">
+                            <input type="number" id="manual-boxes-fcl" placeholder="Cajas por FCL" class="text-sm">
                         </div>
 
-                        <div class="grid grid-cols-2 gap-4 mt-4">
-                            <div>
-                                <label>Comisión (%)</label>
-                                <input type="number" id="commission" value="8.34" step="0.01">
+                        <div class="p-3 bg-blue-50 rounded-lg">
+                            <label>Base del Cálculo</label>
+                            <div class="flex gap-2">
+                                <label class="text-[10px]"><input type="radio" name="calculation-base" value="proveedor_fob" checked> FOB Prov</label>
+                                <label class="text-[10px]"><input type="radio" name="calculation-base" value="proveedor_cif"> CIF Prov</label>
+                                <label class="text-[10px]"><input type="radio" name="calculation-base" value="cliente_cif"> CIF Cliente</label>
                             </div>
+                            <input type="number" id="main-price-input" step="0.01" class="mt-2" placeholder="Ingrese monto USD/Caja">
+                        </div>
+                    </div>
+
+                    <div class="space-y-4">
+                        <h3 class="text-md font-bold border-b pb-2 mb-2 uppercase text-gray-500">Logística y Gastos</h3>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div><label>Envío</label><select id="shipping-type"><option value="maritime">Marítimo</option><option value="air">Aéreo</option></select></div>
+                            <div><label>Ruta</label><select id="route"></select></div>
+                        </div>
+
+                        <div id="manual-freight-wrapper" class="hidden p-3 border rounded-lg bg-orange-50 space-y-2">
+                            <input type="number" id="manual-freight-cost" placeholder="Flete Total (USD)" class="text-sm">
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <div><label>Comisión (%)</label><input type="number" id="commission" value="8.34" step="0.01"></div>
                             <div>
                                 <label>Base Comisión</label>
                                 <select id="commission-base">
                                     <option value="fob_shipper">FOB Shipper</option>
-                                    <option value="fob_cliente">FOB Cliente</option>
                                     <option value="cif_cliente" selected>CIF Cliente</option>
                                 </select>
                             </div>
                         </div>
-                    </div>
 
-                    <div>
-                        <h3 class="text-lg font-bold border-b pb-2 mb-4">Logística</h3>
-                        <div id="air-options" class="hidden mb-4 p-4 bg-orange-50 border border-orange-200 rounded-lg">
-                            <label>N° Cajas del Envío (Aéreo)</label>
-                            <input type="number" id="air-boxes" placeholder="Ej: 360">
-                            <div class="grid grid-cols-2 gap-2 mt-2">
-                                <input type="number" id="air-clearance" placeholder="Clearance Tot." step="0.01">
-                                <input type="number" id="air-cooler" placeholder="Cooler Tot." step="0.01">
-                            </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div><label>Seguro (USD/Tot)</label><input type="number" id="insurance-total" value="235"></div>
+                            <div><label>Otros/FCL (USD)</label><input type="number" id="services-total" value="500"></div>
                         </div>
-
-                        <label>Ruta (Flete/Tarifa)</label>
-                        <select id="route" class="mb-4"></select>
-
-                        <div id="manual-freight-wrapper" class="hidden p-4 border rounded-lg bg-gray-50 mb-4">
-                            <div id="manual-maritime-wrapper">
-                                <label>Costo Flete Manual FCL (USD)</label>
-                                <input type="number" id="manual-maritime-cost" step="0.01">
-                            </div>
-                            <div id="manual-air-wrapper" class="hidden">
-                                <label>Tarifa Manual por Kg (USD)</label>
-                                <input type="number" id="manual-air-rate" step="0.01">
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-4 mb-4">
-                            <div>
-                                <label>Seguro (USD/Tot)</label>
-                                <input type="number" id="insurance-total" value="235" step="0.01">
-                            </div>
-                            <div id="maritime-costs-fields">
-                                <label>Otros Gastos FCL (USD)</label>
-                                <input type="number" id="services-total" value="500" step="0.01">
-                            </div>
-                        </div>
-
-                        <button id="calculate-btn" class="btn btn-primary w-full mt-2">Calcular Detalle</button>
+                        <button id="calculate-btn" class="btn btn-primary w-full">CALCULAR DESGLOSE</button>
                     </div>
                 </div>
             </div>
 
             <div id="detailed-results-card" class="card hidden">
-                <h2 class="text-xl font-bold mb-4 border-b pb-2">Desglose de Costos</h2>
-                <div id="results-grid" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6"></div>
-                <div id="detailed-text-breakdown" class="text-sm space-y-1 mb-6 bg-gray-50 p-4 rounded-lg"></div>
-                <div class="flex gap-4">
-                    <button id="add-to-table-btn" class="btn btn-success flex-1">Añadir a Comparativa</button>
-                    <button onclick="exportToPDF()" class="btn bg-gray-800 text-white">Generar PDF</button>
+                <div id="results-grid" class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4"></div>
+                <div id="detailed-text-breakdown" class="text-[11px] font-mono grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 p-4 rounded-lg border"></div>
+                <div class="flex gap-4 mt-4">
+                    <button id="add-to-table-btn" class="btn btn-success flex-1">AÑADIR A TABLA</button>
+                    <button onclick="exportToPDF()" class="btn bg-gray-700 text-white">EXPORTAR PDF</button>
                 </div>
             </div>
 
             <div id="results-table-card" class="card hidden">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-xl font-bold">Historial de Comparación</h2>
-                    <button id="clear-table-btn" class="text-red-500 text-sm hover:underline">Limpiar Todo</button>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200" id="main-table">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-4 py-3 text-left text-[10px] font-bold uppercase">Producto/Formato</th>
-                                <th class="px-4 py-3 text-left text-[10px] font-bold uppercase">Ajuste</th>
-                                <th class="px-4 py-3 text-right text-[10px] font-bold uppercase">FOB Prov.</th>
-                                <th class="px-4 py-3 text-right text-[10px] font-bold uppercase">CIF Cliente (Caja/Kg)</th>
-                                <th class="px-4 py-3"></th>
-                            </tr>
-                        </thead>
-                        <tbody id="results-tbody" class="bg-white divide-y divide-gray-200"></tbody>
-                    </table>
-                </div>
+                <table class="min-w-full text-[10px]" id="main-table">
+                    <thead class="bg-gray-100 uppercase">
+                        <tr>
+                            <th class="px-2 py-2 text-left">Producto</th>
+                            <th class="px-2 py-2 text-right">Prov FOB (Caja/Kg Neto)</th>
+                            <th class="px-2 py-2 text-right">Cliente CIF (Caja/Kg Neto)</th>
+                            <th class="px-2 py-2 text-center">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="results-tbody" class="divide-y divide-gray-200"></tbody>
+                </table>
             </div>
         </main>
     </div>
@@ -214,247 +137,165 @@
             const { jsPDF } = window.jspdf;
             let lastData = null;
 
-            // Selectores
-            const getEl = (id) => document.getElementById(id);
-            const speciesSel = getEl('species');
-            const formatSel = getEl('format');
-            const routeSel = getEl('route');
-            const shipTypeSel = getEl('shipping-type');
+            // Poblado de especies
+            const speciesSel = document.getElementById('species');
+            const formatSel = document.getElementById('format');
+            const routeSel = document.getElementById('route');
+            const shipTypeSel = document.getElementById('shipping-type');
 
-            // --- INICIALIZACIÓN ---
             function init() {
-                // Poblado de especies con opción manual
                 speciesSel.innerHTML = '<option value="">Seleccione...</option>';
-                window.APP_DATA.species.forEach(s => {
-                    speciesSel.innerHTML += `<option value="${s.id}">${s.name}</option>`;
-                });
-                speciesSel.innerHTML += `<option value="manual">--- Ingresar Manual ---</option>`;
-                renderRoutes();
+                window.APP_DATA.species.forEach(s => speciesSel.innerHTML += `<option value="${s.id}">${s.name}</option>`);
+                speciesSel.innerHTML += '<option value="manual">-- Manual --</option>';
             }
 
-            // --- UI TOGGLING (Lógica Original) ---
-            speciesSel.addEventListener('change', (e) => {
-                const isManual = e.target.value === 'manual';
-                getEl('manual-product-wrapper').classList.toggle('hidden', !isManual);
-                getEl('format-select-wrapper').classList.toggle('hidden', isManual);
-                
-                if (!isManual && e.target.value !== "") {
-                    const sid = parseInt(e.target.value);
+            speciesSel.addEventListener('change', () => {
+                const sid = speciesSel.value;
+                document.getElementById('manual-product-wrapper').classList.toggle('hidden', sid !== 'manual');
+                if(sid !== 'manual' && sid !== "") {
                     formatSel.innerHTML = '<option value="">Seleccione...</option>';
-                    window.APP_DATA.formats.filter(f => f.speciesId === sid).forEach(f => {
-                        formatSel.innerHTML += `<option value="${f.id}">${f.name}</option>`;
-                    });
+                    window.APP_DATA.formats.filter(f => f.speciesId == sid).forEach(f => formatSel.innerHTML += `<option value="${f.id}">${f.name}</option>`);
                 }
-                renderRoutes();
+                updateRoutes();
             });
 
-            shipTypeSel.addEventListener('change', () => {
-                const type = shipTypeSel.value;
-                getEl('air-options').classList.toggle('hidden', type !== 'air');
-                getEl('maritime-costs-fields').classList.toggle('hidden', type !== 'maritime');
-                getEl('manual-maritime-fields').classList.toggle('hidden', type !== 'maritime');
-                renderRoutes();
+            formatSel.addEventListener('change', () => {
+                const fid = formatSel.value;
+                const format = window.APP_DATA.formats.find(f => f.id == fid);
+                if(format) {
+                    // Aquí asumimos que en datos.js podrías tener neto. Si no, el usuario lo ajusta manual
+                    document.getElementById('weight-gross').value = format.weightPerBox;
+                    document.getElementById('weight-net').value = (format.weightPerBox * 0.93).toFixed(2); // Estimado neto si no existe
+                }
             });
 
-            routeSel.addEventListener('change', (e) => {
-                getEl('manual-freight-wrapper').classList.toggle('hidden', e.target.value !== 'manual');
-                getEl('manual-maritime-wrapper').classList.toggle('hidden', shipTypeSel.value !== 'maritime');
-                getEl('manual-air-wrapper').classList.toggle('hidden', shipTypeSel.value !== 'air');
-            });
-
-            document.querySelectorAll('input[name="calculation-base"]').forEach(radio => {
-                radio.addEventListener('change', (e) => {
-                    getEl('input-fob-proveedor-wrapper').classList.toggle('hidden', e.target.value !== 'proveedor_fob');
-                    getEl('input-cif-proveedor-wrapper').classList.toggle('hidden', e.target.value !== 'proveedor_cif');
-                    getEl('input-cif-cliente-wrapper').classList.toggle('hidden', e.target.value !== 'cliente_cif');
-                });
-            });
-
-            function renderRoutes() {
-                const sid = speciesSel.value === 'manual' ? 'manual' : parseInt(speciesSel.value);
+            shipTypeSel.addEventListener('change', updateRoutes);
+            function updateRoutes() {
+                const sid = speciesSel.value;
                 const type = shipTypeSel.value;
                 routeSel.innerHTML = '<option value="">Seleccione...</option>';
-                
-                if (sid !== 'manual' && sid !== "") {
-                    const pool = type === 'maritime' ? window.APP_DATA.maritimeFreights : window.APP_DATA.airRates;
-                    pool.filter(r => r.speciesId === sid).forEach(r => {
-                        const costText = type === 'maritime' ? `$${r.cost}` : `$${r.ratePerKg}/kg`;
-                        routeSel.innerHTML += `<option value="${r.id}">${r.origin} > ${r.destination} (${costText})</option>`;
-                    });
-                }
-                routeSel.innerHTML += `<option value="manual">--- Flete Manual ---</option>`;
+                const pool = type === 'maritime' ? window.APP_DATA.maritimeFreights : window.APP_DATA.airRates;
+                pool.filter(r => r.speciesId == sid).forEach(r => routeSel.innerHTML += `<option value="${r.id}">${r.origin} > ${r.destination}</option>`);
+                routeSel.innerHTML += '<option value="manual">-- Manual --</option>';
             }
 
-            // --- LÓGICA DE CÁLCULO (Robustecida) ---
-            function performCalculation() {
+            // CÁLCULO
+            document.getElementById('calculate-btn').addEventListener('click', () => {
                 const type = shipTypeSel.value;
-                const calcBase = document.querySelector('input[name="calculation-base"]:checked').value;
+                const wNet = parseFloat(document.getElementById('weight-net').value) || 1;
+                const wGross = parseFloat(document.getElementById('weight-gross').value) || 1;
+                const boxes = parseInt(document.getElementById('manual-boxes-fcl').value) || 2200;
                 
-                // Obtener Formato (Manual o Lista)
-                let format;
-                if (speciesSel.value === 'manual') {
-                    format = {
-                        name: getEl('manual-format-name').value || 'Manual',
-                        weightPerBox: parseFloat(getEl('manual-weight').value) || 0,
-                        boxesPerContainer: parseInt(getEl('manual-boxes-fcl').value) || 1
-                    };
-                    format.speciesName = getEl('manual-species-name').value || 'Manual';
+                let freightTotal = 0;
+                if(routeSel.value === 'manual') {
+                    freightTotal = parseFloat(document.getElementById('manual-freight-cost').value) || 0;
                 } else {
-                    const fid = parseInt(formatSel.value);
-                    if (!fid) return alert("Seleccione formato");
-                    format = window.APP_DATA.formats.find(f => f.id === fid);
-                    format.speciesName = window.APP_DATA.species.find(s => s.id === format.speciesId).name;
+                    const r = (type === 'maritime' ? window.APP_DATA.maritimeFreights : window.APP_DATA.airRates).find(x => x.id == routeSel.value);
+                    freightTotal = type === 'maritime' ? r.cost : (r.ratePerKg * wGross * boxes);
                 }
 
-                // Obtener Ruta/Flete (Manual o Lista)
-                let freightPerBox = 0;
-                if (routeSel.value === 'manual') {
-                    if (type === 'maritime') {
-                        const totalF = parseFloat(getEl('manual-maritime-cost').value) || 0;
-                        freightPerBox = totalF / format.boxesPerContainer;
+                const fBox = freightTotal / boxes;
+                const iBox = (parseFloat(document.getElementById('insurance-total').value)||0) / boxes;
+                const sBox = (parseFloat(document.getElementById('services-total').value)||0) / boxes;
+                const priceIn = parseFloat(document.getElementById('main-price-input').value) || 0;
+                const commP = parseFloat(document.getElementById('commission').value) / 100;
+                const commBase = document.getElementById('commission-base').value;
+
+                let fobShipper, cifClient, fobClient, commVal;
+                const base = document.querySelector('input[name="calculation-base"]:checked').value;
+
+                if(base === 'proveedor_fob') {
+                    fobShipper = priceIn;
+                    if(commBase === 'fob_shipper') {
+                        commVal = fobShipper * commP;
+                        fobClient = fobShipper + iBox + sBox + commVal;
                     } else {
-                        const rateKg = parseFloat(getEl('manual-air-rate').value) || 0;
-                        freightPerBox = rateKg * format.weightPerBox;
+                        fobClient = (fobShipper + iBox + sBox + fBox * commP) / (1 - commP);
+                        commVal = (fobClient + fBox) * commP;
                     }
-                } else {
-                    const rid = parseInt(routeSel.value);
-                    if (!rid) return alert("Seleccione ruta");
-                    const route = type === 'maritime' ? window.APP_DATA.maritimeFreights.find(r => r.id === rid) : window.APP_DATA.airRates.find(r => r.id === rid);
-                    freightPerBox = type === 'maritime' ? (route.cost / format.boxesPerContainer) : (route.ratePerKg * format.weightPerBox);
+                    cifClient = fobClient + fBox;
+                } else if (base === 'cliente_cif') {
+                    cifClient = priceIn;
+                    fobClient = cifClient - fBox;
+                    commVal = cifClient * commP;
+                    fobShipper = fobClient - commVal - iBox - sBox;
                 }
 
-                // Otros Gastos
-                const insurance = (parseFloat(getEl('insurance-total').value) || 0);
-                const services = type === 'maritime' ? (parseFloat(getEl('services-total').value) || 0) : 0;
-                const boxesTotal = type === 'maritime' ? format.boxesPerContainer : (parseInt(getEl('air-boxes').value) || 1);
-                const airExtras = type === 'air' ? ((parseFloat(getEl('air-clearance').value)||0) + (parseFloat(getEl('air-cooler').value)||0)) : 0;
-                
-                const othersPerBox = (insurance + services + airExtras) / boxesTotal;
-                const C = parseFloat(getEl('commission').value) / 100;
-                const baseComm = getEl('commission-base').value;
-
-                let fobShipper, fobClient, cifClient, commVal;
-
-                if (calcBase === 'proveedor_fob') {
-                    fobShipper = parseFloat(getEl('fob-proveedor-cost').value) || 0;
-                    if (baseComm === 'fob_shipper') {
-                        commVal = fobShipper * C;
-                        fobClient = fobShipper + othersPerBox + commVal;
-                    } else if (baseComm === 'cif_cliente') {
-                        fobClient = (fobShipper + othersPerBox + freightPerBox * C) / (1 - C);
-                    } else { // fob_cliente
-                        fobClient = (fobShipper + othersPerBox) / (1 - C);
-                    }
-                    cifClient = fobClient + freightPerBox;
-                } 
-                else if (calcBase === 'proveedor_cif') {
-                    const cifProv = parseFloat(getEl('cif-proveedor-cost').value) || 0;
-                    fobShipper = cifProv - freightPerBox;
-                    fobClient = (fobShipper + othersPerBox) / (1 - C);
-                    cifClient = fobClient + freightPerBox;
-                }
-                else { // cliente_cif
-                    cifClient = parseFloat(getEl('cif-cliente-price').value) || 0;
-                    fobClient = cifClient - freightPerBox;
-                    if (baseComm === 'fob_shipper') {
-                        fobShipper = (fobClient - othersPerBox) / (1 + C);
-                    } else {
-                        fobShipper = fobClient - (fobClient * C) - othersPerBox;
-                    }
-                }
-
-                return {
-                    species: format.speciesName, format: format,
-                    fobShipper, cifShipper: fobShipper + freightPerBox,
-                    fobClient, cifClient, othersPerBox, freightPerBox,
-                    commission: getEl('commission').value, baseComm, boxesTotal
+                lastData = { 
+                    fobShipper, cifClient, fobClient, fBox, iBox, sBox, commVal, 
+                    wNet, wGross, boxes, species: speciesSel.value === 'manual' ? document.getElementById('manual-species-name').value : "Producto",
+                    commP: (commP*100).toFixed(2)
                 };
+
+                renderResults(lastData);
+            });
+
+            function formatV(v) {
+                const rate = document.getElementById('display-currency').value === 'EUR' ? parseFloat(document.getElementById('exchange-rate').value) : 1;
+                const sym = document.getElementById('display-currency').value === 'EUR' ? '€' : '$';
+                return sym + (v * rate).toFixed(2);
             }
 
-            // --- UI RENDER (Con Divisas y Kg) ---
-            function formatV(val) {
-                const isEUR = getEl('display-currency').value === 'EUR';
-                const rate = parseFloat(getEl('exchange-rate').value);
-                const symbol = isEUR ? '€' : '$';
-                const final = isEUR ? val * rate : val;
-                return symbol + final.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-            }
+            function renderResults(d) {
+                const grid = document.getElementById('results-grid');
+                grid.innerHTML = `
+                    <div class="price-box"><p class="text-[9px]">FOB SHIPPER</p><p class="font-bold">${formatV(d.fobShipper)}</p><p class="text-[8px] neto-badge">Kg Neto: ${formatV(d.fobShipper/d.wNet)}</p></div>
+                    <div class="price-box"><p class="text-[9px]">FLETE/CAJA (BRUTO)</p><p class="font-bold">${formatV(d.fBox)}</p></div>
+                    <div class="price-box bg-indigo-50"><p class="text-[9px]">FOB CLIENTE</p><p class="font-bold text-indigo-700">${formatV(d.fobClient)}</p></div>
+                    <div class="price-box bg-green-50"><p class="text-[9px]">CIF CLIENTE</p><p class="font-bold text-green-700">${formatV(d.cifClient)}</p><p class="text-[8px] neto-badge">Kg Neto: ${formatV(d.cifClient/d.wNet)}</p></div>
+                `;
 
-            getEl('calculate-btn').addEventListener('click', () => {
-                const data = performCalculation();
-                if (!data) return;
-                lastData = data;
-
-                // Render Tarjetas
-                const grid = getEl('results-grid');
-                const kg = data.format.weightPerBox || 1;
-                const targets = [
-                    { l: 'FOB Shipper', v: data.fobShipper },
-                    { l: 'CIF Shipper', v: data.cifShipper },
-                    { l: 'FOB Cliente', v: data.fobClient },
-                    { l: 'CIF Cliente', v: data.cifClient }
-                ];
-                grid.innerHTML = targets.map(t => `
-                    <div class="price-box border-b-4 ${t.l.includes('Cliente') ? 'border-green-500' : 'border-indigo-500'}">
-                        <p class="text-[10px] font-bold text-gray-400 uppercase">${t.l}</p>
-                        <p class="text-2xl font-black">${formatV(t.v)}</p>
-                        <p class="text-xs text-indigo-500 font-bold border-t mt-1 pt-1">${formatV(t.v/kg)} <span class="font-normal text-gray-400">/Kg</span></p>
+                document.getElementById('detailed-text-breakdown').innerHTML = `
+                    <div>
+                        <p class="font-bold border-b mb-1">MONTO POR CAJA</p>
+                        <p>Precio FOB Shipper: ${formatV(d.fobShipper)}</p>
+                        <p>(+) Seguro: ${formatV(d.iBox)}</p>
+                        <p>(+) Otros/Servicios: ${formatV(d.sBox)}</p>
+                        <p>(+) Comisión (${d.commP}%): ${formatV(d.commVal)}</p>
+                        <p>(+) Flete (Base Bruto ${d.wGross}kg): ${formatV(d.fBox)}</p>
+                        <p class="font-bold mt-1">CIF CLIENTE: ${formatV(d.cifClient)}</p>
                     </div>
-                `).join('');
-
-                // Render Desglose Detallado (Como estaba antes)
-                getEl('detailed-text-breakdown').innerHTML = `
-                    <p><b>Desglose por Caja:</b></p>
-                    <p>FOB Shipper: ${formatV(data.fobShipper)}</p>
-                    <p>(+) Logística/Seguro: ${formatV(data.othersPerBox)}</p>
-                    <p>(+) Flete: ${formatV(data.freightPerBox)}</p>
-                    <p>(+) Comisión (${data.commission}% sobre ${data.baseComm}): ${formatV(data.cifClient - data.fobShipper - data.othersPerBox - data.freightPerBox)}</p>
-                    <p class="font-bold text-green-600">Total CIF Cliente: ${formatV(data.cifClient)}</p>
+                    <div>
+                        <p class="font-bold border-b mb-1">TOTALES (${d.boxes} Cajas)</p>
+                        <p>Total FOB Shipper: ${formatV(d.fobShipper * d.boxes)}</p>
+                        <p>Total Logística: ${formatV((d.iBox+d.sBox)*d.boxes)}</p>
+                        <p>Total Comisión: ${formatV(d.commVal * d.boxes)}</p>
+                        <p>Total Flete: ${formatV(d.fBox * d.boxes)}</p>
+                        <p class="font-bold text-green-600 mt-1">TOTAL CIF: ${formatV(d.cifClient * d.boxes)}</p>
+                    </div>
                 `;
+                document.getElementById('detailed-results-card').classList.remove('hidden');
+            }
 
-                getEl('detailed-results-card').classList.remove('hidden');
-            });
-
-            // --- TABLA Y PDF ---
-            getEl('add-to-table-btn').addEventListener('click', () => {
-                if(!lastData) return;
-                const tbody = getEl('results-tbody');
-                const row = document.createElement('tr');
-                const kg = lastData.format.weightPerBox || 1;
-                row.innerHTML = `
-                    <td class="px-4 py-3 text-sm"><b>${lastData.species}</b><br><span class="text-xs text-gray-400">${lastData.format.name}</span></td>
-                    <td class="px-4 py-3 text-[10px] uppercase text-gray-500">C:${lastData.commission}%<br>B:${lastData.baseComm}</td>
-                    <td class="px-4 py-3 text-right text-sm">${formatV(lastData.fobShipper)}</td>
-                    <td class="px-4 py-3 text-right text-sm font-bold text-green-600">${formatV(lastData.cifClient)}<br><span class="text-[10px] font-normal text-gray-400">${formatV(lastData.cifClient/kg)}/kg</span></td>
-                    <td class="px-4 py-3 text-center"><button onclick="this.closest('tr').remove()" class="text-red-400">✕</button></td>
-                `;
-                tbody.appendChild(row);
-                getEl('results-table-card').classList.remove('hidden');
-            });
-
-            getEl('clear-table-btn').addEventListener('click', () => {
-                getEl('results-tbody').innerHTML = '';
-                getEl('results-table-card').classList.add('hidden');
+            document.getElementById('add-to-table-btn').addEventListener('click', () => {
+                const tbody = document.getElementById('results-tbody');
+                const row = `<tr>
+                    <td class="px-2 py-2">${lastData.species}</td>
+                    <td class="px-2 py-2 text-right">${formatV(lastData.fobShipper)} / <span class="text-blue-600 font-bold">${formatV(lastData.fobShipper/lastData.wNet)}/Kg</span></td>
+                    <td class="px-2 py-2 text-right">${formatV(lastData.cifClient)} / <span class="text-green-600 font-bold">${formatV(lastData.cifClient/lastData.wNet)}/Kg</span></td>
+                    <td class="px-2 py-2 text-center"><button onclick="this.closest('tr').remove()" class="text-red-500">✕</button></td>
+                </tr>`;
+                tbody.innerHTML += row;
+                document.getElementById('results-table-card').classList.remove('hidden');
             });
 
             window.exportToPDF = function() {
                 const doc = new jsPDF();
-                const isEUR = getEl('display-currency').value === 'EUR';
-                doc.setFontSize(18);
-                doc.text("REPORTE DE COTIZACIÓN", 14, 20);
-                doc.setFontSize(10);
-                doc.text(`Moneda: ${isEUR?'EURO':'USD'} | Tasa: ${getEl('exchange-rate').value} | Fecha: ${new Date().toLocaleDateString()}`, 14, 28);
-                
+                doc.setFontSize(14);
+                doc.text("Resumen de Cotización (Kg Neto vs Bruto)", 14, 20);
                 doc.autoTable({
-                    startY: 35,
-                    head: [['Producto', 'Ajuste', 'FOB Prov.', 'CIF Cliente (Caja)', 'CIF Cliente (Kg)']],
+                    startY: 30,
+                    head: [['Especie', 'FOB Prov (Caja)', 'FOB Prov (Kg Neto)', 'CIF Cliente (Caja)', 'CIF Cliente (Kg Neto)']],
                     body: Array.from(document.querySelectorAll('#results-tbody tr')).map(tr => {
-                        const c = tr.querySelectorAll('td');
-                        return [c[0].innerText.trim(), c[1].innerText.trim(), c[2].innerText.trim(), c[3].innerText.split('\n')[0].trim(), c[3].innerText.split('\n')[1].trim()];
-                    }),
-                    headStyles: { fillColor: [79, 70, 229] }
+                        const td = tr.querySelectorAll('td');
+                        return [
+                            td[0].innerText, 
+                            td[1].innerText.split('/')[0], td[1].innerText.split('/')[1],
+                            td[2].innerText.split('/')[0], td[2].innerText.split('/')[1]
+                        ];
+                    })
                 });
-                doc.save(`Cotizacion_${new Date().getTime()}.pdf`);
+                doc.save("Cotizacion_Fruta.pdf");
             };
 
             init();

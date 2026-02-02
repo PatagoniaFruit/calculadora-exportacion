@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Exportación Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
+        .card { background-color: white; border-radius: 0.75rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); padding: 1.5rem; margin-bottom: 1.5rem; }
+        .btn { display: inline-block; padding: 0.625rem 1.25rem; border-radius: 0.375rem; font-weight: 500; transition: all 0.2s; cursor: pointer; text-align: center; }
+        .btn-primary { background-color: #4f46e5; color: white; }
+        .btn-primary:hover { background-color: #4338ca; }
+        .btn-success { background-color: #10b981; color: white; }
+        .btn-success:hover { background-color: #059669; }
+        .price-box { background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 0.5rem; padding: 1rem; text-align: center; }
+        input, select { width: 100%; padding: 0.5rem; border-radius: 0.375rem; border: 1px solid #d1d5db; background-color: white; }
+        label { display: block; margin-bottom: 0.25rem; font-size: 0.875rem; font-weight: 500; color: #374151; }
+    </style>
+</head>
+<body class="p-4 sm:p-8">
+
+    <div class="max-w-6xl mx-auto">
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900 tracking-tight">Calculadora de Exportación</h1>
+                <p class="text-gray-600 mt-1">Cotización Multidivisa y Desglose por Kg.</p>
+            </div>
+            
+            <div class="bg-white p-4 rounded-lg shadow-sm border border-indigo-100 flex items-center gap-4">
+                <div>
+                    <label class="text-[10px] uppercase text-indigo-600 font-bold">Moneda Vista</label>
+                    <select id="display-currency" class="text-sm font-bold py-1">
+                        <option value="USD">Dólar (USD)</option>
+                        <option value="EUR">Euro (EUR)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-[10px] uppercase text-indigo-600 font-bold">Tasa 1 USD a EUR</label>
+                    <input type="number" id="exchange-rate" value="0.92" step="0.001" class="text-sm font-bold py-1 w-20">
+                </div>
+            </div>
+        </header>
+
+        <main>
+            <div class="card">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="space-y-4">
+                        <h3 class="text-lg font-semibold border-b pb-2">1. Detalles del Producto</h3>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label>Especie</label>
+                                <select id="species"></select>
+                            </div>
+                            <div>
+                                <label>Formato</label>
+                                <select id="format"></select>
+                            </div>
+                        </div>
+                        <div>
+                            <label id="base-price-label">Costo FOB Proveedor (USD/Caja)</label>
+                            <input type="number" id="base-price" step="0.01" placeholder="Ej: 15.50">
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label>Comisión (%)</label>
+                                <input type="number" id="commission" value="8.34" step="0.01">
+                            </div>
+                            <div>
+                                <label>Base Comisión</label>
+                                <select id="commission-base">
+                                    <option value="fob_shipper">FOB Shipper</option>
+                                    <option value="fob_cliente">FOB Cliente</option>
+                                    <option value="cif_cliente" selected>CIF Cliente</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4">
+                        <h3 class="text-lg font-semibold border-b pb-2">2. Logística y Envío</h3>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label>Tipo de Envío</label>
+                                <select id="shipping-type">
+                                    <option value="maritime">Marítimo (FCL)</option>
+                                    <option value="air">Aéreo</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label>Ruta / Flete</label>
+                                <select id="route"></select>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label>Seguro (USD/Envío)</label>
+                                <input type="number" id="insurance-total" value="235" step="0.01">
+                            </div>
+                            <div id="maritime-only-fields">
+                                <label>Gastos FCL (USD)</label>
+                                <input type="number" id="services-total" value="500" step="0.01">
+                            </div>
+                        </div>
+                        <button id="calculate-btn" class="btn btn-primary w-full mt-6 text-lg">Calcular</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="detailed-results-card" class="card hidden border-t-4 border-indigo-500">
+                <div id="results-grid" class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    </div>
+                <div class="mt-6 flex flex-col sm:flex-row gap-4">
+                    <button id="add-to-table-btn" class="btn btn-success flex-1">Añadir a Comparativa</button>
+                    <button onclick="exportToPDF()" class="btn bg-gray-800 text-white flex-1">Descargar Cotización PDF</button>
+                </div>
+            </div>
+
+            <div id="results-table-card" class="card hidden">
+                <h2 class="text-xl font-bold mb-4">Tabla de Comparación</h2>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-4 py-3 text-left text-xs font-bold uppercase">Producto</th>
+                                <th class="px-4 py-3 text-left text-xs font-bold uppercase">Detalle Cambio</th>
+                                <th class="px-4 py-3 text-right text-xs font-bold uppercase">FOB Prov.</th>
+                                <th class="px-4 py-3 text-right text-xs font-bold uppercase">CIF Cliente (Caja/Kg)</th>
+                                <th class="px-4 py-3"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="results-tbody" class="divide-y divide-gray-200 bg-white"></tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="datos.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const { jsPDF } = window.jspdf;
+            let lastCalc = null;
+
+            // Elementos del DOM
+            const speciesSel = document.getElementById('species');
+            const formatSel = document.getElementById('format');
+            const routeSel = document.getElementById('route');
+            const shipTypeSel = document.getElementById('shipping-type');
+
+            // --- INICIALIZACIÓN DE SELECTS ---
+            function init() {
+                // Cargar Especies
+                speciesSel.innerHTML = '<option value="">Seleccione...</option>';
+                window.APP_DATA.species.forEach(s => {
+                    speciesSel.innerHTML += `<option value="${s.id}">${s.name}</option>`;
+                });
+                renderRoutes();
+            }
+
+            speciesSel.addEventListener('change', () => {
+                const sid = parseInt(speciesSel.value);
+                formatSel.innerHTML = '<option value="">Seleccione...</option>';
+                window.APP_DATA.formats.filter(f => f.speciesId === sid).forEach(f => {
+                    formatSel.innerHTML += `<option value="${f.id}">${f.name}</option>`;
+                });
+                renderRoutes();
+            });
+
+            shipTypeSel.addEventListener('change', renderRoutes);
+
+            function renderRoutes() {
+                const sid = parseInt(speciesSel.value);
+                const type = shipTypeSel.value;
+                routeSel.innerHTML = '<option value="">Seleccione...</option>';
+                
+                if (type === 'maritime') {
+                    window.APP_DATA.maritimeFreights.filter(r => r.speciesId === sid).forEach(r => {
+                        routeSel.innerHTML += `<option value="${r.id}">${r.origin} > ${r.destination} ($${r.cost})</option>`;
+                    });
+                } else {
+                    window.APP_DATA.airRates.filter(r => r.speciesId === sid).forEach(r => {
+                        routeSel.innerHTML += `<option value="${r.id}">${r.origin} > ${r.destination} ($${r.ratePerKg}/kg)</option>`;
+                    });
+                }
+            }
+
+            // --- LÓGICA DE CÁLCULO ---
+            function calculate() {
+                const sid = parseInt(speciesSel.value);
+                const fid = parseInt(formatSel.value);
+                const rid = parseInt(routeSel.value);
+                
+                if (!sid || !fid || !rid) return alert("Por favor complete Especie, Formato y Ruta.");
+
+                const format = window.APP_DATA.formats.find(f => f.id === fid);
+                const type = shipTypeSel.value;
+                const route = type === 'maritime' ? 
+                    window.APP_DATA.maritimeFreights.find(r => r.id === rid) : 
+                    window.APP_DATA.airRates.find(r => r.id === rid);
+
+                const basePrice = parseFloat(document.getElementById('base-price').value) || 0;
+                const commPerc = parseFloat(document.getElementById('commission').value) / 100;
+                const commBase = document.getElementById('commission-base').value;
+                const insurance = parseFloat(document.getElementById('insurance-total').value) || 0;
+                const services = parseFloat(document.getElementById('services-total').value) || 0;
+
+                // Prorrateo por caja
+                const boxes = type === 'maritime' ? format.boxesPerContainer : 360; // 360 valor x defecto si es aire
+                const fBox = type === 'maritime' ? (route.cost / boxes) : (format.weightPerBox * route.ratePerKg);
+                const iBox = insurance / boxes;
+                const sBox = type === 'maritime' ? (services / boxes) : 0;
+                const others = iBox + sBox;
+
+                // Cálculo FOB / CIF (Asumiendo entrada como FOB Proveedor)
+                let fobShipper = basePrice;
+                let fobClient, cifClient, commVal;
+
+                if (commBase === 'fob_shipper') {
+                    commVal = fobShipper * commPerc;
+                    fobClient = fobShipper + others + commVal;
+                } else if (commBase === 'cif_cliente') {
+                    fobClient = (fobShipper + others + fBox * commPerc) / (1 - commPerc);
+                    commVal = (fobClient + fBox) * commPerc;
+                } else { // fob_cliente
+                    fobClient = (fobShipper + others) / (1 - commPerc);
+                    commVal = fobClient * commPerc;
+                }
+
+                cifClient = fobClient + fBox;
+
+                return {
+                    species: window.APP_DATA.species.find(s => s.id === sid).name,
+                    format: format,
+                    fobShipper, cifShipper: fobShipper + fBox,
+                    fobClient, cifClient,
+                    commission: document.getElementById('commission').value,
+                    commBase: commBase
+                };
+            }
+
+            // --- INTERFAZ ---
+            function getCurrencySettings() {
+                const curr = document.getElementById('display-currency').value;
+                const rate = parseFloat(document.getElementById('exchange-rate').value) || 1;
+                return { symbol: curr === 'EUR' ? '€' : '$', factor: curr === 'EUR' ? rate : 1 };
+            }
+
+            function formatDisp(val) {
+                const settings = getCurrencySettings();
+                return settings.symbol + (val * settings.factor).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            }
+
+            document.getElementById('calculate-btn').addEventListener('click', () => {
+                const res = calculate();
+                if (!res) return;
+                lastCalc = res;
+
+                const grid = document.getElementById('results-grid');
+                const kg = res.format.weightPerBox;
+                const targets = [
+                    { l: 'FOB Shipper', v: res.fobShipper },
+                    { l: 'CIF Shipper', v: res.cifShipper },
+                    { l: 'FOB Cliente', v: res.fobClient },
+                    { l: 'CIF Cliente', v: res.cifClient }
+                ];
+
+                grid.innerHTML = targets.map(t => `
+                    <div class="price-box border-b-4 ${t.l.includes('Cliente') ? 'border-green-500' : 'border-indigo-500'}">
+                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">${t.l}</p>
+                        <p class="text-2xl font-black">${formatDisp(t.v)}</p>
+                        <div class="mt-2 pt-2 border-t border-gray-100">
+                            <span class="text-sm font-semibold text-indigo-600">${formatDisp(t.v / kg)}</span>
+                            <span class="text-[10px] text-gray-400">/ Kg</span>
+                        </div>
+                    </div>
+                `).join('');
+
+                document.getElementById('detailed-results-card').classList.remove('hidden');
+            });
+
+            document.getElementById('add-to-table-btn').addEventListener('click', () => {
+                if (!lastCalc) return;
+                const tbody = document.getElementById('results-tbody');
+                const row = document.createElement('tr');
+                const kg = lastCalc.format.weightPerBox;
+
+                row.innerHTML = `
+                    <td class="px-4 py-3 text-sm font-bold">${lastCalc.species}<br><span class="text-[10px] font-normal text-gray-500">${lastCalc.format.name}</span></td>
+                    <td class="px-4 py-3 text-[10px] text-gray-500 uppercase">Com: ${lastCalc.commission}%<br>Base: ${lastCalc.commBase}</td>
+                    <td class="px-4 py-3 text-right text-sm">${formatDisp(lastCalc.fobShipper)}</td>
+                    <td class="px-4 py-3 text-right text-sm font-bold text-green-600">${formatDisp(lastCalc.cifClient)}<br><span class="text-[10px] font-normal text-gray-400">${formatDisp(lastCalc.cifClient / kg)}/kg</span></td>
+                    <td class="px-4 py-3 text-center"><button onclick="this.closest('tr').remove()" class="text-red-400">✕</button></td>
+                `;
+                tbody.appendChild(row);
+                document.getElementById('results-table-card').classList.remove('hidden');
+            });
+
+            window.exportToPDF = function() {
+                const doc = new jsPDF();
+                const settings = getCurrencySettings();
+                doc.setFontSize(18);
+                doc.text("COTIZACIÓN DE EXPORTACIÓN", 14, 20);
+                doc.setFontSize(10);
+                doc.text(`Fecha: ${new Date().toLocaleDateString()} | Moneda: ${settings.symbol === '$' ? 'USD' : 'EUR'} (Tasa: ${document.getElementById('exchange-rate').value})`, 14, 28);
+                
+                doc.autoTable({
+                    startY: 35,
+                    head: [['Producto/Formato', 'Comisión', 'FOB Prov (Caja)', 'CIF Cliente (Caja)', 'CIF Cliente (Kg)']],
+                    body: Array.from(document.querySelectorAll('#results-tbody tr')).map(tr => {
+                        const cells = tr.querySelectorAll('td');
+                        return [cells[0].innerText.trim(), cells[1].innerText.trim(), cells[2].innerText.trim(), cells[3].innerText.split('\n')[0].trim(), cells[3].innerText.split('\n')[1].trim()];
+                    }),
+                    headStyles: { fillColor: [79, 70, 229] }
+                });
+                doc.save("Cotizacion.pdf");
+            };
+
+            init();
+        });
+    </script>
+</body>
+</html>

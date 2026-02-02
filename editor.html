@@ -1,0 +1,463 @@
+editor.html: <!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editor de Datos para Calculadora</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .card {
+            background-color: white; border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            padding: 1.5rem; margin-bottom: 1.5rem;
+        }
+        .btn {
+            display: inline-block; padding: 0.75rem 1.5rem; border-radius: 0.5rem;
+            font-weight: 600; text-align: center; transition: background-color 0.2s; cursor: pointer;
+        }
+        .btn-primary { background-color: #4f46e5; color: white; }
+        .btn-primary:hover { background-color: #4338ca; }
+        .btn-danger { background-color: #ef4444; color: white; }
+        .btn-danger:hover { background-color: #dc2626; }
+        input, select, textarea {
+            width: 100%; padding: 0.5rem; border-radius: 0.375rem; border: 1px solid #d1d5db;
+        }
+        .modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.5); display: flex;
+            align-items: center; justify-content: center; z-index: 50;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800 p-4 sm:p-8">
+
+    <div class="max-w-6xl mx-auto">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-900">Editor de Datos de la Calculadora</h1>
+            <p class="text-gray-600 mt-2">Use esta página para modificar las especies, formatos y fletes.</p>
+        </header>
+
+        <main class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Data Management UI -->
+            <div class="card">
+                <h2 class="text-xl font-semibold mb-4 border-b pb-2">Gestionar Datos</h2>
+
+                <!-- Species -->
+                <div class="mb-6">
+                    <div class="flex justify-between items-center mb-2">
+                        <h3 class="text-lg font-medium">Especies</h3>
+                        <button onclick="openModal('species-modal')" class="btn btn-primary btn-sm py-1 px-3">Agregar Especie</button>
+                    </div>
+                    <div id="species-list" class="space-y-2 max-h-48 overflow-y-auto p-2 border rounded"></div>
+                </div>
+
+                <!-- Formats -->
+                <div class="mb-6">
+                    <div class="flex justify-between items-center mb-2">
+                        <h3 class="text-lg font-medium">Formatos</h3>
+                        <button onclick="openModal('format-modal')" class="btn btn-primary btn-sm py-1 px-3">Agregar Formato</button>
+                    </div>
+                    <div id="format-list" class="space-y-2 max-h-48 overflow-y-auto p-2 border rounded"></div>
+                </div>
+
+                <!-- Maritime Freights -->
+                 <div class="mb-6">
+                    <div class="flex justify-between items-center mb-2">
+                        <h3 class="text-lg font-medium">Fletes Marítimos</h3>
+                        <button onclick="openModal('maritime-freight-modal')" class="btn btn-primary btn-sm py-1 px-3">Agregar Flete</button>
+                    </div>
+                    <div id="maritime-freight-list" class="space-y-2 max-h-48 overflow-y-auto p-2 border rounded"></div>
+                </div>
+
+                <!-- Air Rates -->
+                <div>
+                    <div class="flex justify-between items-center mb-2">
+                        <h3 class="text-lg font-medium">Tarifas Aéreas</h3>
+                        <button onclick="openModal('air-rate-modal')" class="btn btn-primary btn-sm py-1 px-3">Agregar Tarifa</button>
+                    </div>
+                    <div id="air-rate-list" class="space-y-2 max-h-48 overflow-y-auto p-2 border rounded"></div>
+                </div>
+            </div>
+
+            <!-- Code Generation Section -->
+            <div class="card">
+                <h2 class="text-xl font-semibold mb-4">1. Generar Código</h2>
+                <div class="p-4 bg-blue-50 border-l-4 border-blue-400 text-blue-800 mb-4">
+                    <p>Después de hacer sus cambios, haga clic en el botón de abajo para generar el nuevo código para el archivo <code>datos.js</code>.</p>
+                </div>
+                <button onclick="generateCode()" class="btn btn-primary w-full">Generar Código para datos.js</button>
+                
+                <h2 class="text-xl font-semibold mt-8 mb-4">2. Copiar y Pegar</h2>
+                <div class="p-4 bg-green-50 border-l-4 border-green-400 text-green-800 mb-4">
+                    <p>Copie todo el contenido del siguiente cuadro de texto y péguelo en el archivo <code>datos.js</code>, reemplazando todo su contenido. Guarde el archivo para finalizar.</p>
+                </div>
+                <textarea id="output-code" rows="15" class="font-mono text-sm bg-gray-50" readonly></textarea>
+                <button onclick="copyCode()" class="btn btn-secondary w-full mt-2">Copiar al Portapapeles</button>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modals for Adding/Editing -->
+    <!-- Species Modal -->
+    <div id="species-modal" class="modal hidden">
+        <div class="bg-white rounded-lg p-6 w-1/3">
+            <h3 class="text-lg font-medium mb-4">Agregar/Editar Especie</h3>
+            <input type="hidden" id="species-id">
+            <div class="mb-4"><label>Nombre</label><input type="text" id="species-name"></div>
+            <div class="flex justify-end space-x-2">
+                <button onclick="closeModal('species-modal')" class="btn btn-secondary">Cancelar</button>
+                <button onclick="saveSpecies()" class="btn btn-primary">Guardar</button>
+            </div>
+        </div>
+    </div>
+    <!-- Format Modal -->
+    <div id="format-modal" class="modal hidden">
+         <div class="bg-white rounded-lg p-6 w-1/2">
+            <h3 class="text-lg font-medium mb-4">Agregar/Editar Formato</h3>
+            <input type="hidden" id="format-id">
+            <div class="grid grid-cols-2 gap-4">
+                <div class="col-span-2"><label>Asociar a Especie</label><select id="format-speciesId"></select></div>
+                <div><label>Nombre Formato</label><input type="text" id="format-name"></div>
+                <div><label>Kg Bruto/Caja</label><input type="number" id="format-weightPerBox" step="0.01"></div>
+                <div><label>Cajas/FCL</label><input type="number" id="format-boxesPerContainer"></div>
+                <div><label>Cajas/Skid</label><input type="number" id="format-boxesPerSkid"></div>
+            </div>
+            <div class="flex justify-end space-x-2 mt-4">
+                <button onclick="closeModal('format-modal')" class="btn btn-secondary">Cancelar</button>
+                <button onclick="saveFormat()" class="btn btn-primary">Guardar</button>
+            </div>
+        </div>
+    </div>
+    <!-- Maritime Freight Modal -->
+    <div id="maritime-freight-modal" class="modal hidden">
+         <div class="bg-white rounded-lg p-6 w-1/2">
+            <h3 class="text-lg font-medium mb-4">Agregar/Editar Flete Marítimo</h3>
+            <input type="hidden" id="maritime-freight-id">
+            <div class="grid grid-cols-2 gap-4">
+                <div class="col-span-2"><label>Asociar a Especie</label><select id="maritime-freight-speciesId"></select></div>
+                <div><label>Origen</label><input type="text" id="maritime-freight-origin"></div>
+                <div><label>Destino</label><input type="text" id="maritime-freight-destination"></div>
+                <div class="col-span-2"><label>Costo Flete (USD)</label><input type="number" id="maritime-freight-cost"></div>
+            </div>
+            <div class="flex justify-end space-x-2 mt-4">
+                <button onclick="closeModal('maritime-freight-modal')" class="btn btn-secondary">Cancelar</button>
+                <button onclick="saveMaritimeFreight()" class="btn btn-primary">Guardar</button>
+            </div>
+        </div>
+    </div>
+    <!-- Air Rate Modal -->
+    <div id="air-rate-modal" class="modal hidden">
+         <div class="bg-white rounded-lg p-6 w-1/2">
+            <h3 class="text-lg font-medium mb-4">Agregar/Editar Tarifa Aérea</h3>
+            <input type="hidden" id="air-rate-id">
+            <div class="grid grid-cols-2 gap-4">
+                <div class="col-span-2"><label>Asociar a Especie</label><select id="air-rate-speciesId"></select></div>
+                <div><label>Origen</label><input type="text" id="air-rate-origin"></div>
+                <div><label>Destino</label><input type="text" id="air-rate-destination"></div>
+                <div class="col-span-2"><label>Tarifa por Kg (USD)</label><input type="number" id="air-rate-ratePerKg" step="0.01"></div>
+            </div>
+            <div class="flex justify-end space-x-2 mt-4">
+                <button onclick="closeModal('air-rate-modal')" class="btn btn-secondary">Cancelar</button>
+                <button onclick="saveAirRate()" class="btn btn-primary">Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data file -->
+    <script src="datos.js"></script>
+
+    <!-- App logic for editor -->
+    <script>
+        let localData;
+
+        if (typeof window.APP_DATA !== 'undefined') {
+            // Use a deep copy to avoid modifying the original data object
+            localData = JSON.parse(JSON.stringify(window.APP_DATA));
+        } else {
+            // If datos.js is missing or empty, start with a blank slate
+            console.warn("datos.js no encontrado o vacío. Empezando con datos por defecto.");
+            localData = {
+                species: [],
+                formats: [],
+                maritimeFreights: [],
+                airRates: []
+            };
+        }
+        
+        const getEl = (id) => document.getElementById(id);
+
+        function renderAllLists() {
+            // Species
+            const speciesList = getEl('species-list');
+            speciesList.innerHTML = '';
+            localData.species.forEach(s => {
+                speciesList.innerHTML += `<div class="flex justify-between items-center bg-gray-50 p-2 rounded text-sm">
+                    <span>${s.name}</span>
+                    <div>
+                        <button onclick="editSpecies(${s.id})" class="text-blue-600 hover:underline mr-2">Editar</button>
+                        <button onclick="deleteSpecies(${s.id})" class="text-red-600 hover:underline">Eliminar</button>
+                    </div>
+                </div>`;
+            });
+            populateSpeciesSelects();
+
+            // Formats
+            const formatList = getEl('format-list');
+            formatList.innerHTML = '';
+            localData.formats.forEach(f => {
+                const speciesName = localData.species.find(s => s.id === f.speciesId)?.name || 'N/A';
+                formatList.innerHTML += `<div class="flex justify-between items-center bg-gray-50 p-2 rounded text-sm">
+                    <span>[${speciesName}] ${f.name}</span>
+                    <div>
+                         <button onclick="editFormat(${f.id})" class="text-blue-600 hover:underline mr-2">Editar</button>
+                        <button onclick="deleteFormat(${f.id})" class="text-red-600 hover:underline">Eliminar</button>
+                    </div>
+                </div>`;
+            });
+
+            // Maritime Freights
+            const maritimeList = getEl('maritime-freight-list');
+            maritimeList.innerHTML = '';
+            localData.maritimeFreights.forEach(f => {
+                const speciesName = localData.species.find(s => s.id === f.speciesId)?.name || 'N/A';
+                 maritimeList.innerHTML += `<div class="flex justify-between items-center bg-gray-50 p-2 rounded text-sm">
+                    <span>[${speciesName}] ${f.origin} -> ${f.destination}</span>
+                    <div>
+                         <button onclick="editMaritimeFreight(${f.id})" class="text-blue-600 hover:underline mr-2">Editar</button>
+                        <button onclick="deleteMaritimeFreight(${f.id})" class="text-red-600 hover:underline">Eliminar</button>
+                    </div>
+                </div>`;
+            });
+
+             // Air Rates
+            const airRateList = getEl('air-rate-list');
+            airRateList.innerHTML = '';
+            localData.airRates.forEach(r => {
+                const speciesName = localData.species.find(s => s.id === r.speciesId)?.name || 'N/A';
+                 airRateList.innerHTML += `<div class="flex justify-between items-center bg-gray-50 p-2 rounded text-sm">
+                    <span>[${speciesName}] ${r.origin} -> ${r.destination}</span>
+                    <div>
+                         <button onclick="editAirRate(${r.id})" class="text-blue-600 hover:underline mr-2">Editar</button>
+                        <button onclick="deleteAirRate(${r.id})" class="text-red-600 hover:underline">Eliminar</button>
+                    </div>
+                </div>`;
+            });
+        }
+        
+        function populateSpeciesSelects() {
+            const selects = ['format-speciesId', 'maritime-freight-speciesId', 'air-rate-speciesId'];
+            selects.forEach(selId => {
+                const select = getEl(selId);
+                select.innerHTML = '';
+                localData.species.forEach(s => {
+                    select.innerHTML += `<option value="${s.id}">${s.name}</option>`;
+                });
+            });
+        }
+
+        // --- Modal Control ---
+        function openModal(modalId, itemId = null) {
+            // A better way to reset would be to clear each field manually
+            // This is because there are no <form> tags
+            const modal = getEl(modalId);
+            const inputs = modal.querySelectorAll('input, select');
+            inputs.forEach(input => {
+                if (input.type === 'hidden') {
+                    input.value = '';
+                } else if (input.tagName === 'SELECT') {
+                    if (input.options.length > 0) input.selectedIndex = 0;
+                } else {
+                    input.value = '';
+                }
+            });
+            
+            getEl(modalId).classList.remove('hidden');
+        }
+        function closeModal(modalId) {
+            getEl(modalId).classList.add('hidden');
+        }
+
+        // --- CRUD for Species ---
+        function saveSpecies() {
+            const id = parseInt(getEl('species-id').value);
+            const name = getEl('species-name').value.trim();
+            if (!name) return alert('El nombre es obligatorio.');
+
+            if (id) { // Edit
+                const index = localData.species.findIndex(s => s.id === id);
+                localData.species[index].name = name;
+            } else { // Add
+                const newId = localData.species.length > 0 ? Math.max(...localData.species.map(s => s.id)) + 1 : 1;
+                localData.species.push({ id: newId, name });
+            }
+            renderAllLists();
+            closeModal('species-modal');
+        }
+        window.editSpecies = (id) => {
+            const item = localData.species.find(s => s.id === id);
+            getEl('species-id').value = item.id;
+            getEl('species-name').value = item.name;
+            openModal('species-modal');
+        }
+        window.deleteSpecies = (id) => {
+             if (!confirm('¿Seguro? Se eliminarán también formatos y fletes asociados.')) return;
+             localData.species = localData.species.filter(s => s.id !== id);
+             localData.formats = localData.formats.filter(f => f.speciesId !== id);
+             localData.maritimeFreights = localData.maritimeFreights.filter(f => f.speciesId !== id);
+             localData.airRates = localData.airRates.filter(r => r.speciesId !== id);
+             renderAllLists();
+        }
+        
+        // --- CRUD for Formats ---
+        function saveFormat() {
+            const id = parseInt(getEl('format-id').value);
+            const data = {
+                speciesId: parseInt(getEl('format-speciesId').value),
+                name: getEl('format-name').value.trim(),
+                weightPerBox: parseFloat(getEl('format-weightPerBox').value),
+                boxesPerContainer: parseInt(getEl('format-boxesPerContainer').value) || null,
+                boxesPerSkid: parseInt(getEl('format-boxesPerSkid').value) || null,
+            };
+            if (!data.speciesId || !data.name || !data.weightPerBox) return alert('Faltan campos obligatorios.');
+
+            if (id) {
+                const index = localData.formats.findIndex(f => f.id === id);
+                localData.formats[index] = { ...localData.formats[index], ...data };
+            } else {
+                const newId = localData.formats.length > 0 ? Math.max(...localData.formats.map(f => f.id)) + 1 : 1;
+                localData.formats.push({ id: newId, ...data });
+            }
+            renderAllLists();
+            closeModal('format-modal');
+        }
+         window.editFormat = (id) => {
+            const item = localData.formats.find(f => f.id === id);
+            getEl('format-id').value = item.id;
+            getEl('format-speciesId').value = item.speciesId;
+            getEl('format-name').value = item.name;
+            getEl('format-weightPerBox').value = item.weightPerBox;
+            getEl('format-boxesPerContainer').value = item.boxesPerContainer;
+            getEl('format-boxesPerSkid').value = item.boxesPerSkid;
+            openModal('format-modal');
+        }
+        window.deleteFormat = (id) => {
+            if (confirm('¿Seguro?')) {
+                localData.formats = localData.formats.filter(f => f.id !== id);
+                renderAllLists();
+            }
+        }
+        
+        // --- CRUD for Maritime Freights ---
+        function saveMaritimeFreight() {
+            const id = parseInt(getEl('maritime-freight-id').value);
+            const data = {
+                speciesId: parseInt(getEl('maritime-freight-speciesId').value),
+                origin: getEl('maritime-freight-origin').value.trim(),
+                destination: getEl('maritime-freight-destination').value.trim(),
+                cost: parseFloat(getEl('maritime-freight-cost').value),
+            };
+            if(!data.speciesId || !data.origin || !data.destination || !data.cost) return alert('Todos los campos son obligatorios');
+
+            if(id) {
+                const index = localData.maritimeFreights.findIndex(f => f.id === id);
+                localData.maritimeFreights[index] = {...localData.maritimeFreights[index], ...data};
+            } else {
+                const newId = localData.maritimeFreights.length > 0 ? Math.max(...localData.maritimeFreights.map(f => f.id)) + 1 : 1;
+                localData.maritimeFreights.push({id: newId, ...data});
+            }
+            renderAllLists();
+            closeModal('maritime-freight-modal');
+        }
+        window.editMaritimeFreight = (id) => {
+            const item = localData.maritimeFreights.find(f => f.id === id);
+            getEl('maritime-freight-id').value = item.id;
+            getEl('maritime-freight-speciesId').value = item.speciesId;
+            getEl('maritime-freight-origin').value = item.origin;
+            getEl('maritime-freight-destination').value = item.destination;
+            getEl('maritime-freight-cost').value = item.cost;
+            openModal('maritime-freight-modal');
+        }
+        window.deleteMaritimeFreight = (id) => {
+            if(confirm('¿Seguro?')) {
+                localData.maritimeFreights = localData.maritimeFreights.filter(f => f.id !== id);
+                renderAllLists();
+            }
+        }
+
+        // --- CRUD for Air Rates ---
+        function saveAirRate() {
+             const id = parseInt(getEl('air-rate-id').value);
+            const data = {
+                speciesId: parseInt(getEl('air-rate-speciesId').value),
+                origin: getEl('air-rate-origin').value.trim(),
+                destination: getEl('air-rate-destination').value.trim(),
+                ratePerKg: parseFloat(getEl('air-rate-ratePerKg').value),
+            };
+            if(!data.speciesId || !data.origin || !data.destination || !data.ratePerKg) return alert('Todos los campos son obligatorios');
+
+            if(id) {
+                const index = localData.airRates.findIndex(r => r.id === id);
+                localData.airRates[index] = {...localData.airRates[index], ...data};
+            } else {
+                const newId = localData.airRates.length > 0 ? Math.max(...localData.airRates.map(r => r.id)) + 1 : 1;
+                localData.airRates.push({id: newId, ...data});
+            }
+            renderAllLists();
+            closeModal('air-rate-modal');
+        }
+        window.editAirRate = (id) => {
+            const item = localData.airRates.find(r => r.id === id);
+            getEl('air-rate-id').value = item.id;
+            getEl('air-rate-speciesId').value = item.speciesId;
+            getEl('air-rate-origin').value = item.origin;
+            getEl('air-rate-destination').value = item.destination;
+            getEl('air-rate-ratePerKg').value = item.ratePerKg;
+            openModal('air-rate-modal');
+        }
+        window.deleteAirRate = (id) => {
+             if(confirm('¿Seguro?')) {
+                localData.airRates = localData.airRates.filter(r => r.id !== id);
+                renderAllLists();
+            }
+        }
+
+        // --- Code Generation ---
+        function generateCode() {
+            const instructions = `// --- INSTRUCCIONES ---
+// Para actualizar los datos de la calculadora, edite las listas que se encuentran a continuación.
+// - No cambie los nombres de las variables (species, formats, etc.).
+// - Asegúrese de que cada elemento nuevo tenga un 'id' único y consecutivo.
+// - Mantenga la estructura de cada objeto (los nombres como 'name', 'cost', 'speciesId', etc.).`;
+
+            let code = `${instructions}\n\nwindow.APP_DATA = {\n\n`;
+            code += `  // 1. LISTA DE ESPECIES (PRODUCTOS BASE)\n`;
+            code += `  species: ${JSON.stringify(localData.species, null, 2)},\n\n`;
+            code += `  // 2. LISTA DE FORMATOS DE EMPAQUE\n`;
+            code += `  // - Cada formato debe estar asociado a una especie por su 'speciesId'.\n`;
+            code += `  formats: ${JSON.stringify(localData.formats, null, 2)},\n\n`;
+            code += `  // 3. LISTA DE FLETES MARÍTIMOS\n`;
+            code += `  // - Cada flete debe estar asociado a una especie por su 'speciesId'.\n`;
+            code += `  maritimeFreights: ${JSON.stringify(localData.maritimeFreights, null, 2)},\n\n`;
+            code += `  // 4. LISTA DE TARIFAS AÉREAS\n`;
+            code += `  // - Cada tarifa debe estar asociada a una especie por su 'speciesId'.\n`;
+            code += `  airRates: ${JSON.stringify(localData.airRates, null, 2)}\n\n`;
+            code += `};`;
+            
+            getEl('output-code').value = code;
+        }
+
+        function copyCode() {
+            const output = getEl('output-code');
+            if(!output.value) return alert('Primero debe generar el código.');
+            output.select();
+            document.execCommand('copy');
+            alert('¡Código copiado al portapapeles!');
+        }
+
+        // Initialize
+        window.onload = renderAllLists;
+    </script>
+</body>
+</html>

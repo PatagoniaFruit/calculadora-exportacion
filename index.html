@@ -3,108 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculadora de Precios de Exportación</title>
+    <title>Calculadora de Exportación Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; /* Light gray background */ }
-        .card {
-            background-color: white;
-            border-radius: 0.75rem; /* Slightly larger radius */
-            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1); /* Softer shadow */
-            padding: 1.5rem; /* p-6 */
-            margin-bottom: 1.5rem; /* mb-6 */
-        }
-        .btn {
-            display: inline-block; padding: 0.625rem 1.25rem; /* Adjusted padding */ border-radius: 0.375rem; /* rounded-md */
-            font-weight: 500; /* Medium weight */ text-align: center; transition: background-color 0.2s, box-shadow 0.2s;
-            cursor: pointer; box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05); /* Subtle shadow */
-        }
-        .btn-primary { background-color: #4f46e5; /* Indigo 600 */ color: white; }
-        .btn-primary:hover { background-color: #4338ca; /* Indigo 700 */ box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); }
-        .btn-secondary { background-color: #e5e7eb; /* Gray 200 */ color: #374151; /* Gray 700 */ }
-        .btn-secondary:hover { background-color: #d1d5db; /* Gray 300 */ box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); }
-        .btn-danger { background-color: #ef4444; /* Red 500 */ color: white; }
-        .btn-danger:hover { background-color: #dc2626; /* Red 600 */ box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); }
-        /* [NUEVO] Botón verde para excel/tabla */
-        .btn-success { background-color: #10b981; color: white; }
-        .btn-success:hover { background-color: #059669; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
-
-        input[type="number"], input[type="text"], select {
-            width: 100%; padding: 0.5rem 0.75rem; /* py-2 px-3 */ border-radius: 0.375rem; /* rounded-md */
-            border: 1px solid #d1d5db; /* Gray 300 */ background-color: #fff;
-            transition: border-color 0.2s, box-shadow 0.2s;
-        }
-         input:focus, select:focus {
-            outline: none;
-            border-color: #4f46e5; /* Indigo 600 */
-            box-shadow: 0 0 0 3px rgb(79 70 229 / 0.2); /* Indigo focus ring */
-        }
-        label {
-             /* display: block; */ /* Ensure labels are block for margin */
-             margin-bottom: 0.25rem; /* mb-1 */
-             font-size: 0.875rem; /* text-sm */
-             font-weight: 500; /* font-medium */
-             color: #374151; /* Gray 700 */
-        }
-        .price-box {
-            background-color: #f9fafb; /* Gray 50 */
-            border: 1px solid #e5e7eb; /* Gray 200 */
-            border-radius: 0.5rem; /* rounded-lg */
-            padding: 1rem; /* p-4 */
-            text-align: center;
-        }
-        /* Style for the calculation base section */
-        .calc-base-bg { background-color: #eef2ff; /* Indigo 50 */ }
-        /* Table styles */
-        th { background-color: #f9fafb; /* Gray 50 */ color: #6b7280; /* Gray 500 */ font-weight: 500;}
-        td { color: #374151; /* Gray 700 */}
-        tbody tr:hover { background-color: #f9fafb; /* Gray 50 */ }
-        /* Style for radio button base options */
-        .base-option-label {
-             display: inline-flex; /* Use inline-flex for better alignment */
-             align-items: center;
-             padding: 0.5rem 1rem; /* py-2 px-4 */
-             border: 1px solid #d1d5db; /* Gray 300 */
-             border-radius: 9999px; /* rounded-full */
-             cursor: pointer;
-             transition: all 0.2s;
-             background-color: #fff;
-             margin-right: 0.75rem; /* mr-3 */
-             margin-bottom: 0.75rem; /* mb-3 */
-        }
-         .base-option-label input[type="radio"] {
-             display: none; /* Hide the actual radio button */
-        }
-         .base-option-label:has(input:checked) {
-             background-color: #4f46e5; /* Indigo 600 */
-             color: white;
-             border-color: #4f46e5;
-             box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-        }
-         .base-option-label:has(input:checked) span {
-             color: white;
-        }
-         .base-option-label span {
-             margin-left: 0.5rem; /* ml-2 */
-             font-size: 0.875rem; /* text-sm */
-             color: #374151; /* Gray 700 */
-        }
-        .base-option-label svg {
-             width: 1.25rem; /* w-5 */
-             height: 1.25rem; /* h-5 */
-             margin-right: 0.5rem; /* mr-2 */
-             fill: #6b7280; /* Gray 500 */
-        }
-        .base-option-label:has(input:checked) svg {
-            fill: white;
-        }
-        /* [NUEVO] Estilos extra para badges de peso */
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
+        .card { background-color: white; border-radius: 0.75rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); padding: 1.5rem; margin-bottom: 1.5rem; }
+        .btn { display: inline-block; padding: 0.625rem 1.25rem; border-radius: 0.375rem; font-weight: 500; text-align: center; cursor: pointer; transition: all 0.2s; }
+        .btn-primary { background-color: #4f46e5; color: white; } .btn-primary:hover { background-color: #4338ca; }
+        .btn-secondary { background-color: #e5e7eb; color: #374151; } .btn-secondary:hover { background-color: #d1d5db; }
+        .btn-success { background-color: #10b981; color: white; } .btn-success:hover { background-color: #059669; }
+        .btn-danger { background-color: #ef4444; color: white; } .btn-danger:hover { background-color: #dc2626; }
+        input, select { width: 100%; padding: 0.5rem; border-radius: 0.375rem; border: 1px solid #d1d5db; background-color: white; }
+        input:focus, select:focus { outline: none; border-color: #4f46e5; ring: 2px solid #e0e7ff; }
+        label { font-size: 0.85rem; font-weight: 600; color: #374151; margin-bottom: 0.25rem; display: block; }
+        .price-box { background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 0.5rem; padding: 1rem; text-align: center; }
+        .calc-base-bg { background-color: #eef2ff; border: 1px solid #c7d2fe; }
+        
+        /* Badges */
         .badge-weight { font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; font-weight: 600; display: inline-block; margin-top: 4px; }
         .badge-net { background-color: #dcfce7; color: #166534; }
-        .badge-gross { background-color: #ffedd5; color: #9a3412; }
     </style>
 </head>
 <body class="bg-gray-100 text-gray-800 p-4 sm:p-8">
@@ -112,8 +32,8 @@
     <div class="max-w-6xl mx-auto">
         <header class="flex flex-col md:flex-row justify-between items-center mb-10 gap-4">
             <div class="text-center md:text-left">
-                <h1 class="text-3xl font-bold text-gray-900 tracking-tight">Calculadora de Precios de Exportación</h1>
-                <p class="text-gray-600 mt-2">Calcula precios detallados para envíos marítimos y aéreos.</p>
+                <h1 class="text-3xl font-bold text-gray-900 tracking-tight">Calculadora de Exportación</h1>
+                <p class="text-gray-600 mt-1">Herramienta de Cotización Comercial</p>
             </div>
             <div class="bg-white p-3 rounded-lg shadow-sm border border-indigo-100 flex items-center gap-4">
                 <div>
@@ -133,41 +53,39 @@
             </div>
         </header>
 
-        <main id="main-content">
+        <main>
             <div class="card">
-                 <div class="mb-6">
-                    <label for="shipping-type" class="block">Tipo de Envío</label>
-                    <select id="shipping-type" class="mt-1">
-                        <option value="maritime">Marítimo (FCL)</option>
-                        <option value="air">Aéreo</option>
-                    </select>
-                </div>
-
-                <div class="mb-8 p-4 calc-base-bg rounded-lg border border-indigo-200">
-                    <label class="block text-sm font-medium text-gray-900 mb-3">Punto de Partida del Cálculo</label>
-                    <div class="flex flex-wrap items-center">
-                         <label class="base-option-label">
-                            <input type="radio" name="calculation-base" value="proveedor_fob" checked>
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M10.75 4.75a.75.75 0 0 0-1.5 0v4.5h-4.5a.75.75 0 0 0 0 1.5h4.5v4.5a.75.75 0 0 0 1.5 0v-4.5h4.5a.75.75 0 0 0 0-1.5h-4.5v-4.5Z" /></svg>
-                            <span>Costo FOB Proveedor</span>
-                        </label>
-                         <label class="base-option-label">
-                            <input type="radio" name="calculation-base" value="proveedor_cif">
-                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M10.75 4.75a.75.75 0 0 0-1.5 0v4.5h-4.5a.75.75 0 0 0 0 1.5h4.5v4.5a.75.75 0 0 0 1.5 0v-4.5h4.5a.75.75 0 0 0 0-1.5h-4.5v-4.5Z" /></svg>
-                            <span>Costo CIF Proveedor</span>
-                        </label>
-                         <label class="base-option-label">
-                            <input type="radio" name="calculation-base" value="cliente_cif">
-                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 10a.75.75 0 0 1 .75-.75h10.5a.75.75 0 0 1 0 1.5H4.75A.75.75 0 0 1 4 10Z" clip-rule="evenodd" /></svg>
-                            <span>Precio CIF Cliente</span>
-                        </label>
-                    </div>
-                     <p class="text-xs text-indigo-700 mt-2">El símbolo indica si se parte de un costo base ( + ) o de un precio final ( - ).</p>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                     <div>
-                         <h3 class="text-lg font-semibold text-gray-800 mb-4 border-b pb-2">Detalles del Producto y Costos</h3>
+                        <label>Tipo de Envío</label>
+                        <select id="shipping-type" class="mt-1">
+                            <option value="maritime">Marítimo (FCL)</option>
+                            <option value="air">Aéreo</option>
+                        </select>
+                    </div>
+                    <div class="md:col-span-2 p-3 calc-base-bg rounded-lg border border-indigo-200">
+                        <label>Punto de Partida del Cálculo</label>
+                        <div class="flex flex-wrap gap-4 mt-2">
+                            <label class="flex items-center space-x-2 cursor-pointer bg-white px-3 py-1 rounded-full border shadow-sm hover:border-indigo-500">
+                                <input type="radio" name="calculation-base" value="proveedor_fob" checked class="text-indigo-600 focus:ring-indigo-500">
+                                <span class="text-sm">FOB Proveedor (+)</span>
+                            </label>
+                            <label class="flex items-center space-x-2 cursor-pointer bg-white px-3 py-1 rounded-full border shadow-sm hover:border-indigo-500">
+                                <input type="radio" name="calculation-base" value="proveedor_cif" class="text-indigo-600 focus:ring-indigo-500">
+                                <span class="text-sm">CIF Proveedor (+)</span>
+                            </label>
+                            <label class="flex items-center space-x-2 cursor-pointer bg-white px-3 py-1 rounded-full border shadow-sm hover:border-indigo-500">
+                                <input type="radio" name="calculation-base" value="cliente_cif" class="text-indigo-600 focus:ring-indigo-500">
+                                <span class="text-sm">CIF Cliente (-)</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-800 mb-4 border-b pb-2">1. Producto y Costos</h3>
+                        
                         <div class="flex space-x-4 mb-4">
                             <div class="w-1/2">
                                 <label for="species">Especie</label>
@@ -179,860 +97,532 @@
                             </div>
                         </div>
 
-                        <div id="manual-product-wrapper" class="hidden space-y-4 mb-4 p-4 border rounded-lg bg-gray-50">
-                            <h4 class="text-sm font-medium text-gray-800 text-center border-b pb-2 mb-3">Datos del Producto Manual</h4>
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label for="manual-species-name" class="block text-xs font-medium text-gray-600">Nombre Especie</label>
-                                    <input type="text" id="manual-species-name" placeholder="Especie Manual" class="text-sm mt-1">
-                                </div>
-                                <div>
-                                    <label for="manual-format-name" class="block text-xs font-medium text-gray-600">Nombre Formato</label>
-                                    <input type="text" id="manual-format-name" placeholder="Formato Manual" class="text-sm mt-1">
-                                </div>
+                        <div id="manual-product-wrapper" class="hidden mb-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
+                            <p class="text-xs font-bold text-gray-500 uppercase mb-2">Ingreso Manual</p>
+                            <div class="grid grid-cols-2 gap-3 mb-3">
+                                <input type="text" id="manual-species-name" placeholder="Nombre Especie">
+                                <input type="text" id="manual-format-name" placeholder="Nombre Formato">
                             </div>
                             <div id="manual-maritime-product-fields">
-                                <label for="manual-boxes-fcl" class="block text-xs font-medium text-gray-600">Cajas por Contenedor (FCL)</label>
-                                <input type="number" id="manual-boxes-fcl" placeholder="Ej: 2200" class="text-sm mt-1">
-                            </div>
-                            <div id="manual-air-product-fields" class="hidden">
-                                <label for="manual-weight" class="block text-xs font-medium text-gray-600">Peso Bruto por Caja (Kg)</label>
-                                <input type="number" id="manual-weight" step="0.01" placeholder="Ej: 8.19" class="text-sm mt-1">
+                                <label class="text-xs">Cajas por Contenedor (FCL)</label>
+                                <input type="number" id="manual-boxes-fcl" placeholder="Ej: 2200">
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-2 gap-4 mb-4 p-3 bg-gray-50 rounded border border-gray-200">
-                             <div>
-                                <label for="weight-net" class="text-green-700">Peso NETO (Kg)</label>
-                                <input type="number" id="weight-net" step="0.001" placeholder="Ej: 1.5" class="mt-1 bg-white">
-                                <p class="text-[10px] text-gray-500 mt-1">Base para cálculo precio/kg</p>
+                        <div class="grid grid-cols-2 gap-4 mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                            <div>
+                                <label class="text-green-700">Peso NETO (Kg)</label>
+                                <input type="number" id="weight-net" step="0.001" placeholder="Ej: 1.5" class="bg-white font-bold">
+                                <p class="text-[10px] text-gray-500 mt-1">Base para cálculo $/kg</p>
                             </div>
                             <div>
-                                <label for="weight-gross" class="text-orange-700">Peso BRUTO (Kg)</label>
-                                <input type="number" id="weight-gross" step="0.001" placeholder="Ej: 2.0" class="mt-1 bg-white">
-                                <p class="text-[10px] text-gray-500 mt-1">Base para cálculo flete aéreo</p>
+                                <label class="text-orange-700">Peso BRUTO (Kg)</label>
+                                <input type="number" id="weight-gross" step="0.001" placeholder="Ej: 2.0" class="bg-white font-bold">
+                                <p class="text-[10px] text-gray-500 mt-1">Base para flete aéreo</p>
                             </div>
                         </div>
 
                         <div class="mb-4">
-                            <label for="variety-caliber">Variedad / Calibre (Opcional)</label>
-                            <input type="text" id="variety-caliber" placeholder="Ej: Duke / 18mm" class="mt-1">
+                            <div id="input-fob-proveedor-wrapper">
+                                <label>Costo Proveedor FOB (USD/Caja)</label>
+                                <input type="number" id="fob-proveedor-cost" placeholder="0.00" step="0.01">
+                            </div>
+                            <div id="input-cif-proveedor-wrapper" class="hidden">
+                                <label>Costo Proveedor CIF (USD/Caja)</label>
+                                <input type="number" id="cif-proveedor-cost" placeholder="0.00" step="0.01">
+                            </div>
+                            <div id="input-cif-cliente-wrapper" class="hidden">
+                                <label>Precio Cliente CIF (USD/Caja)</label>
+                                <input type="number" id="cif-cliente-price" placeholder="0.00" step="0.01">
+                            </div>
                         </div>
 
-                        <div id="input-fob-proveedor-wrapper" class="mb-4">
-                            <label for="fob-proveedor-cost">Costo Proveedor por Caja (USD/caja, FOB)</label>
-                            <input type="number" id="fob-proveedor-cost" placeholder="Ingresar costo FOB proveedor" step="0.01" class="mt-1">
-                        </div>
-                        <div id="input-cif-proveedor-wrapper" class="mb-4 hidden">
-                            <label for="cif-proveedor-cost">Costo Proveedor por Caja (USD/caja, CIF)</label>
-                            <input type="number" id="cif-proveedor-cost" placeholder="Ingresar costo CIF proveedor" step="0.01" class="mt-1">
-                        </div>
-                        <div id="input-cif-cliente-wrapper" class="mb-4 hidden">
-                            <label for="cif-cliente-price">Precio Cliente por Caja (USD/caja, CIF)</label>
-                            <input type="number" id="cif-cliente-price" placeholder="Ingresar oferta del cliente" step="0.01" class="mt-1">
-                        </div>
-                        <div class="grid grid-cols-2 gap-4 mb-4">
-                           <div>
-                               <label for="commission">Comisión (%)</label>
-                               <input type="number" id="commission" placeholder="Ej: 5.34" value="8.34" step="0.01" class="mt-1">
-                           </div>
-                           <div>
-                                <label for="commission-base">Base de Comisión</label>
-                                <select id="commission-base" class="mt-1">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label>Comisión (%)</label>
+                                <input type="number" id="commission" value="8.34" step="0.01">
+                            </div>
+                            <div>
+                                <label>Base Comisión</label>
+                                <select id="commission-base">
                                     <option value="fob_shipper">FOB Shipper</option>
                                     <option value="fob_cliente">FOB Cliente</option>
                                     <option value="cif_cliente" selected>CIF Cliente</option>
                                 </select>
-                           </div>
-                        </div>
-                         <div class="mb-4">
-                            <label for="insurance-total">Seguro Total Envío (USD/cont)</label>
-                            <input type="number" id="insurance-total" placeholder="Ej: 235" step="0.01" class="mt-1">
-                            <p class="text-xs text-gray-500 mt-1">Se prorratea por caja.</p>
-                        </div>
-                        <div id="maritime-costs" class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label for="services-total">Servicios Total FCL (USD/cont)</label>
-                                <input type="number" id="services-total" placeholder="Ej: 500" step="0.01" class="mt-1">
-                            </div>
-                            <div>
-                                <label for="extra-costs-total">Costo Extra Total FCL (USD/cont)</label>
-                                <input type="number" id="extra-costs-total" placeholder="Ej: 300" step="0.01" class="mt-1">
                             </div>
                         </div>
                     </div>
 
                     <div>
-                         <h3 class="text-lg font-semibold text-gray-800 mb-4 border-b pb-2">Detalles Logísticos</h3>
-                        <div id="air-options" class="hidden space-y-4 mb-4">
-                             <div>
-                                <label for="air-boxes">Número de Cajas del Envío</label>
-                                <input type="number" id="air-boxes" placeholder="Ej: 360" class="mt-1">
+                        <h3 class="text-lg font-bold text-gray-800 mb-4 border-b pb-2">2. Logística y Envío</h3>
+                        
+                        <div id="air-options" class="hidden mb-4 p-4 bg-orange-50 border border-orange-200 rounded-lg">
+                            <div class="mb-3">
+                                <label>N° Cajas del Envío</label>
+                                <input type="number" id="air-boxes" placeholder="Ej: 360">
                             </div>
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label for="air-clearance">Clearance Total (USD/cont)</label>
-                                    <input type="number" id="air-clearance" placeholder="Ej: 162" step="0.01" class="mt-1">
-                                </div>
-                                 <div>
-                                    <label for="air-cooler">Cooler Total (USD/cont)</label>
-                                    <input type="number" id="air-cooler" placeholder="Ej: 130" step="0.01" class="mt-1">
-                                </div>
-                                 <div>
-                                    <label for="air-dta">DTA Total (USD/cont)</label>
-                                    <input type="number" id="air-dta" placeholder="Ej: 40" step="0.01" class="mt-1">
-                                </div>
-                                 <div>
-                                    <label for="air-handling">Handling Total (USD/cont)</label>
-                                    <input type="number" id="air-handling" placeholder="Ej: 50" step="0.01" class="mt-1">
-                                </div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div><label class="text-xs">Clearance (Total)</label><input type="number" id="air-clearance" step="0.01"></div>
+                                <div><label class="text-xs">Cooler (Total)</label><input type="number" id="air-cooler" step="0.01"></div>
+                                <div><label class="text-xs">DTA (Total)</label><input type="number" id="air-dta" step="0.01"></div>
+                                <div><label class="text-xs">Handling (Total)</label><input type="number" id="air-handling" step="0.01"></div>
                             </div>
                         </div>
+
                         <div class="mb-4">
-                            <label for="route">Ruta (Flete / Tarifa)</label>
-                            <select id="route" class="mt-1"></select>
+                            <label>Ruta (Flete / Tarifa)</label>
+                            <select id="route"></select>
                         </div>
 
-                        <div id="manual-freight-wrapper" class="hidden space-y-4 mt-4 p-4 border rounded-lg bg-gray-50">
-                             <div id="manual-maritime-wrapper">
-                                <label for="manual-maritime-cost" class="block text-sm font-medium text-gray-700 mb-1">Costo Flete Manual FCL (USD)</label>
-                                <input type="number" id="manual-maritime-cost" placeholder="Costo total del flete" step="0.01">
-                             </div>
-                             <div id="manual-air-wrapper" class="hidden">
-                                <label for="manual-air-rate" class="block text-sm font-medium text-gray-700 mb-1">Tarifa Manual por Kg (USD)</label>
-                                <input type="number" id="manual-air-rate" placeholder="Tarifa por kilo" step="0.01">
-                             </div>
+                        <div id="manual-freight-wrapper" class="hidden p-4 border border-gray-200 rounded-lg bg-gray-50 mb-4">
+                            <p class="text-xs font-bold text-gray-500 uppercase mb-2">Detalle Flete Manual</p>
+                            <div class="grid grid-cols-2 gap-3 mb-3">
+                                <div><label class="text-xs">Origen</label><input type="text" id="manual-route-origin" placeholder="Origen"></div>
+                                <div><label class="text-xs">Destino</label><input type="text" id="manual-route-dest" placeholder="Destino"></div>
+                            </div>
+                            <div id="manual-maritime-wrapper">
+                                <label class="text-xs text-blue-600 font-bold">Costo Flete FCL (USD)</label>
+                                <input type="number" id="manual-maritime-cost" placeholder="Costo Total" step="0.01">
+                            </div>
+                            <div id="manual-air-wrapper" class="hidden">
+                                <label class="text-xs text-orange-600 font-bold">Tarifa Aérea (USD/Kg)</label>
+                                <input type="number" id="manual-air-rate" placeholder="Tarifa por Kg" step="0.01">
+                            </div>
                         </div>
 
-                        <button id="calculate-btn" class="btn btn-primary w-full mt-10">Calcular</button>
+                        <div class="grid grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <label>Seguro (USD Total)</label>
+                                <input type="number" id="insurance-total" value="235" step="0.01">
+                            </div>
+                            <div id="maritime-costs">
+                                <label>Servicios FCL (USD)</label>
+                                <input type="number" id="services-total" value="500" step="0.01">
+                            </div>
+                            <div id="maritime-extra">
+                                <label>Costos Extra FCL</label>
+                                <input type="number" id="extra-costs-total" value="300" step="0.01">
+                            </div>
+                        </div>
+
+                        <button id="calculate-btn" class="btn btn-primary w-full mt-6 text-lg py-3 shadow-lg">CALCULAR RESULTADOS</button>
                     </div>
                 </div>
             </div>
 
-            <div id="detailed-results-card" class="card hidden">
-                <h2 class="text-xl font-semibold mb-6 border-b pb-2">Desglose del Último Cálculo</h2>
+            <div id="detailed-results-card" class="card hidden border-t-4 border-indigo-500">
+                <h2 class="text-xl font-bold mb-6 text-center text-gray-800">Resumen de Cotización</h2>
                 
-                <div id="results-cards-container" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                    </div>
+                <div id="results-cards-container" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8"></div>
 
-                <div id="detailed-results-content" class="space-y-4 p-4 bg-gray-50 rounded-lg border border-gray-200 text-sm font-mono">
-                    </div>
+                <div id="detailed-results-content" class="bg-gray-50 p-6 rounded-lg border border-gray-200 text-sm font-mono mb-6"></div>
 
-                <div class="flex flex-col sm:flex-row gap-4 mt-6">
-                    <button id="add-to-table-btn" class="btn btn-success flex-1">Agregar a la Tabla de Comparación</button>
-                    <button onclick="exportToPDF()" class="btn btn-primary bg-gray-800 flex-none">Exportar PDF</button>
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <button id="add-to-table-btn" class="btn btn-success flex-1">Añadir a Historial</button>
+                    <button onclick="exportToPDF()" class="btn btn-primary bg-slate-800 hover:bg-slate-700 flex-1">Descargar PDF Detallado</button>
                 </div>
             </div>
 
             <div id="results-table-card" class="card hidden">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
-                    <h2 class="text-xl font-semibold">Tabla de Comparación de Cálculos</h2>
-                    <div class="flex space-x-2">
-                        <button id="copy-table-btn" class="btn btn-secondary py-2 px-4 text-sm">Copiar Tabla</button>
-                        <button id="clear-table-btn" class="btn btn-danger py-2 px-4 text-sm">Limpiar Tabla</button>
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-bold">Historial Comparativo</h2>
+                    <div class="space-x-2">
+                        <button id="copy-table-btn" class="text-blue-600 text-sm hover:underline">Copiar</button>
+                        <button id="clear-table-btn" class="text-red-600 text-sm hover:underline">Limpiar</button>
                     </div>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200 text-sm">
-                        <thead>
+                        <thead class="bg-gray-100">
                             <tr>
-                                <th scope="col" class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">Descripción</th>
-                                <th scope="col" class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">Ajuste</th>
-                                <th scope="col" class="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider">Precio Prov. (FOB)</th>
-                                <th scope="col" class="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider">Precio Cliente (CIF)</th>
-                                <th scope="col" class="px-2 py-3 text-left text-xs font-medium uppercase tracking-wider"></th>
+                                <th class="px-4 py-3 text-left font-bold uppercase text-xs text-gray-500">Producto</th>
+                                <th class="px-4 py-3 text-left font-bold uppercase text-xs text-gray-500">Configuración</th>
+                                <th class="px-4 py-3 text-right font-bold uppercase text-xs text-gray-500">FOB Prov.</th>
+                                <th class="px-4 py-3 text-right font-bold uppercase text-xs text-gray-500">CIF Cliente</th>
+                                <th class="px-2 py-3"></th>
                             </tr>
                         </thead>
-                        <tbody id="results-tbody" class="bg-white divide-y divide-gray-200">
-                            </tbody>
+                        <tbody id="results-tbody" class="bg-white divide-y divide-gray-200"></tbody>
                     </table>
                 </div>
-            </div>
-            
-            <div class="card">
-                <h2 class="text-xl font-semibold mb-4 border-b pb-2">Visualización de Datos</h2>
-                <div class="p-4 bg-yellow-100 border-l-4 border-yellow-400 text-yellow-800 mb-6 rounded-md">
-                    <p class="text-sm"><b>Importante:</b> Los datos se leen del archivo <code>datos.js</code>. Para agregar, editar o eliminar registros, por favor use el editor de datos.</p>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div>
-                        <h3 class="text-lg font-medium mb-3 text-gray-700">Especies</h3>
-                        <div id="species-list" class="mb-3 space-y-1 max-h-48 overflow-y-auto p-2 border rounded"></div>
-                    </div>
-                    <div>
-                        <h3 class="text-lg font-medium mb-3 text-gray-700">Formatos</h3>
-                         <div id="format-list" class="mb-3 space-y-1 max-h-48 overflow-y-auto p-2 border rounded"></div>
-                    </div>
-                </div>
-                 <div class="border-t mt-8 pt-6">
-                      <div id="maritime-freight-manager">
-                        <h3 class="text-lg font-medium mb-3 text-gray-700">Fletes Marítimos (por Contenedor)</h3>
-                        <div id="freight-list" class="mb-3 space-y-1 max-h-48 overflow-y-auto p-2 border rounded"></div>
-                    </div>
-                    <div id="air-rate-manager" class="hidden">
-                        <h3 class="text-lg font-medium mb-3 text-gray-700">Tarifas Aéreas (por Kg)</h3>
-                        <div id="air-rate-list" class="mb-3 space-y-1 max-h-48 overflow-y-auto p-2 border rounded"></div>
-                    </div>
-                 </div>
             </div>
         </main>
     </div>
 
     <script src="datos.js"></script>
-
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // [NUEVO] Inicializar jsPDF
             const { jsPDF } = window.jspdf;
-
-            // Fallback for missing or empty data file
+            
+            // Fallback datos
             if (typeof window.APP_DATA === 'undefined') {
-                console.warn("datos.js no se encontró o está vacío. La calculadora se iniciará con datos vacíos.");
                 window.APP_DATA = { species: [], formats: [], maritimeFreights: [], airRates: [] };
             }
 
-            let lastCalculationData = null;
+            let lastCalc = null; // Store full calculation object
 
-            // --- DOM ELEMENTS ---
+            // DOM Elements
             const getEl = (id) => document.getElementById(id);
             const speciesSelect = getEl('species');
             const formatSelect = getEl('format');
             const routeSelect = getEl('route');
             const shippingTypeSelect = getEl('shipping-type');
-            const commissionBaseSelect = getEl('commission-base');
             
-            // [NUEVO] Elementos de Peso
-            const weightNetInput = getEl('weight-net');
-            const weightGrossInput = getEl('weight-gross');
-
-            // --- RENDER FUNCTIONS (UI Updates) ---
-            function renderSpecies(selectElements) {
-                const speciesListDiv = getEl('species-list');
-                speciesListDiv.innerHTML = '';
-                selectElements.forEach(sel => { sel.innerHTML = '<option value="">Seleccione...</option>'; });
-
+            // --- INICIALIZACIÓN ---
+            function init() {
+                speciesSelect.innerHTML = '<option value="">Seleccione...</option>';
                 window.APP_DATA.species.forEach(s => {
-                    const itemDiv = document.createElement('div');
-                    itemDiv.className = 'flex justify-between items-center bg-gray-50 p-2 rounded text-sm';
-                    itemDiv.innerHTML = `<span><b>${s.name}</b></span>`;
-                    speciesListDiv.appendChild(itemDiv);
-                    
-                    selectElements.forEach(sel => {
-                        const option = document.createElement('option');
-                        option.value = s.id;
-                        option.textContent = s.name;
-                        sel.appendChild(option);
+                    speciesSelect.innerHTML += `<option value="${s.id}">${s.name}</option>`;
+                });
+                speciesSelect.innerHTML += `<option value="manual">--- Ingresar Manual ---</option>`;
+                renderRoutes();
+            }
+
+            // --- LISTENERS ---
+            speciesSelect.addEventListener('change', (e) => {
+                const isManual = e.target.value === 'manual';
+                getEl('manual-product-wrapper').classList.toggle('hidden', !isManual);
+                getEl('format-select-wrapper').classList.toggle('hidden', isManual);
+                
+                if (!isManual && e.target.value !== "") {
+                    const sid = parseInt(e.target.value);
+                    formatSelect.innerHTML = '<option value="">Seleccione...</option>';
+                    window.APP_DATA.formats.filter(f => f.speciesId === sid).forEach(f => {
+                        // [MEJORA] Mostrar cajas en el selector
+                        const boxTxt = f.boxesPerContainer ? ` - ${f.boxesPerContainer} Cajas` : '';
+                        formatSelect.innerHTML += `<option value="${f.id}">${f.name}${boxTxt}</option>`;
                     });
-                });
-                const manualOption = document.createElement('option');
-                manualOption.value = 'manual';
-                manualOption.textContent = '--- Ingresar Especie/Formato Manual ---';
-                speciesSelect.appendChild(manualOption);
-            }
-
-            function renderFormatsForSpecies(speciesId, selectElement = formatSelect) {
-                const relevantFormats = window.APP_DATA.formats.filter(f => f.speciesId === speciesId);
-                selectElement.innerHTML = '<option value="">Seleccione...</option>';
-                relevantFormats.forEach(f => {
-                    const option = document.createElement('option');
-                    option.value = f.id;
-                    option.textContent = f.name;
-                    selectElement.appendChild(option);
-                });
-            }
-            
-            function renderRoutes(speciesId, type) {
-                routeSelect.innerHTML = '<option value="">Seleccione Ruta...</option>';
-                let routes = [];
-                if (speciesId && speciesId !== 'manual'){
-                    if (type === 'maritime') {
-                        routes = window.APP_DATA.maritimeFreights.filter(f => f.speciesId === speciesId);
-                        if(routes.length === 0) routeSelect.innerHTML = '<option value="">Sin fletes para esta especie</option>';
-                        routes.forEach(f => {
-                            const option = document.createElement('option');
-                            option.value = f.id;
-                            option.textContent = `${f.origin} -> ${f.destination} - $${f.cost.toLocaleString('en-US')}`;
-                            routeSelect.appendChild(option);
-                        });
-                    } else { // air
-                        routes = window.APP_DATA.airRates.filter(r => r.speciesId === speciesId);
-                         if(routes.length === 0) routeSelect.innerHTML = '<option value="">Sin tarifas para esta especie</option>';
-                        routes.forEach(r => {
-                            const option = document.createElement('option');
-                            option.value = r.id;
-                            option.textContent = `${r.origin} -> ${r.destination} - $${r.ratePerKg.toFixed(2)}/kg`;
-                            routeSelect.appendChild(option);
-                        });
-                    }
                 }
-                const manualOption = document.createElement('option');
-                manualOption.value = 'manual';
-                manualOption.textContent = '--- Ingresar Flete/Tarifa Manual ---';
-                routeSelect.appendChild(manualOption);
-            }
-
-            function renderManagementLists() {
-                // (Misma lógica original, simplificada aquí para ahorrar espacio visual, pero funcional igual)
-                const formatListDiv = getEl('format-list');
-                formatListDiv.innerHTML = '';
-                window.APP_DATA.formats.forEach(f => {
-                    const speciesName = window.APP_DATA.species.find(s => s.id === f.speciesId)?.name || 'N/A';
-                    const item = document.createElement('div');
-                    item.className = 'flex justify-between items-center bg-gray-50 p-2 rounded text-sm';
-                    item.innerHTML = `<span>[${speciesName}] <b>${f.name}</b> (${f.weightPerBox}kg)</span>`;
-                    formatListDiv.appendChild(item);
-                });
-                // ... (Igual para freights y air rates, usando lógica original)
-                const freightListDiv = getEl('freight-list');
-                freightListDiv.innerHTML = '';
-                window.APP_DATA.maritimeFreights.forEach(f => {
-                    const speciesName = window.APP_DATA.species.find(s => s.id === f.speciesId)?.name || 'N/A';
-                    const item = document.createElement('div');
-                    item.className = 'flex justify-between items-center bg-gray-50 p-2 rounded text-sm';
-                    item.innerHTML = `<span>[${speciesName}] ${f.origin} -> ${f.destination} - $${f.cost.toLocaleString('en-US')}</span>`;
-                    freightListDiv.appendChild(item);
-                });
-                const airRateListDiv = getEl('air-rate-list');
-                airRateListDiv.innerHTML = '';
-                window.APP_DATA.airRates.forEach(r => {
-                    const speciesName = window.APP_DATA.species.find(s => s.id === r.speciesId)?.name || 'N/A';
-                    const item = document.createElement('div');
-                    item.className = 'flex justify-between items-center bg-gray-50 p-2 rounded text-sm';
-                    item.innerHTML = `<span>[${speciesName}] ${r.origin} -> ${r.destination} - $${r.ratePerKg.toFixed(2)}/kg</span>`;
-                    airRateListDiv.appendChild(item);
-                });
-            }
-
-            // --- CALCULATION LOGIC ---
-            function getInputs() {
-                const type = shippingTypeSelect.value;
-                const selectedSpeciesValue = speciesSelect.value;
-                let format;
-
-                // [NUEVO] Lógica de peso manual/automático
-                // Si es manual o lista, leemos los inputs de peso que el usuario puede haber editado
-                const wNet = parseFloat(weightNetInput.value) || 0;
-                const wGross = parseFloat(weightGrossInput.value) || 0;
-
-                if (selectedSpeciesValue === 'manual') {
-                    const boxesPerContainer = parseInt(getEl('manual-boxes-fcl').value) || null;
-                    if (type === 'maritime' && (!boxesPerContainer || boxesPerContainer <= 0)) {
-                        alert('Ingrese un número válido de cajas por contenedor para el producto manual.');
-                        return null;
-                    }
-                    format = {
-                        id: 'manual', speciesId: 'manual',
-                        name: getEl('manual-format-name').value || 'Formato Manual',
-                        weightPerBox: wGross, // Usamos bruto para el objeto formato por compatibilidad
-                        boxesPerContainer: boxesPerContainer
-                    };
-                } else {
-                     if (!selectedSpeciesValue) { alert('Seleccione una Especie.'); return null; }
-                    const selectedFormatId = parseInt(formatSelect.value);
-                    if (!selectedFormatId) { alert('Seleccione un Formato.'); return null; }
-                    const dbFormat = window.APP_DATA.formats.find(f => f.id === selectedFormatId);
-                    
-                    // Creamos una copia del formato usando los pesos que están EN PANTALLA
-                    // Esto permite editar el peso manualmente antes de calcular
-                    format = { ...dbFormat, weightPerBox: wGross };
-                }
-
-                if (!format) { alert('Formato no encontrado.'); return null; }
-                if (wNet <= 0) { alert('El peso NETO debe ser mayor a 0 para calcular $/kg.'); return null; }
-
-                const selectedRouteValue = routeSelect.value;
-                const commissionPercentage = parseFloat(getEl('commission').value) || 0;
-                const commissionBase = commissionBaseSelect.value;
-                const insuranceTotal = parseFloat(getEl('insurance-total').value) || 0;
-
-                let route;
-                if (selectedRouteValue === 'manual') {
-                    if (type === 'maritime') {
-                        const manualCost = parseFloat(getEl('manual-maritime-cost').value);
-                        if (isNaN(manualCost) || manualCost <= 0) { alert('Ingrese un costo de flete manual válido.'); return null; }
-                        route = { id: 'manual', origin: 'Manual', destination: 'Manual', cost: manualCost };
-                    } else { // air
-                        const manualRate = parseFloat(getEl('manual-air-rate').value);
-                        if (isNaN(manualRate) || manualRate <= 0) { alert('Ingrese una tarifa aérea manual válida.'); return null; }
-                        route = { id: 'manual', origin: 'Manual', destination: 'Manual', ratePerKg: manualRate };
-                    }
-                } else {
-                    const selectedRouteId = parseInt(selectedRouteValue);
-                    if (!selectedRouteId) { alert('Seleccione una ruta válida.'); return null; }
-                    if (type === 'maritime') {
-                        route = window.APP_DATA.maritimeFreights.find(f => f.id === selectedRouteId);
-                    } else {
-                        route = window.APP_DATA.airRates.find(r => r.id === selectedRouteId);
-                    }
-                }
-
-                if (!route) { alert('Ruta de flete no encontrada.'); return null; }
-
-                // RETORNO DE DATOS PARA CALCULAR
-                // Notar que enviamos wNet y wGross explícitamente
-                if (type === 'maritime') {
-                    if (!format.boxesPerContainer) { alert('El formato seleccionado no tiene datos de cajas por FCL.'); return null; }
-                    const servicesTotal = parseFloat(getEl('services-total').value) || 0;
-                    const extraCostsTotal = parseFloat(getEl('extra-costs-total').value) || 0;
-                    return {
-                        type, format, route, commission: commissionPercentage, commissionBase,
-                        boxes: format.boxesPerContainer,
-                        insurance: insuranceTotal / format.boxesPerContainer,
-                        freightPerBox: route.cost / format.boxesPerContainer,
-                        services: servicesTotal / format.boxesPerContainer,
-                        extraCosts: extraCostsTotal / format.boxesPerContainer,
-                        wNet, wGross // Pasamos pesos
-                    };
-                } else { // air
-                    const boxes = parseInt(getEl('air-boxes').value);
-                    if (!boxes || boxes <= 0) { alert('Faltan datos del número de cajas del envío.'); return null; }
-                     if (wGross <= 0) { alert('Peso bruto inválido.'); return null; }
-                    const clearance = (parseFloat(getEl('air-clearance').value) || 0) / boxes;
-                    const cooler = (parseFloat(getEl('air-cooler').value) || 0) / boxes;
-                    const dta = (parseFloat(getEl('air-dta').value) || 0) / boxes;
-                    const handling = (parseFloat(getEl('air-handling').value) || 0) / boxes;
-                    return {
-                        type, format, route, commission: commissionPercentage, commissionBase, boxes,
-                        insurance: insuranceTotal / boxes,
-                        freightPerBox: wGross * route.ratePerKg, // FLETE AÉREO USA PESO BRUTO
-                        clearance, cooler, dta, handling,
-                        wNet, wGross // Pasamos pesos
-                    };
-                }
-            }
-
-            function performCalculation() {
-                const calcBase = document.querySelector('input[name="calculation-base"]:checked').value;
-                const inputs = getInputs();
-                if (!inputs) return null;
-                
-                let results = { 
-                    calcBase: calcBase, 
-                    entryValue: 0, 
-                    fobShipper: 0, 
-                    fobClient: 0, 
-                    cifClient: 0, 
-                    cifShipper: 0, 
-                    commissionValuePerBox: 0 
-                };
-                const C = inputs.commission / 100; // Commission rate
-                const F = inputs.freightPerBox;
-                let O = inputs.insurance; // Other costs (start with insurance)
-                if (inputs.type === 'maritime') O += inputs.services + inputs.extraCosts;
-                else O += inputs.clearance + inputs.cooler + inputs.dta + inputs.handling;
-
-                // --- LÓGICA DE PRECIOS ORIGINAL (Mantenida Intacta) ---
-                if (calcBase === 'proveedor_fob') {
-                    const baseCostPerBox = parseFloat(getEl('fob-proveedor-cost').value);
-                    if (isNaN(baseCostPerBox) || baseCostPerBox < 0) { alert('Ingresa un costo de proveedor válido.'); return null; }
-                    results.entryValue = baseCostPerBox;
-                    results.fobShipper = baseCostPerBox;
-
-                    if (inputs.commissionBase === 'fob_shipper') {
-                        results.commissionValuePerBox = results.fobShipper * C;
-                        results.fobClient = results.fobShipper + O + results.commissionValuePerBox;
-                        results.cifClient = results.fobClient + F;
-                    } else if (inputs.commissionBase === 'cif_cliente') {
-                         if (1 - C <= 0) { alert('Comisión inválida.'); return null; }
-                        results.fobClient = (results.fobShipper + O + F * C) / (1 - C);
-                        results.cifClient = results.fobClient + F;
-                        results.commissionValuePerBox = results.cifClient * C;
-                    } else { // fob_cliente
-                        if (1 - C <= 0) { alert('Comisión inválida.'); return null; }
-                        results.fobClient = (results.fobShipper + O) / (1 - C);
-                        results.cifClient = results.fobClient + F;
-                        results.commissionValuePerBox = results.fobClient * C;
-                    }
-
-                } else if (calcBase === 'proveedor_cif') {
-                    const cifProveedorCost = parseFloat(getEl('cif-proveedor-cost').value);
-                    if (isNaN(cifProveedorCost) || cifProveedorCost < 0) { alert('Ingresa un costo CIF válido.'); return null; }
-                    results.entryValue = cifProveedorCost;
-                    results.cifProveedorCost = cifProveedorCost;
-                    results.fobShipper = cifProveedorCost - F;
-
-                     if (inputs.commissionBase === 'fob_shipper') {
-                        results.commissionValuePerBox = results.fobShipper * C;
-                        results.fobClient = results.fobShipper + O + results.commissionValuePerBox;
-                        results.cifClient = results.fobClient + F;
-                    } else if (inputs.commissionBase === 'cif_cliente') {
-                        results.fobClient = (results.fobShipper + O + F * C) / (1 - C);
-                        results.cifClient = results.fobClient + F;
-                        results.commissionValuePerBox = results.cifClient * C;
-                    } else { 
-                        results.fobClient = (results.fobShipper + O) / (1 - C);
-                        results.cifClient = results.fobClient + F;
-                        results.commissionValuePerBox = results.fobClient * C;
-                    }
-                } else { // 'cliente_cif'
-                    const cifPrice = parseFloat(getEl('cif-cliente-price').value);
-                    if (isNaN(cifPrice) || cifPrice <= 0) { alert('Ingresa un precio cliente válido.'); return null; }
-                    results.entryValue = cifPrice;
-                    results.cifClient = cifPrice;
-                    results.fobClient = results.cifClient - F;
-
-                    if (inputs.commissionBase === 'fob_shipper') {
-                        results.fobShipper = (results.fobClient - O) / (1 + C);
-                        results.commissionValuePerBox = results.fobShipper * C;
-                    } else if (inputs.commissionBase === 'cif_cliente') {
-                        results.commissionValuePerBox = results.cifClient * C;
-                        results.fobShipper = results.fobClient - results.commissionValuePerBox - O;
-                    } else { 
-                        results.commissionValuePerBox = results.fobClient * C;
-                        results.fobShipper = results.fobClient - results.commissionValuePerBox - O;
-                    }
-                }
-                
-                results.cifShipper = results.fobShipper + F;
-                inputs.commissionValuePerBox = results.commissionValuePerBox; 
-                return { ...inputs, ...results };
-            }
-
-            // [NUEVO] Funciones de Formato con Divisas
-            function getCurrencyFactor() {
-                const currency = getEl('display-currency').value;
-                const rate = parseFloat(getEl('exchange-rate').value) || 0.92;
-                return currency === 'EUR' ? rate : 1;
-            }
-
-            function getCurrencySymbol() {
-                return getEl('display-currency').value === 'EUR' ? '€' : '$';
-            }
-
-            function formatMoney(val) {
-                if (val === undefined || val === null) return '-';
-                const factor = getCurrencyFactor();
-                const symbol = getCurrencySymbol();
-                const finalVal = val * factor;
-                return `${symbol}${finalVal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-            }
-
-            function displayDetailedResult(data) {
-                const resultsCard = getEl('detailed-results-card');
-                const resultsContainer = getEl('results-cards-container');
-                const resultsContent = getEl('detailed-results-content');
-                
-                let speciesName;
-                 if (data.format.speciesId === 'manual') {
-                    speciesName = getEl('manual-species-name').value || 'Especie Manual';
-                } else {
-                    speciesName = window.APP_DATA.species.find(s => s.id === data.format.speciesId)?.name || 'N/A';
-                }
-                
-                // [NUEVO] Renderizado de Tarjetas Visuales con Kg
-                const wNet = data.wNet;
-                const targets = [
-                    { label: 'FOB Shipper', val: data.fobShipper },
-                    { label: 'CIF Shipper', val: data.cifShipper },
-                    { label: 'FOB Cliente', val: data.fobClient },
-                    { label: 'CIF Cliente', val: data.cifClient }
-                ];
-
-                resultsContainer.innerHTML = targets.map(t => `
-                    <div class="price-box border-b-4 ${t.label.includes('Cliente') ? 'border-green-500' : 'border-indigo-500'}">
-                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">${t.label}</p>
-                        <p class="text-2xl font-black text-gray-800">${formatMoney(t.val)}</p>
-                        <div class="mt-2 pt-2 border-t border-gray-100 flex justify-center items-center gap-1">
-                            <span class="text-sm font-semibold text-indigo-600">${formatMoney(t.val / wNet)}</span>
-                            <span class="text-[10px] text-gray-400">/ Kg Neto</span>
-                        </div>
-                    </div>
-                `).join('');
-
-                // [NUEVO] Desglose Detallado por Montos
-                let content = `<p><strong>Resumen para:</strong> ${speciesName} (${data.format.name}) a ${data.route.destination}</p>
-                               <p class="text-xs text-gray-500 mt-1">Peso Neto: ${data.wNet}kg | Peso Bruto: ${data.wGross}kg | Cajas: ${data.boxes}</p>
-                               <div class="border-t my-2"></div>`;
-                
-                let otherCostsPerBox = data.insurance;
-                 // Sumar logistica
-                if (data.type === 'air') otherCostsPerBox += data.clearance + data.cooler + data.dta + data.handling;
-                if (data.type === 'maritime') otherCostsPerBox += data.services + data.extraCosts;
-
-                // Columnas de desglose
-                content += `<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div>
-                        <p class="font-bold underline mb-2">Por Caja Individual</p>
-                        <div class="flex justify-between"><span>FOB Shipper:</span><span>${formatMoney(data.fobShipper)}</span></div>
-                        <div class="flex justify-between text-gray-500 text-xs"><span>(+) Logística/Seguro:</span><span>${formatMoney(otherCostsPerBox)}</span></div>
-                        <div class="flex justify-between text-gray-500 text-xs"><span>(+) Comisión:</span><span>${formatMoney(data.commissionValuePerBox)}</span></div>
-                        <div class="flex justify-between border-t border-gray-300 mt-1 pt-1 font-semibold"><span>FOB Cliente:</span><span>${formatMoney(data.fobClient)}</span></div>
-                        <div class="flex justify-between text-gray-500 text-xs"><span>(+) Flete (Bruto):</span><span>${formatMoney(data.freightPerBox)}</span></div>
-                        <div class="flex justify-between border-t border-gray-300 mt-1 pt-1 font-bold text-green-700"><span>CIF Cliente:</span><span>${formatMoney(data.cifClient)}</span></div>
-                    </div>
-                    <div>
-                        <p class="font-bold underline mb-2">Total Envío (${data.boxes} cajas)</p>
-                        <div class="flex justify-between"><span>Total FOB Shipper:</span><span>${formatMoney(data.fobShipper * data.boxes)}</span></div>
-                        <div class="flex justify-between"><span>Total Logística:</span><span>${formatMoney(otherCostsPerBox * data.boxes)}</span></div>
-                        <div class="flex justify-between"><span>Total Comisión:</span><span>${formatMoney(data.commissionValuePerBox * data.boxes)}</span></div>
-                        <div class="flex justify-between"><span>Total Flete:</span><span>${formatMoney(data.freightPerBox * data.boxes)}</span></div>
-                        <div class="flex justify-between border-t border-gray-800 mt-2 pt-1 font-black text-lg"><span>TOTAL CIF:</span><span>${formatMoney(data.cifClient * data.boxes)}</span></div>
-                    </div>
-                </div>`;
-
-                resultsContent.innerHTML = content;
-                resultsCard.classList.remove('hidden');
-            }
-            
-            function addResultsToTable(data) {
-                if (!data) return;
-                const tableCard = getEl('results-table-card');
-                const tbody = getEl('results-tbody');
-                
-                let speciesName;
-                if (data.format.speciesId === 'manual') {
-                    speciesName = getEl('manual-species-name').value || 'Manual';
-                } else {
-                    speciesName = window.APP_DATA.species.find(s => s.id === data.format.speciesId)?.name || 'N/A';
-                }
-
-                const varietyCaliber = getEl('variety-caliber').value || '-';
-                const commText = `C:${data.commission}% (${data.commissionBase})`;
-                const wNet = data.wNet;
-
-                // [NUEVO] Fila con detalles de Kg
-                const newRow = document.createElement('tr');
-                newRow.className = 'hover:bg-gray-50';
-                newRow.innerHTML = `
-                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-800 font-bold">${speciesName}<br><span class="font-normal text-xs text-gray-500">${data.format.name}</span></td>
-                    <td class="px-4 py-3 whitespace-nowrap text-xs text-gray-500">${commText}<br>${varietyCaliber}</td>
-                    <td class="px-4 py-3 whitespace-nowrap text-right text-sm font-medium text-blue-600">
-                        ${formatMoney(data.fobShipper)}<br>
-                        <span class="badge-weight badge-net">Net: ${formatMoney(data.fobShipper/wNet)}</span>
-                    </td>
-                    <td class="px-4 py-3 whitespace-nowrap text-right text-sm font-medium text-green-600">
-                        ${formatMoney(data.cifClient)}<br>
-                        <span class="badge-weight badge-net">Net: ${formatMoney(data.cifClient/wNet)}</span>
-                    </td>
-                    <td class="px-2 py-3 whitespace-nowrap text-center text-sm">
-                        <button class="text-red-500 hover:text-red-700">✖</button>
-                    </td>
-                `;
-
-                newRow.querySelector('button').addEventListener('click', () => {
-                    newRow.remove();
-                    if (tbody.rows.length === 0) {
-                        tableCard.classList.add('hidden');
-                    }
-                });
-
-                tbody.appendChild(newRow);
-                tableCard.classList.remove('hidden');
-            }
-
-            function clearTable() {
-                getEl('results-tbody').innerHTML = '';
-                getEl('results-table-card').classList.add('hidden');
-            }
-
-            function copyTable() {
-                const table = getEl('results-tbody');
-                if (table.rows.length === 0) { return alert('No hay datos.'); }
-                let tsv = 'Producto\tDetalle\tFOB Prov\tCIF Cliente\n';
-                for (const row of table.rows) {
-                    let cells = [];
-                    for (let i = 0; i < row.cells.length - 1; i++) cells.push(row.cells[i].innerText.replace(/\n/g, ' '));
-                    tsv += cells.join('\t') + '\n';
-                }
-                const textarea = document.createElement('textarea');
-                textarea.value = tsv;
-                document.body.appendChild(textarea);
-                textarea.select();
-                document.execCommand('copy');
-                document.body.removeChild(textarea);
-                alert('¡Tabla copiada!');
-            }
-            
-            // [NUEVO] Función Exportar PDF
-            window.exportToPDF = function() {
-                const doc = new jsPDF();
-                const currency = getEl('display-currency').value;
-                const rate = getEl('exchange-rate').value;
-
-                doc.setFontSize(18);
-                doc.text("COTIZACIÓN DE EXPORTACIÓN", 14, 20);
-                doc.setFontSize(10);
-                doc.text(`Fecha: ${new Date().toLocaleDateString()} | Moneda: ${currency} (Tasa: ${rate})`, 14, 28);
-                
-                const rows = [];
-                const trs = document.querySelectorAll('#results-tbody tr');
-                
-                trs.forEach(tr => {
-                    const tds = tr.querySelectorAll('td');
-                    // Extraemos texto limpio de las celdas (Caja y Kg)
-                    const prod = tds[0].innerText.replace('\n', ' - ');
-                    const det = tds[1].innerText.replace('\n', ' ');
-                    
-                    // FOB
-                    const fobText = tds[2].innerText.split('\n'); // [0] Caja, [1] Kg
-                    const fobBox = fobText[0];
-                    const fobKg = fobText[1] ? fobText[1].replace('Net:', '') : '';
-
-                    // CIF
-                    const cifText = tds[3].innerText.split('\n');
-                    const cifBox = cifText[0];
-                    const cifKg = cifText[1] ? cifText[1].replace('Net:', '') : '';
-
-                    rows.push([prod, det, fobBox, fobKg, cifBox, cifKg]);
-                });
-
-                doc.autoTable({
-                    startY: 35,
-                    head: [['Producto', 'Detalles', 'FOB (Caja)', 'FOB (Kg)', 'CIF (Caja)', 'CIF (Kg)']],
-                    body: rows,
-                    theme: 'grid',
-                    headStyles: { fillColor: [79, 70, 229] },
-                    columnStyles: {
-                        4: { fontStyle: 'bold', textColor: [22, 101, 52] }, // CIF Green
-                        5: { fontStyle: 'bold' }
-                    }
-                });
-                doc.save(`Cotizacion_${new Date().getTime()}.pdf`);
-            };
-
-            // --- UI TOGGLING AND EVENT HANDLERS ---
-            function toggleShippingMode() {
-                const type = shippingTypeSelect.value;
-                getEl('maritime-costs').classList.toggle('hidden', type !== 'maritime');
-                getEl('air-options').classList.toggle('hidden', type !== 'air');
-                const maritimeFreightManager = document.getElementById('maritime-freight-manager');
-                const airRateManager = document.getElementById('air-rate-manager');
-                if(maritimeFreightManager) maritimeFreightManager.classList.toggle('hidden', type !== 'maritime');
-                if(airRateManager) airRateManager.classList.toggle('hidden', type !== 'air');
-
-                const isManualProduct = speciesSelect.value === 'manual';
-                if (isManualProduct) {
-                    getEl('manual-maritime-product-fields').classList.toggle('hidden', type !== 'maritime');
-                    getEl('manual-air-product-fields').classList.toggle('hidden', type !== 'air');
-                }
-                const manualMaritime = getEl('manual-maritime-wrapper');
-                const manualAir = getEl('manual-air-wrapper');
-                if(manualMaritime) manualMaritime.classList.toggle('hidden', type !== 'maritime');
-                if(manualAir) manualAir.classList.toggle('hidden', type !== 'air');
-                
-                 if(speciesSelect.value && speciesSelect.value !== 'manual') {
-                    renderRoutes(parseInt(speciesSelect.value), type);
-                } else if (!speciesSelect.value) { 
-                     routeSelect.innerHTML = '<option value="">Seleccione Ruta...</option>';
-                     const manualOption = document.createElement('option');
-                     manualOption.value = 'manual';
-                     manualOption.textContent = '--- Ingresar Flete/Tarifa Manual ---';
-                     routeSelect.appendChild(manualOption);
-                } else if (speciesSelect.value === 'manual'){ 
-                     routeSelect.innerHTML = '<option value="manual">--- Ingresar Flete/Tarifa Manual ---</option>'; 
-                     routeSelect.value = 'manual';
-                     getEl('manual-freight-wrapper').classList.remove('hidden'); 
-                }
-                if(speciesSelect.value !== 'manual') {
-                    getEl('manual-freight-wrapper').classList.add('hidden');
-                }
-                 getEl('detailed-results-card').classList.add('hidden');
-            }
-
-            function toggleCalculationBase() {
-                const calcBase = document.querySelector('input[name="calculation-base"]:checked').value;
-                getEl('input-fob-proveedor-wrapper').classList.toggle('hidden', calcBase !== 'proveedor_fob');
-                getEl('input-cif-proveedor-wrapper').classList.toggle('hidden', calcBase !== 'proveedor_cif');
-                getEl('input-cif-cliente-wrapper').classList.toggle('hidden', calcBase !== 'cliente_cif');
-                getEl('fob-proveedor-cost').value = '';
-                getEl('cif-proveedor-cost').value = '';
-                getEl('cif-cliente-price').value = '';
-                getEl('detailed-results-card').classList.add('hidden');
-            }
-            
-            // [NUEVO] Lógica automática de peso
-            formatSelect.addEventListener('change', (e) => {
-                 const fid = parseInt(e.target.value);
-                 if (fid) {
-                     const f = window.APP_DATA.formats.find(x => x.id === fid);
-                     if(f) {
-                         // Asignar peso bruto automático
-                         weightGrossInput.value = f.weightPerBox;
-                         // Estimar Neto (aprox 90-93% suele ser fruta) o dejar igual si no hay datos.
-                         // El usuario debe ajustarlo manualmente.
-                         weightNetInput.value = (f.weightPerBox * 0.93).toFixed(2); 
-                     }
-                 }
+                renderRoutes();
             });
 
-            function renderAllUI() {
-                const allSpeciesSelects = [speciesSelect];
-                renderSpecies(allSpeciesSelects);
-                const selectedSpeciesId = parseInt(speciesSelect.value);
-                 if (selectedSpeciesId && speciesSelect.value !== 'manual') { 
-                    renderFormatsForSpecies(selectedSpeciesId);
-                    renderRoutes(selectedSpeciesId, shippingTypeSelect.value);
-                } else if (speciesSelect.value === 'manual') {
-                     getEl('manual-product-wrapper').classList.remove('hidden');
-                     getEl('format-select-wrapper').classList.add('hidden');
-                     routeSelect.innerHTML = '<option value="manual">--- Ingresar Flete/Tarifa Manual ---</option>';
-                     routeSelect.value = 'manual';
-                     toggleShippingMode();
-                } else {
-                     formatSelect.innerHTML = '<option value="">Seleccione...</option>';
-                     routeSelect.innerHTML = '<option value="">Seleccione Ruta...</option>';
-                      const manualOption = document.createElement('option');
-                      manualOption.value = 'manual';
-                      manualOption.textContent = '--- Ingresar Flete/Tarifa Manual ---';
-                      routeSelect.appendChild(manualOption);
+            // [MEJORA] Auto-llenado de pesos al cambiar formato
+            formatSelect.addEventListener('change', (e) => {
+                const fid = parseInt(e.target.value);
+                if(fid) {
+                    const fmt = window.APP_DATA.formats.find(f => f.id === fid);
+                    if(fmt) {
+                        getEl('weight-gross').value = fmt.weightPerBox; // Asumimos weightPerBox de DB es Bruto Logístico
+                        // Estimamos neto al 92% por defecto para ayudar, usuario ajusta
+                        getEl('weight-net').value = (fmt.weightPerBox * 0.92).toFixed(3);
+                    }
                 }
-                renderManagementLists();
+            });
+
+            shippingTypeSelect.addEventListener('change', () => {
+                const type = shippingTypeSelect.value;
+                getEl('air-options').classList.toggle('hidden', type !== 'air');
+                getEl('maritime-costs').classList.toggle('hidden', type !== 'maritime');
+                getEl('maritime-extra').classList.toggle('hidden', type !== 'maritime');
+                getEl('manual-maritime-product-fields').classList.toggle('hidden', type !== 'maritime');
+                renderRoutes();
+            });
+
+            routeSelect.addEventListener('change', (e) => {
+                getEl('manual-freight-wrapper').classList.toggle('hidden', e.target.value !== 'manual');
+                const type = shippingTypeSelect.value;
+                getEl('manual-maritime-wrapper').classList.toggle('hidden', type !== 'maritime');
+                getEl('manual-air-wrapper').classList.toggle('hidden', type !== 'air');
+                getEl('detailed-results-card').classList.add('hidden');
+            });
+
+            document.querySelectorAll('input[name="calculation-base"]').forEach(radio => {
+                radio.addEventListener('change', toggleBaseInputs);
+            });
+
+            function toggleBaseInputs() {
+                const base = document.querySelector('input[name="calculation-base"]:checked').value;
+                getEl('input-fob-proveedor-wrapper').classList.toggle('hidden', base !== 'proveedor_fob');
+                getEl('input-cif-proveedor-wrapper').classList.toggle('hidden', base !== 'proveedor_cif');
+                getEl('input-cif-cliente-wrapper').classList.toggle('hidden', base !== 'cliente_cif');
+                getEl('detailed-results-card').classList.add('hidden');
             }
-            
-            function initApp() {
-                document.querySelectorAll('input[name="calculation-base"]').forEach(radio => radio.addEventListener('change', toggleCalculationBase));
-                speciesSelect.addEventListener('change', (e) => {
-                    const speciesId = e.target.value;
-                    getEl('detailed-results-card').classList.add('hidden');
-                    if (speciesId === 'manual') {
-                        getEl('manual-product-wrapper').classList.remove('hidden');
-                        getEl('format-select-wrapper').classList.add('hidden');
-                        routeSelect.innerHTML = '<option value="manual">--- Ingresar Flete/Tarifa Manual ---</option>';
-                        routeSelect.value = 'manual'; 
-                        getEl('manual-freight-wrapper').classList.remove('hidden');
-                        toggleShippingMode();
-                        // Limpiar pesos manuales
-                        weightNetInput.value = ''; weightGrossInput.value = '';
-                    } else if (speciesId){
-                        getEl('manual-product-wrapper').classList.add('hidden');
-                        getEl('format-select-wrapper').classList.remove('hidden');
-                        renderFormatsForSpecies(parseInt(speciesId));
-                        renderRoutes(parseInt(speciesId), shippingTypeSelect.value);
-                         getEl('manual-freight-wrapper').classList.add('hidden'); 
-                    } else {
-                         getEl('manual-product-wrapper').classList.add('hidden');
-                         getEl('format-select-wrapper').classList.remove('hidden'); 
-                         formatSelect.innerHTML = '<option value="">Seleccione...</option>'; 
-                         routeSelect.innerHTML = '<option value="">Seleccione Ruta...</option>'; 
-                          const manualOption = document.createElement('option');
-                          manualOption.value = 'manual';
-                          manualOption.textContent = '--- Ingresar Flete/Tarifa Manual ---';
-                          routeSelect.appendChild(manualOption);
-                         getEl('manual-freight-wrapper').classList.add('hidden');
-                    }
-                });
-                routeSelect.addEventListener('change', (e) => {
-                    getEl('manual-freight-wrapper').classList.toggle('hidden', e.target.value !== 'manual');
-                     getEl('detailed-results-card').classList.add('hidden');
-                });
-                getEl('calculate-btn').addEventListener('click', () => {
-                    const data = performCalculation();
-                    if(data) {
-                        lastCalculationData = data; 
-                        displayDetailedResult(data);
-                    }
-                });
-                getEl('add-to-table-btn').addEventListener('click', () => addResultsToTable(lastCalculationData));
-                getEl('clear-table-btn').addEventListener('click', clearTable);
-                getEl('copy-table-btn').addEventListener('click', copyTable);
-                shippingTypeSelect.addEventListener('change', toggleShippingMode);
+
+            function renderRoutes() {
+                const sid = speciesSelect.value === 'manual' ? 'manual' : parseInt(speciesSelect.value);
+                const type = shippingTypeSelect.value;
+                routeSelect.innerHTML = '<option value="">Seleccione Ruta...</option>';
                 
-                toggleShippingMode();
-                toggleCalculationBase();
-                renderAllUI();
+                if (sid !== 'manual' && !isNaN(sid)) {
+                    const pool = type === 'maritime' ? window.APP_DATA.maritimeFreights : window.APP_DATA.airRates;
+                    pool.filter(r => r.speciesId === sid).forEach(r => {
+                        const costTxt = type === 'maritime' ? `$${r.cost}` : `$${r.ratePerKg}/kg`;
+                        routeSelect.innerHTML += `<option value="${r.id}">${r.origin} > ${r.destination} (${costTxt})</option>`;
+                    });
+                }
+                routeSelect.innerHTML += `<option value="manual">--- Flete Manual ---</option>`;
             }
-            
-            initApp();
+
+            // --- LOGICA DE CÁLCULO ---
+            function getInputs() {
+                // ... (Recopilar datos del DOM)
+                const type = shippingTypeSelect.value;
+                let format;
+                
+                const wNet = parseFloat(getEl('weight-net').value) || 0;
+                const wGross = parseFloat(getEl('weight-gross').value) || 0;
+
+                if(wNet <= 0 || wGross <= 0) { alert('Revise los pesos Neto y Bruto'); return null; }
+
+                if (speciesSelect.value === 'manual') {
+                    const boxes = parseInt(getEl('manual-boxes-fcl').value) || 0;
+                    if(type === 'maritime' && boxes <= 0) { alert('Ingrese Cajas por Contenedor'); return null; }
+                    format = {
+                        id: 'manual', name: getEl('manual-format-name').value || 'Manual',
+                        weightPerBox: wGross, boxesPerContainer: boxes, speciesName: getEl('manual-species-name').value || 'Manual'
+                    };
+                } else {
+                    const fid = parseInt(formatSelect.value);
+                    if(!fid) { alert('Seleccione Formato'); return null; }
+                    const dbF = window.APP_DATA.formats.find(f => f.id === fid);
+                    const spName = window.APP_DATA.species.find(s => s.id === dbF.speciesId).name;
+                    format = { ...dbF, weightPerBox: wGross, speciesName: spName }; // Usamos el bruto de pantalla
+                }
+
+                let route;
+                if (routeSelect.value === 'manual') {
+                    // [MEJORA] Captura origen/destino manual
+                    const mOrig = getEl('manual-route-origin').value || 'Manual Orig';
+                    const mDest = getEl('manual-route-dest').value || 'Manual Dest';
+                    
+                    if(type === 'maritime') {
+                        const cost = parseFloat(getEl('manual-maritime-cost').value);
+                        if(isNaN(cost)) { alert('Ingrese Costo Flete'); return null; }
+                        route = { id: 'manual', origin: mOrig, destination: mDest, cost: cost };
+                    } else {
+                        const rate = parseFloat(getEl('manual-air-rate').value);
+                        if(isNaN(rate)) { alert('Ingrese Tarifa Aérea'); return null; }
+                        route = { id: 'manual', origin: mOrig, destination: mDest, ratePerKg: rate };
+                    }
+                } else {
+                    const rid = parseInt(routeSelect.value);
+                    if(!rid) { alert('Seleccione Ruta'); return null; }
+                    const pool = type === 'maritime' ? window.APP_DATA.maritimeFreights : window.APP_DATA.airRates;
+                    route = pool.find(r => r.id === rid);
+                }
+
+                // Cálculo Flete Unitario
+                let freightPerBox = 0;
+                let boxesTotal = 0;
+
+                if (type === 'maritime') {
+                    boxesTotal = format.boxesPerContainer;
+                    freightPerBox = route.cost / boxesTotal;
+                } else {
+                    boxesTotal = parseInt(getEl('air-boxes').value);
+                    if(!boxesTotal) { alert('Ingrese cantidad de cajas aéreo'); return null; }
+                    freightPerBox = wGross * route.ratePerKg;
+                }
+
+                // Otros costos
+                const insurance = parseFloat(getEl('insurance-total').value) || 0;
+                let extraLogistics = 0;
+                if(type === 'maritime') {
+                    extraLogistics += (parseFloat(getEl('services-total').value)||0) + (parseFloat(getEl('extra-costs-total').value)||0);
+                } else {
+                    extraLogistics += (parseFloat(getEl('air-clearance').value)||0) + (parseFloat(getEl('air-cooler').value)||0) + 
+                                      (parseFloat(getEl('air-dta').value)||0) + (parseFloat(getEl('air-handling').value)||0);
+                }
+                const othersPerBox = (insurance + extraLogistics) / boxesTotal;
+
+                return {
+                    format, route, type, boxesTotal, freightPerBox, othersPerBox, wNet, wGross,
+                    commP: parseFloat(getEl('commission').value)/100,
+                    commBase: getEl('commission-base').value,
+                    baseType: document.querySelector('input[name="calculation-base"]:checked').value
+                };
+            }
+
+            getEl('calculate-btn').addEventListener('click', () => {
+                const inp = getInputs();
+                if(!inp) return;
+
+                let fobShipper, fobClient, cifClient, commVal;
+                
+                // Lógica Precio
+                if (inp.baseType === 'proveedor_fob') {
+                    fobShipper = parseFloat(getEl('fob-proveedor-cost').value);
+                    if(isNaN(fobShipper)) return alert('Ingrese Costo FOB');
+                    
+                    if(inp.commBase === 'fob_shipper') {
+                        commVal = fobShipper * inp.commP;
+                        fobClient = fobShipper + inp.othersPerBox + commVal;
+                        cifClient = fobClient + inp.freightPerBox;
+                    } else if (inp.commBase === 'cif_cliente') {
+                        fobClient = (fobShipper + inp.othersPerBox + inp.freightPerBox * inp.commP) / (1 - inp.commP);
+                        cifClient = fobClient + inp.freightPerBox;
+                        commVal = cifClient * inp.commP;
+                    } else { // fob client
+                        fobClient = (fobShipper + inp.othersPerBox) / (1 - inp.commP);
+                        cifClient = fobClient + inp.freightPerBox;
+                        commVal = fobClient * inp.commP;
+                    }
+
+                } else if (inp.baseType === 'proveedor_cif') {
+                    const cifProv = parseFloat(getEl('cif-proveedor-cost').value);
+                    if(isNaN(cifProv)) return alert('Ingrese Costo CIF Prov');
+                    fobShipper = cifProv - inp.freightPerBox;
+                    // Simplificado para este ejemplo, asume logica similar hacia adelante
+                    fobClient = (fobShipper + inp.othersPerBox) / (1 - inp.commP);
+                    cifClient = fobClient + inp.freightPerBox;
+                    commVal = fobClient * inp.commP;
+
+                } else { // Client CIF
+                    cifClient = parseFloat(getEl('cif-cliente-price').value);
+                    if(isNaN(cifClient)) return alert('Ingrese Precio Cliente');
+                    fobClient = cifClient - inp.freightPerBox;
+                    
+                    if(inp.commBase === 'cif_cliente') commVal = cifClient * inp.commP;
+                    else commVal = fobClient * inp.commP; // aprox
+
+                    fobShipper = fobClient - commVal - inp.othersPerBox;
+                }
+
+                lastCalc = { ...inp, fobShipper, fobClient, cifClient, commVal };
+                renderResults(lastCalc);
+            });
+
+            // --- FORMATTERS ---
+            function formatM(val) {
+                const currency = getEl('display-currency').value;
+                const rate = parseFloat(getEl('exchange-rate').value);
+                const final = currency === 'EUR' ? val * rate : val;
+                const sym = currency === 'EUR' ? '€' : '$';
+                return sym + final.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            }
+
+            function renderResults(d) {
+                const grid = getEl('results-cards-container');
+                const content = getEl('detailed-results-content');
+                
+                // Tarjetas
+                grid.innerHTML = `
+                    <div class="price-box border-b-4 border-gray-400"><p class="text-[10px] font-bold uppercase text-gray-500">FOB Shipper</p><p class="text-xl font-black">${formatM(d.fobShipper)}</p><p class="text-xs text-blue-600 font-bold border-t mt-1 pt-1">${formatM(d.fobShipper/d.wNet)}/Kg</p></div>
+                    <div class="price-box border-b-4 border-gray-400"><p class="text-[10px] font-bold uppercase text-gray-500">CIF Shipper</p><p class="text-xl font-black">${formatM(d.fobShipper + d.freightPerBox)}</p></div>
+                    <div class="price-box border-b-4 border-indigo-500"><p class="text-[10px] font-bold uppercase text-gray-500">FOB Cliente</p><p class="text-xl font-black text-indigo-700">${formatM(d.fobClient)}</p></div>
+                    <div class="price-box border-b-4 border-green-500"><p class="text-[10px] font-bold uppercase text-gray-500">CIF Cliente</p><p class="text-xl font-black text-green-700">${formatM(d.cifClient)}</p><p class="text-xs text-green-700 font-bold border-t mt-1 pt-1">${formatM(d.cifClient/d.wNet)}/Kg</p></div>
+                `;
+
+                // Desglose Texto
+                content.innerHTML = `
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div>
+                            <p class="font-bold border-b mb-2">Desglose por Caja (${d.format.name})</p>
+                            <div class="flex justify-between"><span>Precio FOB Proveedor:</span> <span>${formatM(d.fobShipper)}</span></div>
+                            <div class="flex justify-between text-xs text-gray-500"><span>(+) Gastos Logísticos/Seguro:</span> <span>${formatM(d.othersPerBox)}</span></div>
+                            <div class="flex justify-between text-xs text-gray-500"><span>(+) Comisión Agente:</span> <span>${formatM(d.commVal)}</span></div>
+                            <div class="flex justify-between font-semibold border-t pt-1 mt-1"><span>= FOB Cliente:</span> <span>${formatM(d.fobClient)}</span></div>
+                            <div class="flex justify-between text-xs text-gray-500"><span>(+) Flete Internacional:</span> <span>${formatM(d.freightPerBox)}</span></div>
+                            <div class="flex justify-between font-bold text-green-700 border-t pt-1 mt-1"><span>= CIF Cliente:</span> <span>${formatM(d.cifClient)}</span></div>
+                        </div>
+                        <div>
+                            <p class="font-bold border-b mb-2">Totales Operación (${d.boxesTotal} Cajas)</p>
+                            <div class="flex justify-between"><span>Total a Pagar Proveedor:</span> <span>${formatM(d.fobShipper * d.boxesTotal)}</span></div>
+                            <div class="flex justify-between"><span>Total Logística Local:</span> <span>${formatM(d.othersPerBox * d.boxesTotal)}</span></div>
+                            <div class="flex justify-between"><span>Total Comisión:</span> <span>${formatM(d.commVal * d.boxesTotal)}</span></div>
+                            <div class="flex justify-between"><span>Total Flete:</span> <span>${formatM(d.freightPerBox * d.boxesTotal)}</span></div>
+                            <div class="flex justify-between font-black text-lg border-t pt-2 mt-2"><span>TOTAL CIF FACTURA:</span> <span>${formatM(d.cifClient * d.boxesTotal)}</span></div>
+                        </div>
+                    </div>
+                `;
+                getEl('detailed-results-card').classList.remove('hidden');
+            }
+
+            getEl('add-to-table-btn').addEventListener('click', () => {
+                if(!lastCalc) return;
+                const tbody = getEl('results-tbody');
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="px-4 py-2 text-xs font-bold">${lastCalc.format.speciesName}<br><span class="font-normal text-gray-500">${lastCalc.format.name}</span></td>
+                    <td class="px-4 py-2 text-xs text-gray-500">Com:${(lastCalc.commP*100).toFixed(2)}%<br>${lastCalc.commBase}</td>
+                    <td class="px-4 py-2 text-right text-xs font-medium text-blue-700">${formatM(lastCalc.fobShipper)}<br><span class="bg-blue-100 px-1 rounded">${formatM(lastCalc.fobShipper/lastCalc.wNet)}/kg</span></td>
+                    <td class="px-4 py-2 text-right text-xs font-bold text-green-700">${formatM(lastCalc.cifClient)}<br><span class="bg-green-100 px-1 rounded">${formatM(lastCalc.cifClient/lastCalc.wNet)}/kg</span></td>
+                    <td class="px-2 py-2 text-center"><button onclick="this.closest('tr').remove()" class="text-red-500 font-bold">×</button></td>
+                `;
+                tbody.appendChild(row);
+                getEl('results-table-card').classList.remove('hidden');
+            });
+
+            getEl('clear-table-btn').addEventListener('click', () => {
+                getEl('results-tbody').innerHTML = '';
+                getEl('results-table-card').classList.add('hidden');
+            });
+
+            // [MEJORA] PDF con Desglose Total
+            window.exportToPDF = function() {
+                const doc = new jsPDF();
+                const curr = getEl('display-currency').value;
+                
+                // Header
+                doc.setFontSize(18); doc.setTextColor(40);
+                doc.text("COTIZACIÓN DE EXPORTACIÓN", 14, 20);
+                doc.setFontSize(10); doc.setTextColor(100);
+                doc.text(`Fecha: ${new Date().toLocaleDateString()} | Moneda: ${curr}`, 14, 28);
+
+                let currentY = 35;
+
+                // 1. Imprimir el Desglose del cálculo ACTUAL si existe
+                if (lastCalc && !getEl('detailed-results-card').classList.contains('hidden')) {
+                    doc.setFontSize(12); doc.setTextColor(0);
+                    doc.text("1. DETALLE DEL CÁLCULO ACTUAL", 14, currentY);
+                    currentY += 6;
+                    doc.setFontSize(10); doc.setTextColor(80);
+                    doc.text(`Producto: ${lastCalc.format.speciesName} - ${lastCalc.format.name}`, 14, currentY);
+                    doc.text(`Ruta: ${lastCalc.route.origin} > ${lastCalc.route.destination}`, 14, currentY + 5);
+                    doc.text(`Cajas: ${lastCalc.boxesTotal} | Peso Neto: ${lastCalc.wNet}kg`, 14, currentY + 10);
+                    
+                    currentY += 15;
+                    
+                    // Tabla de desglose simple
+                    const detailBody = [
+                        ["FOB Shipper", formatM(lastCalc.fobShipper), formatM(lastCalc.fobShipper * lastCalc.boxesTotal)],
+                        ["Logística/Seguro", formatM(lastCalc.othersPerBox), formatM(lastCalc.othersPerBox * lastCalc.boxesTotal)],
+                        ["Comisión", formatM(lastCalc.commVal), formatM(lastCalc.commVal * lastCalc.boxesTotal)],
+                        ["Flete", formatM(lastCalc.freightPerBox), formatM(lastCalc.freightPerBox * lastCalc.boxesTotal)],
+                        [{content: "TOTAL CIF CLIENTE", styles: {fontStyle: 'bold', fillColor: [220, 252, 231]}}, 
+                         {content: formatM(lastCalc.cifClient), styles: {fontStyle: 'bold'}}, 
+                         {content: formatM(lastCalc.cifClient * lastCalc.boxesTotal), styles: {fontStyle: 'bold'}}]
+                    ];
+
+                    doc.autoTable({
+                        startY: currentY,
+                        head: [['Concepto', 'Valor Caja', 'Valor Total Envío']],
+                        body: detailBody,
+                        theme: 'grid',
+                        headStyles: { fillColor: [75, 85, 99] }
+                    });
+                    currentY = doc.lastAutoTable.finalY + 15;
+                }
+
+                // 2. Tabla Comparativa
+                const tableRows = [];
+                document.querySelectorAll('#results-tbody tr').forEach(tr => {
+                    const tds = tr.querySelectorAll('td');
+                    tableRows.push([
+                        tds[0].innerText.replace('\n', ' '),
+                        tds[1].innerText.replace('\n', ' '),
+                        tds[2].innerText.replace('\n', ' '),
+                        tds[3].innerText.replace('\n', ' ')
+                    ]);
+                });
+
+                if (tableRows.length > 0) {
+                    doc.setFontSize(12); doc.setTextColor(0);
+                    doc.text("2. TABLA COMPARATIVA DE ESCENARIOS", 14, currentY);
+                    doc.autoTable({
+                        startY: currentY + 5,
+                        head: [['Producto', 'Config', 'FOB Prov (Caja/Kg)', 'CIF Cliente (Caja/Kg)']],
+                        body: tableRows,
+                        theme: 'striped',
+                        headStyles: { fillColor: [79, 70, 229] }
+                    });
+                }
+
+                doc.save(`Cotizacion_Export_${new Date().getTime()}.pdf`);
+            };
+
+            init();
+            toggleBaseInputs();
         });
     </script>
 </body>

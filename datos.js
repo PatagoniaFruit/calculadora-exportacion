@@ -23,7 +23,7 @@ window.APP_DATA = {
     { "id": 4, "speciesId": 1, "name": "12x310", "netWeight": 3.72, "weightPerBox": 4.98, "boxesPerContainer": 4080, "boxesPerSkid": 600 },
     { "id": 5, "speciesId": 1, "name": "12x300", "netWeight": 3.6, "weightPerBox": 4.82, "boxesPerContainer": 4080, "boxesPerSkid": 600 },
     { "id": 6, "speciesId": 1, "name": "12x125", "netWeight": 1.5, "weightPerBox": 2.01, "boxesPerContainer": 7800, "boxesPerSkid": 1200 },
-    { "id": 7, "speciesId": 1, "name": "Bulk",   "netWeight": 4.0, "weightPerBox": 4.82, "boxesPerContainer": 5440, "boxesPerSkid": 880 },
+    { "id": 7, "speciesId": 1, "name": "Bulk",   "netWeight": 3.6, "weightPerBox": 4.82, "boxesPerContainer": 5440, "boxesPerSkid": 880 },
     { "id": 8, "speciesId": 1, "name": "8x510",  "netWeight": 4.08, "weightPerBox": 8.19, "boxesPerContainer": 4080, "boxesPerSkid": 600 },
     
     // Espárragos

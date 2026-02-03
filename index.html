@@ -11,7 +11,6 @@
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
         .card { background-color: white; border-radius: 0.75rem; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); padding: 1.5rem; margin-bottom: 1.5rem; }
-        
         .btn { display: inline-block; padding: 0.75rem 1.5rem; border-radius: 0.5rem; font-weight: 600; text-align: center; cursor: pointer; transition: all 0.2s; }
         .btn-primary { background-color: #4f46e5; color: white; box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.4); }
         .btn-primary:hover { background-color: #4338ca; transform: translateY(-1px); }
@@ -19,30 +18,23 @@
         .btn-success { background-color: #10b981; color: white; box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.4); } 
         .btn-success:hover { background-color: #059669; }
         .btn-danger { color: #ef4444; font-weight: bold;} .btn-danger:hover { color: #dc2626; background-color: #fee2e2; border-radius: 4px; padding: 2px 6px;}
-
         input, select { width: 100%; padding: 0.6rem; border-radius: 0.375rem; border: 1px solid #d1d5db; background-color: #fff; font-size: 0.9rem; }
         input:focus, select:focus { outline: none; border-color: #4f46e5; ring: 2px solid #e0e7ff; }
         label { font-size: 0.75rem; font-weight: 700; color: #4b5563; margin-bottom: 0.25rem; display: block; text-transform: uppercase; letter-spacing: 0.05em; }
-
         .price-box { background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 0.75rem; padding: 1rem; text-align: center; transition: transform 0.2s; }
         .price-box:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
-        
         .segment-group { display: flex; background-color: #f1f5f9; padding: 4px; border-radius: 0.5rem; gap: 4px; }
-        
-        .ship-option {
-            flex: 1; cursor: pointer; border: 2px solid transparent; border-radius: 0.5rem; padding: 0.75rem;
-            display: flex; align-items: center; justify-content: center; gap: 0.5rem; transition: all 0.2s;
-            background-color: #f8fafc; color: #64748b;
-        }
+        .ship-option { flex: 1; cursor: pointer; border: 2px solid transparent; border-radius: 0.5rem; padding: 0.75rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem; transition: all 0.2s; background-color: #f8fafc; color: #64748b; }
         .ship-option:hover { background-color: #e2e8f0; }
-        
         input[value="maritime"]:checked + .ship-option { background-color: #eff6ff; border-color: #3b82f6; color: #1e40af; box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2); }
         input[value="air"]:checked + .ship-option { background-color: #fff7ed; border-color: #f97316; color: #9a3412; box-shadow: 0 4px 6px -1px rgba(249, 115, 22, 0.2); }
-
         .base-option input:checked + span { background-color: white; color: #4f46e5; box-shadow: 0 1px 3px rgba(0,0,0,0.1); font-weight: 800; border: 1px solid #e0e7ff; }
-
         .badge-weight { font-size: 0.65rem; padding: 2px 5px; border-radius: 4px; font-weight: 700; display: inline-block; margin-top: 2px; }
         .badge-net { background-color: #dcfce7; color: #166534; }
+        /* [NUEVO] Estilo botón conversor */
+        .btn-convert { position: absolute; right: 8px; top: 32px; background: #e0e7ff; color: #4338ca; font-size: 0.65rem; padding: 2px 6px; border-radius: 4px; font-weight: bold; cursor: pointer; border: 1px solid #c7d2fe; }
+        .btn-convert:hover { background: #c7d2fe; }
+        .input-group { position: relative; }
     </style>
 </head>
 <body class="bg-gray-100 text-gray-800 p-4 sm:p-8">
@@ -53,7 +45,6 @@
                 <h1 class="text-3xl font-bold text-gray-900 tracking-tight">Cotizador de Exportación</h1>
                 <p class="text-gray-500 text-sm mt-1">Gestión Comercial y Logística</p>
             </div>
-            
             <div class="bg-white px-4 py-2 rounded-xl shadow-sm border border-gray-200 flex items-center gap-6">
                 <div>
                     <label class="text-indigo-600 mb-0">Visualización</label>
@@ -78,20 +69,8 @@
                     <div>
                         <label class="mb-3 text-gray-700">1. Seleccione Tipo de Envío</label>
                         <div class="flex gap-4">
-                            <label class="flex-1 relative">
-                                <input type="radio" name="shipping-type" value="maritime" class="hidden" checked>
-                                <div class="ship-option h-full">
-                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 19H5V5h14v14zM5 19l7-7 7 7v-1.5l-7-7-7 7V19zM12 3v12.5"></path><path d="M2 21h20"></path></svg>
-                                    <div class="text-center"><span class="block font-bold text-sm">Marítimo (FCL)</span><span class="text-[10px] block opacity-75">Contenedor Completo</span></div>
-                                </div>
-                            </label>
-                            <label class="flex-1 relative">
-                                <input type="radio" name="shipping-type" value="air" class="hidden">
-                                <div class="ship-option h-full">
-                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
-                                    <div class="text-center"><span class="block font-bold text-sm">Aéreo</span><span class="text-[10px] block opacity-75">Envío Urgente</span></div>
-                                </div>
-                            </label>
+                            <label class="flex-1 relative"><input type="radio" name="shipping-type" value="maritime" class="hidden" checked><div class="ship-option h-full"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 19H5V5h14v14zM5 19l7-7 7 7v-1.5l-7-7-7 7V19zM12 3v12.5"></path><path d="M2 21h20"></path></svg><div class="text-center"><span class="block font-bold text-sm">Marítimo (FCL)</span><span class="text-[10px] block opacity-75">Contenedor Completo</span></div></div></label>
+                            <label class="flex-1 relative"><input type="radio" name="shipping-type" value="air" class="hidden"><div class="ship-option h-full"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg><div class="text-center"><span class="block font-bold text-sm">Aéreo</span><span class="text-[10px] block opacity-75">Envío Urgente</span></div></div></label>
                         </div>
                     </div>
                     <div>
@@ -112,16 +91,11 @@
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
                     <div>
                         <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center"><span class="bg-indigo-100 text-indigo-700 w-6 h-6 rounded-full flex items-center justify-center text-xs mr-2">3</span>Datos del Producto</h3>
-                        
                         <div class="grid grid-cols-2 gap-4 mb-4">
                             <div><label>Especie</label><select id="species"></select></div>
                             <div id="format-select-wrapper"><label>Formato</label><select id="format"></select></div>
                         </div>
-
-                        <div class="mb-4">
-                            <label>Variedad / Calibre / Marca</label>
-                            <input type="text" id="variety-caliber" placeholder="Ej: Duke / 18mm / Premium Label" class="border-indigo-200">
-                        </div>
+                        <div class="mb-4"><label>Variedad / Calibre / Marca</label><input type="text" id="variety-caliber" placeholder="Ej: Duke / 18mm" class="border-indigo-200"></div>
 
                         <div id="manual-product-wrapper" class="hidden mb-4 p-4 border border-dashed border-gray-300 rounded-lg bg-gray-50">
                             <div class="grid grid-cols-2 gap-3 mb-3"><input type="text" id="manual-species-name" placeholder="Especie"><input type="text" id="manual-format-name" placeholder="Formato"></div>
@@ -134,9 +108,21 @@
                         </div>
 
                         <div class="mb-6 p-4 bg-indigo-50 rounded-lg border border-indigo-100">
-                            <div id="input-fob-proveedor-wrapper"><label class="text-indigo-900">Costo Compra FOB (USD/Caja)</label><input type="number" id="fob-proveedor-cost" placeholder="0.00" step="0.01" class="text-lg font-bold text-indigo-700"></div>
-                            <div id="input-cif-proveedor-wrapper" class="hidden"><label class="text-indigo-900">Costo Compra CIF (USD/Caja)</label><input type="number" id="cif-proveedor-cost" placeholder="0.00" step="0.01" class="text-lg font-bold text-indigo-700"></div>
-                            <div id="input-cif-cliente-wrapper" class="hidden"><label class="text-indigo-900">Precio Venta CIF (USD/Caja)</label><input type="number" id="cif-cliente-price" placeholder="0.00" step="0.01" class="text-lg font-bold text-indigo-700"></div>
+                            <div id="input-fob-proveedor-wrapper" class="input-group">
+                                <label class="text-indigo-900">Costo Compra FOB (USD/Caja)</label>
+                                <input type="number" id="fob-proveedor-cost" placeholder="0.00" step="0.01" class="text-lg font-bold text-indigo-700">
+                                <button type="button" class="btn-convert" onclick="convertInput('fob-proveedor-cost')">🇪🇺→🇺🇸</button>
+                            </div>
+                            <div id="input-cif-proveedor-wrapper" class="hidden input-group">
+                                <label class="text-indigo-900">Costo Compra CIF (USD/Caja)</label>
+                                <input type="number" id="cif-proveedor-cost" placeholder="0.00" step="0.01" class="text-lg font-bold text-indigo-700">
+                                <button type="button" class="btn-convert" onclick="convertInput('cif-proveedor-cost')">🇪🇺→🇺🇸</button>
+                            </div>
+                            <div id="input-cif-cliente-wrapper" class="hidden input-group">
+                                <label class="text-indigo-900">Precio Venta CIF (USD/Caja)</label>
+                                <input type="number" id="cif-cliente-price" placeholder="0.00" step="0.01" class="text-lg font-bold text-indigo-700">
+                                <button type="button" class="btn-convert" onclick="convertInput('cif-cliente-price')">🇪🇺→🇺🇸</button>
+                            </div>
                         </div>
 
                         <div class="grid grid-cols-2 gap-4">
@@ -147,27 +133,33 @@
 
                     <div>
                         <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center"><span class="bg-indigo-100 text-indigo-700 w-6 h-6 rounded-full flex items-center justify-center text-xs mr-2">4</span>Logística</h3>
-                        
                         <div id="air-options" class="hidden mb-4 p-4 bg-orange-50 border border-orange-200 rounded-lg">
                             <div class="mb-3"><label>N° Cajas Aéreo</label><input type="number" id="air-boxes" placeholder="Ej: 360"></div>
                             <div class="grid grid-cols-2 gap-3">
-                                <div><label class="text-xs">Clearance</label><input type="number" id="air-clearance" step="0.01"></div><div><label>Cooler</label><input type="number" id="air-cooler" step="0.01"></div>
-                                <div><label>DTA</label><input type="number" id="air-dta" step="0.01"></div><div><label>Handling</label><input type="number" id="air-handling" step="0.01"></div>
+                                <div><label class="text-xs">Clearance</label><input type="number" id="air-clearance" step="0.01"></div><div><label class="text-xs">Cooler</label><input type="number" id="air-cooler" step="0.01"></div>
+                                <div><label class="text-xs">DTA</label><input type="number" id="air-dta" step="0.01"></div><div><label>Handling</label><input type="number" id="air-handling" step="0.01"></div>
                             </div>
                         </div>
-
                         <div class="mb-4"><label>Ruta</label><select id="route"></select></div>
 
                         <div id="manual-freight-wrapper" class="hidden p-4 border border-dashed border-gray-300 rounded-lg bg-gray-50 mb-4">
                             <div class="grid grid-cols-2 gap-3 mb-3"><div><label>Origen</label><input type="text" id="manual-route-origin"></div><div><label>Destino</label><input type="text" id="manual-route-dest"></div></div>
-                            <div id="manual-maritime-wrapper"><label class="text-blue-600">Costo Flete FCL (USD)</label><input type="number" id="manual-maritime-cost" step="0.01"></div>
-                            <div id="manual-air-wrapper" class="hidden"><label class="text-orange-600">Tarifa Aérea (USD/Kg)</label><input type="number" id="manual-air-rate" step="0.01"></div>
+                            <div id="manual-maritime-wrapper" class="input-group">
+                                <label class="text-blue-600">Costo Flete FCL (USD)</label>
+                                <input type="number" id="manual-maritime-cost" step="0.01">
+                                <button type="button" class="btn-convert" onclick="convertInput('manual-maritime-cost')">🇪🇺→🇺🇸</button>
+                            </div>
+                            <div id="manual-air-wrapper" class="hidden input-group">
+                                <label class="text-orange-600">Tarifa Aérea (USD/Kg)</label>
+                                <input type="number" id="manual-air-rate" step="0.01">
+                                <button type="button" class="btn-convert" onclick="convertInput('manual-air-rate')">🇪🇺→🇺🇸</button>
+                            </div>
                         </div>
 
                         <div class="grid grid-cols-2 gap-4 mb-4">
-                            <div><label>Seguro (Total)</label><input type="number" id="insurance-total" value="235" step="0.01"></div>
-                            <div id="maritime-costs"><label>Servicios FCL</label><input type="number" id="services-total" value="500" step="0.01"></div>
-                            <div id="maritime-extra"><label>Costos Extra FCL</label><input type="number" id="extra-costs-total" value="300" step="0.01"></div>
+                            <div class="input-group"><label>Seguro (Total USD)</label><input type="number" id="insurance-total" value="235" step="0.01"><button type="button" class="btn-convert" onclick="convertInput('insurance-total')">🇪🇺→🇺🇸</button></div>
+                            <div id="maritime-costs" class="input-group"><label>Servicios FCL (USD)</label><input type="number" id="services-total" value="500" step="0.01"><button type="button" class="btn-convert" onclick="convertInput('services-total')">🇪🇺→🇺🇸</button></div>
+                            <div id="maritime-extra" class="input-group"><label>Costos Extra FCL</label><input type="number" id="extra-costs-total" value="300" step="0.01"><button type="button" class="btn-convert" onclick="convertInput('extra-costs-total')">🇪🇺→🇺🇸</button></div>
                         </div>
 
                         <button id="calculate-btn" class="btn btn-primary w-full mt-8 py-3 text-lg shadow-lg hover:shadow-xl transform transition">CALCULAR</button>
@@ -242,6 +234,24 @@
                 updateBaseHelpText();
             }
 
+            // [NUEVO] Función de Conversión Rápida EUR->USD en Inputs
+            window.convertInput = function(inputId) {
+                const input = getEl(inputId);
+                const val = parseFloat(input.value);
+                const rate = parseFloat(getEl('exchange-rate').value);
+                
+                if (isNaN(val) || isNaN(rate) || rate === 0) return alert('Ingrese un valor y revise la tasa de cambio.');
+                
+                // EUR / Tasa = USD (ej: 10 EUR / 0.92 = 10.86 USD)
+                const usdVal = val / rate;
+                input.value = usdVal.toFixed(2);
+                
+                // Pequeño efecto visual para confirmar cambio
+                input.style.backgroundColor = "#dcfce7";
+                setTimeout(() => input.style.backgroundColor = "#fff", 500);
+            }
+
+            // Listeners
             speciesSelect.addEventListener('change', (e) => {
                 const isManual = e.target.value === 'manual';
                 getEl('manual-product-wrapper').classList.toggle('hidden', !isManual);
@@ -393,6 +403,7 @@
             getEl('calculate-btn').addEventListener('click', () => {
                 const inp = getInputs();
                 if(!inp) return;
+                
                 let fobShipper, fobClient, cifClient, cifShipper, commVal;
                 const C = inp.commP; const F = inp.freightPerBox; const O = inp.othersPerBox;
 
@@ -532,9 +543,7 @@
 
                 let startY = 40;
 
-                // 1. TABLA MAESTRA
                 const tableRows = quoteHistory.map(d => {
-                    // [MEJORA] Indicador Visual de Envío en Tabla
                     const typeLabel = d.type === 'maritime' ? '[MARÍTIMO]' : '[AÉREO]';
                     return [
                         `${d.format.speciesName}\n${d.format.name}\n${typeLabel}`,
@@ -560,7 +569,6 @@
 
                 startY = doc.lastAutoTable.finalY + 15;
 
-                // 2. DETALLE TÉCNICO
                 doc.setFontSize(12); doc.setTextColor(0); doc.setFont(undefined, 'bold');
                 doc.text("DETALLE TÉCNICO POR ÍTEM", 14, startY);
                 startY += 5;
@@ -569,7 +577,6 @@
                     if (startY > 250) { doc.addPage(); startY = 20; }
 
                     doc.setFontSize(10); doc.setTextColor(79, 70, 229); 
-                    // [MEJORA] Título explícito con tipo de envío
                     const typeLabel = d.type === 'maritime' ? '[ENVÍO MARÍTIMO (FCL)]' : '[ENVÍO AÉREO]';
                     doc.text(`#${i+1}. ${d.format.speciesName} - ${d.format.name} (${d.variety}) - ${typeLabel}`, 14, startY + 5);
                     

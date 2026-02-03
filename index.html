@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculadora de Exportación - Comercial</title>
+    <title>Calculadora de Exportación Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
@@ -32,12 +32,31 @@
         
         /* Segmented Control */
         .segment-group { display: flex; background-color: #f1f5f9; padding: 4px; border-radius: 0.5rem; gap: 4px; }
-        input[type="radio"]:checked + span { background-color: white; color: #4f46e5; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        .shipping-radio:checked + span { background-color: #4f46e5; color: white; }
+        
+        /* Shipping Selection Custom Styles */
+        .ship-option {
+            flex: 1; cursor: pointer; border: 2px solid transparent; border-radius: 0.5rem; padding: 0.75rem;
+            display: flex; align-items: center; justify-content: center; gap: 0.5rem; transition: all 0.2s;
+            background-color: #f8fafc; color: #64748b;
+        }
+        .ship-option:hover { background-color: #e2e8f0; }
+        
+        /* Estado Activo Marítimo */
+        input[value="maritime"]:checked + .ship-option {
+            background-color: #eff6ff; border-color: #3b82f6; color: #1e40af; box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2);
+        }
+        /* Estado Activo Aéreo */
+        input[value="air"]:checked + .ship-option {
+            background-color: #fff7ed; border-color: #f97316; color: #9a3412; box-shadow: 0 4px 6px -1px rgba(249, 115, 22, 0.2);
+        }
 
-        /* Badges */
-        .badge-weight { font-size: 0.65rem; padding: 2px 5px; border-radius: 4px; font-weight: 700; display: inline-block; margin-top: 2px; }
-        .badge-net { background-color: #dcfce7; color: #166534; }
+        /* Calculation Base Active State */
+        .base-option input:checked + span {
+            background-color: white; color: #4f46e5; box-shadow: 0 1px 3px rgba(0,0,0,0.1); font-weight: 800; border: 1px solid #e0e7ff;
+        }
+
+        /* Tooltip style text */
+        .help-text { font-size: 0.7rem; color: #6b7280; margin-top: 4px; line-height: 1.2; }
     </style>
 </head>
 <body class="bg-gray-100 text-gray-800 p-4 sm:p-8">
@@ -70,19 +89,53 @@
         <main>
             <div class="card">
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                    
                     <div>
-                        <label>1. Tipo de Envío</label>
-                        <div class="segment-group">
-                            <label class="flex-1 cursor-pointer"><input type="radio" name="shipping-type" value="maritime" class="hidden shipping-radio" checked><span class="block py-2 text-center rounded-md text-sm font-bold">Marítimo (FCL)</span></label>
-                            <label class="flex-1 cursor-pointer"><input type="radio" name="shipping-type" value="air" class="hidden shipping-radio"><span class="block py-2 text-center rounded-md text-sm font-bold">Aéreo</span></label>
+                        <label class="mb-3 text-gray-700">1. Seleccione Tipo de Envío</label>
+                        <div class="flex gap-4">
+                            <label class="flex-1 relative">
+                                <input type="radio" name="shipping-type" value="maritime" class="hidden" checked>
+                                <div class="ship-option h-full">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 19H5V5h14v14zM5 19l7-7 7 7v-1.5l-7-7-7 7V19zM12 3v12.5"></path><path d="M2 21h20"></path></svg>
+                                    <div class="text-center">
+                                        <span class="block font-bold text-sm">Marítimo (FCL)</span>
+                                        <span class="text-[10px] block opacity-75">Contenedor Completo</span>
+                                    </div>
+                                </div>
+                            </label>
+                            <label class="flex-1 relative">
+                                <input type="radio" name="shipping-type" value="air" class="hidden">
+                                <div class="ship-option h-full">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
+                                    <div class="text-center">
+                                        <span class="block font-bold text-sm">Aéreo</span>
+                                        <span class="text-[10px] block opacity-75">Envío Urgente</span>
+                                    </div>
+                                </div>
+                            </label>
                         </div>
                     </div>
+
                     <div>
-                        <label>2. Punto de Partida</label>
-                        <div class="segment-group bg-indigo-50">
-                            <label class="flex-1 cursor-pointer"><input type="radio" name="calculation-base" value="proveedor_fob" class="hidden" checked><span class="block py-2 text-center rounded-md text-sm font-bold">FOB Prov (+)</span></label>
-                            <label class="flex-1 cursor-pointer"><input type="radio" name="calculation-base" value="proveedor_cif" class="hidden"><span class="block py-2 text-center rounded-md text-sm font-bold">CIF Prov (+)</span></label>
-                            <label class="flex-1 cursor-pointer"><input type="radio" name="calculation-base" value="cliente_cif" class="hidden"><span class="block py-2 text-center rounded-md text-sm font-bold">CIF Cliente (-)</span></label>
+                        <label class="mb-3 text-gray-700">2. Punto de Partida del Cálculo</label>
+                        <div class="segment-group bg-gray-100 p-1">
+                            <label class="flex-1 cursor-pointer base-option">
+                                <input type="radio" name="calculation-base" value="proveedor_fob" class="hidden" checked>
+                                <span class="block py-2 text-center rounded-md text-xs font-medium transition-all text-gray-500">FOB Prov (+)</span>
+                            </label>
+                            <label class="flex-1 cursor-pointer base-option">
+                                <input type="radio" name="calculation-base" value="proveedor_cif" class="hidden">
+                                <span class="block py-2 text-center rounded-md text-xs font-medium transition-all text-gray-500">CIF Prov (+)</span>
+                            </label>
+                            <label class="flex-1 cursor-pointer base-option">
+                                <input type="radio" name="calculation-base" value="cliente_cif" class="hidden">
+                                <span class="block py-2 text-center rounded-md text-xs font-medium transition-all text-gray-500">CIF Cliente (-)</span>
+                            </label>
+                        </div>
+                        <div class="mt-2 text-center">
+                            <p id="help-text-base" class="text-xs text-indigo-600 bg-indigo-50 py-1 px-2 rounded inline-block">
+                                <span class="font-bold">FOB Prov:</span> Partimos del costo de compra al productor (Fruta + Proceso).
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -187,7 +240,7 @@
                         <thead class="bg-gray-100">
                             <tr>
                                 <th class="px-3 py-3 text-left font-bold uppercase text-xs text-gray-600">Producto</th>
-                                <th class="px-3 py-3 text-left font-bold uppercase text-xs text-gray-600">Var/Calibre</th>
+                                <th class="px-3 py-3 text-left font-bold uppercase text-xs text-gray-600">Detalles</th>
                                 <th class="px-3 py-3 text-right font-bold text-blue-700 uppercase text-xs bg-blue-50">Compra (Caja)</th>
                                 <th class="px-3 py-3 text-right font-bold text-blue-700 uppercase text-xs bg-blue-50">Compra (Kg)</th>
                                 <th class="px-3 py-3 text-right font-bold text-green-700 uppercase text-xs bg-green-50">Venta (Caja)</th>
@@ -231,6 +284,7 @@
                 window.APP_DATA.species.forEach(s => speciesSelect.innerHTML += `<option value="${s.id}">${s.name}</option>`);
                 speciesSelect.innerHTML += `<option value="manual">--- Ingresar Manual ---</option>`;
                 renderRoutes();
+                updateBaseHelpText();
             }
 
             speciesSelect.addEventListener('change', (e) => {
@@ -301,9 +355,17 @@
                 getEl('input-cif-proveedor-wrapper').classList.toggle('hidden', base !== 'proveedor_cif');
                 getEl('input-cif-cliente-wrapper').classList.toggle('hidden', base !== 'cliente_cif');
                 getEl('detailed-results-card').classList.add('hidden');
+                updateBaseHelpText();
             }
 
-            // --- CÁLCULO ---
+            function updateBaseHelpText() {
+                const base = document.querySelector('input[name="calculation-base"]:checked').value;
+                const txt = getEl('help-text-base');
+                if(base === 'proveedor_fob') txt.innerHTML = '<span class="font-bold">FOB Prov:</span> Partimos del costo de compra al productor (Fruta + Proceso).';
+                else if(base === 'proveedor_cif') txt.innerHTML = '<span class="font-bold">CIF Prov:</span> Partimos del costo puesto en destino que nos da el proveedor.';
+                else txt.innerHTML = '<span class="font-bold">CIF Cliente:</span> Partimos del precio final de venta que negociamos con el cliente.';
+            }
+
             function getInputs() {
                 const type = document.querySelector('input[name="shipping-type"]:checked').value;
                 const wNet = parseFloat(weightNetInput.value) || 0;
@@ -324,7 +386,7 @@
                     format = { ...dbF, weightPerBox: wGross, speciesName: spName };
                 }
 
-                // Capturar variedad/calibre manual
+                // Variedad
                 const variety = getEl('variety-caliber').value || '-';
 
                 let route;
@@ -357,7 +419,6 @@
                     freightPerBox = wGross * route.ratePerKg;
                 }
 
-                // Desglose Logístico individual para el PDF
                 const insuranceTotal = parseFloat(getEl('insurance-total').value) || 0;
                 const insurancePerBox = insuranceTotal / boxesTotal;
                 
@@ -407,7 +468,6 @@
                 renderResults(lastCalc);
             });
 
-            // --- FORMAT ---
             function getCurrencyRate() {
                 const currency = getEl('display-currency').value;
                 const rate = parseFloat(getEl('exchange-rate').value) || 0.92;
@@ -453,7 +513,6 @@
                 getEl('detailed-results-card').classList.remove('hidden');
             }
 
-            // [NUEVO] LÓGICA DE HISTORIAL
             getEl('add-to-table-btn').addEventListener('click', () => {
                 if(!lastCalc) return;
                 quoteHistory.push(lastCalc);
@@ -511,7 +570,7 @@
                 
                 doc.setFontSize(10); doc.setTextColor(100); doc.setFont(undefined, 'normal');
                 doc.text(`Fecha: ${now.toLocaleDateString()} ${now.toLocaleTimeString()}`, 14, 28);
-                doc.text(`Moneda: ${cur.code} (Tasa: ${cur.rate})`, 14, 33);
+                doc.text(`Moneda Referencia: ${cur.code} (Tasa: ${cur.rate})`, 14, 33);
 
                 let startY = 40;
 
@@ -519,7 +578,7 @@
                 const tableRows = quoteHistory.map(d => [
                     `${d.format.speciesName}\n${d.format.name}`,
                     d.variety,
-                    `${d.boxesTotal}`,
+                    `${d.boxesTotal} (${d.type === 'maritime' ? 'Mar' : 'Aéreo'})`,
                     `${fmt(d.fobShipper)}\n${fmt(d.fobShipper/d.wNet)}/kg`,
                     `${fmt(d.cifClient)}\n${fmt(d.cifClient/d.wNet)}/kg`,
                     fmt(d.cifClient * d.boxesTotal)
@@ -530,7 +589,7 @@
 
                 doc.autoTable({
                     startY: startY,
-                    head: [['Producto', 'Variedad', 'Cajas', 'Compra (FOB)', 'Venta (CIF)', 'Total']],
+                    head: [['Producto', 'Var/Calibre', 'Cant/Via', 'Compra (FOB)', 'Venta (CIF)', 'Total']],
                     body: tableRows,
                     theme: 'striped',
                     headStyles: { fillColor: [55, 65, 81] }, 
@@ -539,7 +598,7 @@
 
                 startY = doc.lastAutoTable.finalY + 15;
 
-                // 2. DETALLE TÉCNICO DESGLOSADO
+                // 2. DETALLE TÉCNICO
                 doc.setFontSize(12); doc.setTextColor(0); doc.setFont(undefined, 'bold');
                 doc.text("DETALLE TÉCNICO POR ÍTEM", 14, startY);
                 startY += 5;
@@ -576,7 +635,7 @@
                 doc.save(`Cotizacion_Export_${now.getTime()}.pdf`);
             };
 
-            init(); toggleBaseInputs(); toggleShippingMode();
+            init(); toggleBaseInputs(); toggleShippingMode(); updateBaseHelpText();
         });
     </script>
 </body>

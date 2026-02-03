@@ -3,49 +3,70 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculadora de Precios de Exportación Pro</title>
+    <title>Calculadora de Exportación Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
-        .card { background-color: white; border-radius: 0.75rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); padding: 1.5rem; margin-bottom: 1.5rem; }
-        .btn { display: inline-block; padding: 0.625rem 1.25rem; border-radius: 0.375rem; font-weight: 500; text-align: center; cursor: pointer; transition: all 0.2s; }
-        .btn-primary { background-color: #4f46e5; color: white; } .btn-primary:hover { background-color: #4338ca; }
-        .btn-secondary { background-color: #e5e7eb; color: #374151; } .btn-secondary:hover { background-color: #d1d5db; }
-        .btn-success { background-color: #10b981; color: white; } .btn-success:hover { background-color: #059669; }
-        .btn-danger { background-color: #ef4444; color: white; } .btn-danger:hover { background-color: #dc2626; }
-        input, select { width: 100%; padding: 0.5rem; border-radius: 0.375rem; border: 1px solid #d1d5db; background-color: white; }
+        .card { background-color: white; border-radius: 0.75rem; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); padding: 1.5rem; margin-bottom: 1.5rem; }
+        
+        /* Botones Generales */
+        .btn { display: inline-block; padding: 0.75rem 1.5rem; border-radius: 0.5rem; font-weight: 600; text-align: center; cursor: pointer; transition: all 0.2s; }
+        .btn-primary { background-color: #4f46e5; color: white; box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.4); }
+        .btn-primary:hover { background-color: #4338ca; transform: translateY(-1px); }
+        .btn-secondary { background-color: #f3f4f6; color: #374151; border: 1px solid #d1d5db; }
+        .btn-secondary:hover { background-color: #e5e7eb; }
+        .btn-success { background-color: #10b981; color: white; } 
+        .btn-danger { color: #ef4444; } .btn-danger:hover { color: #dc2626; background-color: #fee2e2; border-radius: 4px; padding: 2px 6px;}
+
+        /* Inputs */
+        input, select { width: 100%; padding: 0.6rem; border-radius: 0.375rem; border: 1px solid #d1d5db; background-color: #fff; font-size: 0.95rem; }
         input:focus, select:focus { outline: none; border-color: #4f46e5; ring: 2px solid #e0e7ff; }
-        label { font-size: 0.85rem; font-weight: 600; color: #374151; margin-bottom: 0.25rem; display: block; }
-        .price-box { background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 0.5rem; padding: 1rem; text-align: center; }
-        .calc-base-bg { background-color: #eef2ff; border: 1px solid #c7d2fe; }
-        .badge-weight { font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; font-weight: 600; display: inline-block; margin-top: 4px; }
+        label { font-size: 0.8rem; font-weight: 600; color: #4b5563; margin-bottom: 0.25rem; display: block; text-transform: uppercase; letter-spacing: 0.05em; }
+
+        /* Price Cards */
+        .price-box { background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 0.75rem; padding: 1rem; text-align: center; transition: transform 0.2s; }
+        .price-box:hover { transform: translateY(-2px); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+        
+        /* Segmented Control (Toggle Buttons) */
+        .segment-group { display: flex; background-color: #f1f5f9; padding: 4px; border-radius: 0.5rem; gap: 4px; }
+        .segment-label { flex: 1; text-align: center; padding: 0.5rem; font-size: 0.875rem; font-weight: 600; border-radius: 0.375rem; cursor: pointer; transition: all 0.2s; color: #64748b; }
+        .segment-label:hover { background-color: #e2e8f0; }
+        
+        /* Cuando el radio está checkeado, estilar el label adyacente (usando JS para añadir clase o peer-checked) */
+        input[type="radio"]:checked + span { background-color: white; color: #4f46e5; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        /* Variante oscura para Shipping */
+        .shipping-radio:checked + span { background-color: #4f46e5; color: white; }
+
+        /* Badges */
+        .badge-weight { font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; font-weight: 600; display: inline-block; }
         .badge-net { background-color: #dcfce7; color: #166534; }
     </style>
 </head>
-<body class="bg-gray-100 text-gray-800 p-4 sm:p-8">
+<body class="bg-gray-50 text-gray-800 p-4 sm:p-8">
 
-    <div class="max-w-6xl mx-auto">
-        <header class="flex flex-col md:flex-row justify-between items-center mb-10 gap-4">
-            <div class="text-center md:text-left">
+    <div class="max-w-7xl mx-auto">
+        <header class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+            <div>
                 <h1 class="text-3xl font-bold text-gray-900 tracking-tight">Calculadora de Exportación</h1>
-                <p class="text-gray-600 mt-1">Herramienta de Cotización Comercial</p>
+                <p class="text-gray-500 text-sm mt-1">Análisis Comercial Detallado (Neto vs Bruto)</p>
             </div>
-            <div class="bg-white p-3 rounded-lg shadow-sm border border-indigo-100 flex items-center gap-4">
+            
+            <div class="bg-white px-4 py-2 rounded-xl shadow-sm border border-gray-200 flex items-center gap-6">
                 <div>
-                    <label class="text-[10px] uppercase text-indigo-600 font-bold mb-0">Moneda Vista</label>
-                    <select id="display-currency" class="text-sm font-bold py-1 border-none bg-gray-50">
-                        <option value="USD">USD ($)</option>
-                        <option value="EUR">EUR (€)</option>
+                    <label class="mb-0 text-indigo-600">Visualización</label>
+                    <select id="display-currency" class="py-1 px-2 border-none bg-gray-50 font-bold text-gray-800 text-sm">
+                        <option value="USD">Dólar (USD)</option>
+                        <option value="EUR">Euro (EUR)</option>
                     </select>
                 </div>
-                <div>
-                    <label class="text-[10px] uppercase text-indigo-600 font-bold mb-0">Tasa 1 USD =</label>
+                <div class="border-l pl-6">
+                    <label class="mb-0 text-indigo-600">Tasa (1 USD)</label>
                     <div class="flex items-center">
-                        <input type="number" id="exchange-rate" value="0.92" step="0.001" class="text-sm font-bold py-1 w-20 border-none bg-gray-50 text-right">
-                        <span class="text-xs font-bold ml-1">EUR</span>
+                        <input type="number" id="exchange-rate" value="0.92" step="0.001" class="w-16 py-1 px-2 border-none bg-gray-50 font-bold text-right text-sm">
+                        <span class="text-xs font-bold ml-1 text-gray-500">EUR</span>
                     </div>
                 </div>
             </div>
@@ -53,79 +74,90 @@
 
         <main>
             <div class="card">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
                     <div>
-                        <label>Tipo de Envío</label>
-                        <select id="shipping-type" class="mt-1">
-                            <option value="maritime">Marítimo (FCL)</option>
-                            <option value="air">Aéreo</option>
-                        </select>
+                        <label class="mb-2">1. Seleccione Tipo de Envío</label>
+                        <div class="segment-group">
+                            <label class="flex-1 cursor-pointer">
+                                <input type="radio" name="shipping-type" value="maritime" class="hidden shipping-radio" checked>
+                                <span class="block py-2 text-center rounded-md text-sm font-bold transition-all">Marítimo (FCL)</span>
+                            </label>
+                            <label class="flex-1 cursor-pointer">
+                                <input type="radio" name="shipping-type" value="air" class="hidden shipping-radio">
+                                <span class="block py-2 text-center rounded-md text-sm font-bold transition-all">Aéreo</span>
+                            </label>
+                        </div>
                     </div>
-                    <div class="md:col-span-2 p-3 calc-base-bg rounded-lg border border-indigo-200">
-                        <label>Punto de Partida del Cálculo</label>
-                        <div class="flex flex-wrap gap-4 mt-2">
-                            <label class="flex items-center space-x-2 cursor-pointer bg-white px-3 py-1 rounded-full border shadow-sm">
-                                <input type="radio" name="calculation-base" value="proveedor_fob" checked class="text-indigo-600">
-                                <span class="text-sm">FOB Proveedor (+)</span>
+                    <div>
+                        <label class="mb-2">2. Punto de Partida del Cálculo</label>
+                        <div class="segment-group bg-indigo-50">
+                            <label class="flex-1 cursor-pointer">
+                                <input type="radio" name="calculation-base" value="proveedor_fob" class="hidden" checked>
+                                <span class="block py-2 text-center rounded-md text-sm font-bold transition-all">FOB Prov (+)</span>
                             </label>
-                            <label class="flex items-center space-x-2 cursor-pointer bg-white px-3 py-1 rounded-full border shadow-sm">
-                                <input type="radio" name="calculation-base" value="proveedor_cif" class="text-indigo-600">
-                                <span class="text-sm">CIF Proveedor (+)</span>
+                            <label class="flex-1 cursor-pointer">
+                                <input type="radio" name="calculation-base" value="proveedor_cif" class="hidden">
+                                <span class="block py-2 text-center rounded-md text-sm font-bold transition-all">CIF Prov (+)</span>
                             </label>
-                            <label class="flex items-center space-x-2 cursor-pointer bg-white px-3 py-1 rounded-full border shadow-sm">
-                                <input type="radio" name="calculation-base" value="cliente_cif" class="text-indigo-600">
-                                <span class="text-sm">CIF Cliente (-)</span>
+                            <label class="flex-1 cursor-pointer">
+                                <input type="radio" name="calculation-base" value="cliente_cif" class="hidden">
+                                <span class="block py-2 text-center rounded-md text-sm font-bold transition-all">CIF Cliente (-)</span>
                             </label>
                         </div>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="border-t border-gray-100 my-6"></div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
                     <div>
-                        <h3 class="text-lg font-bold text-gray-800 mb-4 border-b pb-2">1. Producto y Costos</h3>
+                        <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
+                            <span class="bg-indigo-100 text-indigo-700 w-6 h-6 rounded-full flex items-center justify-center text-xs mr-2">3</span>
+                            Datos del Producto
+                        </h3>
                         
-                        <div class="flex space-x-4 mb-4">
-                            <div class="w-1/2"><label for="species">Especie</label><select id="species" class="mt-1"></select></div>
-                            <div id="format-select-wrapper" class="w-1/2"><label for="format">Formato</label><select id="format" class="mt-1"></select></div>
+                        <div class="grid grid-cols-2 gap-4 mb-4">
+                            <div><label>Especie</label><select id="species"></select></div>
+                            <div id="format-select-wrapper"><label>Formato</label><select id="format"></select></div>
                         </div>
 
-                        <div id="manual-product-wrapper" class="hidden mb-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
+                        <div id="manual-product-wrapper" class="hidden mb-4 p-4 border border-dashed border-gray-300 rounded-lg bg-gray-50">
                             <p class="text-xs font-bold text-gray-500 uppercase mb-2">Ingreso Manual</p>
                             <div class="grid grid-cols-2 gap-3 mb-3">
                                 <input type="text" id="manual-species-name" placeholder="Nombre Especie">
                                 <input type="text" id="manual-format-name" placeholder="Nombre Formato">
                             </div>
                             <div id="manual-maritime-product-fields">
-                                <label class="text-xs">Cajas por Contenedor (FCL)</label>
+                                <label class="text-xs">Cajas por Contenedor</label>
                                 <input type="number" id="manual-boxes-fcl" placeholder="Ej: 2200">
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-2 gap-4 mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                        <div class="grid grid-cols-2 gap-4 mb-6 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
                             <div>
                                 <label class="text-green-700">Peso NETO (Kg)</label>
-                                <input type="number" id="weight-net" step="0.001" placeholder="Ej: 1.5" class="bg-white font-bold">
-                                <p class="text-[10px] text-gray-500 mt-1">Base para cálculo $/kg</p>
+                                <input type="number" id="weight-net" step="0.001" placeholder="Ej: 1.5" class="bg-white font-bold text-green-800 border-green-200 focus:ring-green-200">
+                                <p class="text-[10px] text-gray-500 mt-1">Divisor para Precio/Kg</p>
                             </div>
                             <div>
                                 <label class="text-orange-700">Peso BRUTO (Kg)</label>
-                                <input type="number" id="weight-gross" step="0.001" placeholder="Ej: 2.0" class="bg-white font-bold">
-                                <p class="text-[10px] text-gray-500 mt-1">Base para flete aéreo</p>
+                                <input type="number" id="weight-gross" step="0.001" placeholder="Ej: 2.0" class="bg-white font-bold text-orange-800 border-orange-200 focus:ring-orange-200">
+                                <p class="text-[10px] text-gray-500 mt-1">Base Flete Aéreo</p>
                             </div>
                         </div>
 
-                        <div class="mb-4">
+                        <div class="mb-6 p-4 bg-indigo-50 rounded-lg border border-indigo-100">
                             <div id="input-fob-proveedor-wrapper">
-                                <label>Costo Proveedor FOB (USD/Caja)</label>
-                                <input type="number" id="fob-proveedor-cost" placeholder="0.00" step="0.01">
+                                <label class="text-indigo-900">Costo Proveedor FOB (USD/Caja)</label>
+                                <input type="number" id="fob-proveedor-cost" placeholder="0.00" step="0.01" class="text-lg font-bold text-indigo-700">
                             </div>
                             <div id="input-cif-proveedor-wrapper" class="hidden">
-                                <label>Costo Proveedor CIF (USD/Caja)</label>
-                                <input type="number" id="cif-proveedor-cost" placeholder="0.00" step="0.01">
+                                <label class="text-indigo-900">Costo Proveedor CIF (USD/Caja)</label>
+                                <input type="number" id="cif-proveedor-cost" placeholder="0.00" step="0.01" class="text-lg font-bold text-indigo-700">
                             </div>
                             <div id="input-cif-cliente-wrapper" class="hidden">
-                                <label>Precio Cliente CIF (USD/Caja)</label>
-                                <input type="number" id="cif-cliente-price" placeholder="0.00" step="0.01">
+                                <label class="text-indigo-900">Precio Objetivo Cliente CIF (USD/Caja)</label>
+                                <input type="number" id="cif-cliente-price" placeholder="0.00" step="0.01" class="text-lg font-bold text-indigo-700">
                             </div>
                         </div>
 
@@ -143,33 +175,35 @@
                     </div>
 
                     <div>
-                        <h3 class="text-lg font-bold text-gray-800 mb-4 border-b pb-2">2. Logística y Envío</h3>
+                        <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
+                            <span class="bg-indigo-100 text-indigo-700 w-6 h-6 rounded-full flex items-center justify-center text-xs mr-2">4</span>
+                            Logística y Gastos
+                        </h3>
                         
                         <div id="air-options" class="hidden mb-4 p-4 bg-orange-50 border border-orange-200 rounded-lg">
                             <div class="mb-3"><label>N° Cajas del Envío</label><input type="number" id="air-boxes" placeholder="Ej: 360"></div>
                             <div class="grid grid-cols-2 gap-3">
-                                <div><label class="text-xs">Clearance (Total)</label><input type="number" id="air-clearance" step="0.01"></div>
-                                <div><label class="text-xs">Cooler (Total)</label><input type="number" id="air-cooler" step="0.01"></div>
-                                <div><label class="text-xs">DTA (Total)</label><input type="number" id="air-dta" step="0.01"></div>
-                                <div><label class="text-xs">Handling (Total)</label><input type="number" id="air-handling" step="0.01"></div>
+                                <div><label class="text-xs">Clearance</label><input type="number" id="air-clearance" step="0.01"></div>
+                                <div><label class="text-xs">Cooler</label><input type="number" id="air-cooler" step="0.01"></div>
+                                <div><label class="text-xs">DTA</label><input type="number" id="air-dta" step="0.01"></div>
+                                <div><label class="text-xs">Handling</label><input type="number" id="air-handling" step="0.01"></div>
                             </div>
                         </div>
 
                         <div class="mb-4"><label>Ruta (Flete / Tarifa)</label><select id="route"></select></div>
 
-                        <div id="manual-freight-wrapper" class="hidden p-4 border border-gray-200 rounded-lg bg-gray-50 mb-4">
-                            <p class="text-xs font-bold text-gray-500 uppercase mb-2">Detalle Flete Manual</p>
+                        <div id="manual-freight-wrapper" class="hidden p-4 border border-dashed border-gray-300 rounded-lg bg-gray-50 mb-4">
                             <div class="grid grid-cols-2 gap-3 mb-3">
                                 <div><label class="text-xs">Origen</label><input type="text" id="manual-route-origin" placeholder="Ej: Valpo"></div>
                                 <div><label class="text-xs">Destino</label><input type="text" id="manual-route-dest" placeholder="Ej: Miami"></div>
                             </div>
                             <div id="manual-maritime-wrapper">
-                                <label class="text-xs text-blue-600 font-bold">Costo Flete FCL (USD)</label>
-                                <input type="number" id="manual-maritime-cost" placeholder="Costo Total" step="0.01">
+                                <label class="text-xs font-bold text-blue-600">Costo Flete FCL (USD)</label>
+                                <input type="number" id="manual-maritime-cost" placeholder="Total Contenedor" step="0.01">
                             </div>
                             <div id="manual-air-wrapper" class="hidden">
-                                <label class="text-xs text-orange-600 font-bold">Tarifa Aérea (USD/Kg)</label>
-                                <input type="number" id="manual-air-rate" placeholder="Tarifa por Kg" step="0.01">
+                                <label class="text-xs font-bold text-orange-600">Tarifa Aérea (USD/Kg)</label>
+                                <input type="number" id="manual-air-rate" placeholder="Rate por Kg" step="0.01">
                             </div>
                         </div>
 
@@ -179,37 +213,48 @@
                             <div id="maritime-extra"><label>Costos Extra FCL</label><input type="number" id="extra-costs-total" value="300" step="0.01"></div>
                         </div>
 
-                        <button id="calculate-btn" class="btn btn-primary w-full mt-6 text-lg py-3 shadow-lg">CALCULAR RESULTADOS</button>
+                        <button id="calculate-btn" class="btn btn-primary w-full mt-8 py-3 text-lg shadow-lg hover:shadow-xl transform transition">
+                            CALCULAR RESULTADOS
+                        </button>
                     </div>
                 </div>
             </div>
 
-            <div id="detailed-results-card" class="card hidden border-t-4 border-indigo-500">
-                <h2 class="text-xl font-bold mb-6 text-center text-gray-800">Resumen de Cotización</h2>
-                <div id="results-cards-container" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8"></div>
-                <div id="detailed-results-content" class="bg-gray-50 p-6 rounded-lg border border-gray-200 text-sm font-mono mb-6"></div>
-                <div class="flex flex-col sm:flex-row gap-4">
-                    <button id="add-to-table-btn" class="btn btn-success flex-1">Añadir a Historial</button>
-                    <button onclick="exportToPDF()" class="btn btn-primary bg-slate-800 hover:bg-slate-700 flex-1">Descargar PDF Detallado</button>
+            <div id="detailed-results-card" class="card hidden border-t-4 border-indigo-600">
+                <h2 class="text-xl font-bold mb-6 text-center text-gray-800">Desglose del Cálculo Actual</h2>
+                
+                <div id="results-cards-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8"></div>
+
+                <div id="detailed-results-content" class="bg-slate-50 p-6 rounded-xl border border-slate-200 text-sm font-mono text-slate-700 mb-6"></div>
+
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <button id="add-to-table-btn" class="btn btn-success flex-1 max-w-md py-3 shadow-md">
+                        + Agregar a Tabla Comparativa
+                    </button>
+                    <button onclick="exportToPDF()" class="btn btn-primary bg-slate-800 hover:bg-slate-700 flex-1 max-w-md py-3 shadow-md">
+                        Descargar PDF Completo
+                    </button>
                 </div>
             </div>
 
             <div id="results-table-card" class="card hidden">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-xl font-bold">Historial Comparativo</h2>
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-bold text-gray-800">Historial Comparativo</h2>
                     <div class="space-x-2">
-                        <button id="copy-table-btn" class="text-blue-600 text-sm hover:underline">Copiar</button>
-                        <button id="clear-table-btn" class="text-red-600 text-sm hover:underline">Limpiar</button>
+                        <button id="copy-table-btn" class="text-blue-600 text-sm hover:underline font-semibold">Copiar Datos</button>
+                        <button id="clear-table-btn" class="text-red-600 text-sm hover:underline font-semibold">Limpiar Todo</button>
                     </div>
                 </div>
-                <div class="overflow-x-auto">
+                <div class="overflow-x-auto rounded-lg border border-gray-200">
                     <table class="min-w-full divide-y divide-gray-200 text-sm">
                         <thead class="bg-gray-100">
                             <tr>
-                                <th class="px-4 py-3 text-left font-bold uppercase text-xs text-gray-500">Producto</th>
-                                <th class="px-4 py-3 text-left font-bold uppercase text-xs text-gray-500">Configuración</th>
-                                <th class="px-4 py-3 text-right font-bold uppercase text-xs text-gray-500">FOB Prov.</th>
-                                <th class="px-4 py-3 text-right font-bold uppercase text-xs text-gray-500">CIF Cliente</th>
+                                <th class="px-4 py-3 text-left font-bold text-gray-600 uppercase text-xs">Producto / Formato</th>
+                                <th class="px-4 py-3 text-left font-bold text-gray-600 uppercase text-xs">Configuración</th>
+                                <th class="px-4 py-3 text-right font-bold text-blue-700 uppercase text-xs bg-blue-50">FOB Caja</th>
+                                <th class="px-4 py-3 text-right font-bold text-blue-700 uppercase text-xs bg-blue-50">FOB Kg</th>
+                                <th class="px-4 py-3 text-right font-bold text-green-700 uppercase text-xs bg-green-50">CIF Caja</th>
+                                <th class="px-4 py-3 text-right font-bold text-green-700 uppercase text-xs bg-green-50">CIF Kg</th>
                                 <th class="px-2 py-3"></th>
                             </tr>
                         </thead>
@@ -221,18 +266,23 @@
     </div>
 
     <script src="datos.js"></script>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const { jsPDF } = window.jspdf;
             if (typeof window.APP_DATA === 'undefined') window.APP_DATA = { species: [], formats: [], maritimeFreights: [], airRates: [] };
+            
             let lastCalc = null;
 
+            // DOM
             const getEl = (id) => document.getElementById(id);
             const speciesSelect = getEl('species');
             const formatSelect = getEl('format');
             const routeSelect = getEl('route');
-            const shippingTypeSelect = getEl('shipping-type');
-            
+            const weightNetInput = getEl('weight-net');
+            const weightGrossInput = getEl('weight-gross');
+
+            // --- INIT ---
             function init() {
                 speciesSelect.innerHTML = '<option value="">Seleccione...</option>';
                 window.APP_DATA.species.forEach(s => speciesSelect.innerHTML += `<option value="${s.id}">${s.name}</option>`);
@@ -240,6 +290,7 @@
                 renderRoutes();
             }
 
+            // --- LISTENERS ---
             speciesSelect.addEventListener('change', (e) => {
                 const isManual = e.target.value === 'manual';
                 getEl('manual-product-wrapper').classList.toggle('hidden', !isManual);
@@ -256,48 +307,36 @@
                 renderRoutes();
             });
 
-            // [MEJORA] Lectura directa de Pesos desde datos.js
             formatSelect.addEventListener('change', (e) => {
                 const fid = parseInt(e.target.value);
                 if(fid) {
                     const fmt = window.APP_DATA.formats.find(f => f.id === fid);
                     if(fmt) {
-                        getEl('weight-gross').value = fmt.weightPerBox || 0; // Bruto (Logístico)
-                        getEl('weight-net').value = fmt.netWeight || 0; // Neto (Comercial)
+                        getEl('weight-gross').value = fmt.weightPerBox || 0;
+                        getEl('weight-net').value = fmt.netWeight || 0;
                     }
                 }
             });
 
-            shippingTypeSelect.addEventListener('change', () => {
-                const type = shippingTypeSelect.value;
-                getEl('air-options').classList.toggle('hidden', type !== 'air');
-                getEl('maritime-costs').classList.toggle('hidden', type !== 'maritime');
-                getEl('maritime-extra').classList.toggle('hidden', type !== 'maritime');
-                getEl('manual-maritime-product-fields').classList.toggle('hidden', type !== 'maritime');
-                renderRoutes();
+            // Toggle para Radio Buttons de Shipping y Base
+            document.querySelectorAll('input[name="shipping-type"]').forEach(radio => {
+                radio.addEventListener('change', toggleShippingMode);
+            });
+            document.querySelectorAll('input[name="calculation-base"]').forEach(radio => {
+                radio.addEventListener('change', toggleBaseInputs);
             });
 
             routeSelect.addEventListener('change', (e) => {
                 getEl('manual-freight-wrapper').classList.toggle('hidden', e.target.value !== 'manual');
-                const type = shippingTypeSelect.value;
+                const type = document.querySelector('input[name="shipping-type"]:checked').value;
                 getEl('manual-maritime-wrapper').classList.toggle('hidden', type !== 'maritime');
                 getEl('manual-air-wrapper').classList.toggle('hidden', type !== 'air');
                 getEl('detailed-results-card').classList.add('hidden');
             });
 
-            document.querySelectorAll('input[name="calculation-base"]').forEach(radio => radio.addEventListener('change', toggleBaseInputs));
-
-            function toggleBaseInputs() {
-                const base = document.querySelector('input[name="calculation-base"]:checked').value;
-                getEl('input-fob-proveedor-wrapper').classList.toggle('hidden', base !== 'proveedor_fob');
-                getEl('input-cif-proveedor-wrapper').classList.toggle('hidden', base !== 'proveedor_cif');
-                getEl('input-cif-cliente-wrapper').classList.toggle('hidden', base !== 'cliente_cif');
-                getEl('detailed-results-card').classList.add('hidden');
-            }
-
             function renderRoutes() {
                 const sid = speciesSelect.value === 'manual' ? 'manual' : parseInt(speciesSelect.value);
-                const type = shippingTypeSelect.value;
+                const type = document.querySelector('input[name="shipping-type"]:checked').value;
                 routeSelect.innerHTML = '<option value="">Seleccione Ruta...</option>';
                 if (sid !== 'manual' && !isNaN(sid)) {
                     const pool = type === 'maritime' ? window.APP_DATA.maritimeFreights : window.APP_DATA.airRates;
@@ -309,18 +348,42 @@
                 routeSelect.innerHTML += `<option value="manual">--- Flete Manual ---</option>`;
             }
 
-            function getInputs() {
-                const type = shippingTypeSelect.value;
-                let format;
-                const wNet = parseFloat(getEl('weight-net').value) || 0;
-                const wGross = parseFloat(getEl('weight-gross').value) || 0;
+            function toggleShippingMode() {
+                const type = document.querySelector('input[name="shipping-type"]:checked').value;
+                getEl('air-options').classList.toggle('hidden', type !== 'air');
+                getEl('maritime-costs').classList.toggle('hidden', type !== 'maritime');
+                getEl('maritime-extra').classList.toggle('hidden', type !== 'maritime');
+                getEl('manual-maritime-product-fields').classList.toggle('hidden', type !== 'maritime');
+                
+                const manFrt = getEl('manual-freight-wrapper');
+                if(!manFrt.classList.contains('hidden')) {
+                    getEl('manual-maritime-wrapper').classList.toggle('hidden', type !== 'maritime');
+                    getEl('manual-air-wrapper').classList.toggle('hidden', type !== 'air');
+                }
+                if(speciesSelect.value && speciesSelect.value !== 'manual') renderRoutes();
+            }
 
-                if(wNet <= 0 || wGross <= 0) { alert('Revise los pesos Neto y Bruto'); return null; }
+            function toggleBaseInputs() {
+                const base = document.querySelector('input[name="calculation-base"]:checked').value;
+                getEl('input-fob-proveedor-wrapper').classList.toggle('hidden', base !== 'proveedor_fob');
+                getEl('input-cif-proveedor-wrapper').classList.toggle('hidden', base !== 'proveedor_cif');
+                getEl('input-cif-cliente-wrapper').classList.toggle('hidden', base !== 'cliente_cif');
+                getEl('detailed-results-card').classList.add('hidden');
+            }
+
+            // --- CÁLCULO ---
+            function getInputs() {
+                const type = document.querySelector('input[name="shipping-type"]:checked').value;
+                const wNet = parseFloat(weightNetInput.value) || 0;
+                const wGross = parseFloat(weightGrossInput.value) || 0;
+                let format;
+
+                if(wNet <= 0 || wGross <= 0) { alert('Pesos inválidos. Verifique datos.'); return null; }
 
                 if (speciesSelect.value === 'manual') {
                     const boxes = parseInt(getEl('manual-boxes-fcl').value) || 0;
-                    if(type === 'maritime' && boxes <= 0) { alert('Ingrese Cajas por Contenedor'); return null; }
-                    format = { id: 'manual', name: getEl('manual-format-name').value || 'Manual', weightPerBox: wGross, boxesPerContainer: boxes, speciesName: getEl('manual-species-name').value || 'Especie Manual' };
+                    if(type === 'maritime' && boxes <= 0) { alert('Ingrese cajas por contenedor'); return null; }
+                    format = { id: 'manual', name: getEl('manual-format-name').value || 'Manual', weightPerBox: wGross, boxesPerContainer: boxes, speciesName: getEl('manual-species-name').value || 'Manual' };
                 } else {
                     const fid = parseInt(formatSelect.value);
                     if(!fid) { alert('Seleccione Formato'); return null; }
@@ -331,8 +394,8 @@
 
                 let route;
                 if (routeSelect.value === 'manual') {
-                    const mOrig = getEl('manual-route-origin').value || 'Manual';
-                    const mDest = getEl('manual-route-dest').value || 'Manual';
+                    const mOrig = getEl('manual-route-origin').value || 'Origen Manual';
+                    const mDest = getEl('manual-route-dest').value || 'Destino Manual';
                     if(type === 'maritime') {
                         const cost = parseFloat(getEl('manual-maritime-cost').value);
                         if(isNaN(cost)) { alert('Ingrese Costo Flete'); return null; }
@@ -349,8 +412,7 @@
                     route = pool.find(r => r.id === rid);
                 }
 
-                let freightPerBox = 0;
-                let boxesTotal = 0;
+                let freightPerBox = 0, boxesTotal = 0;
                 if (type === 'maritime') {
                     boxesTotal = format.boxesPerContainer;
                     freightPerBox = route.cost / boxesTotal;
@@ -364,6 +426,7 @@
                 let extraLogistics = 0;
                 if(type === 'maritime') extraLogistics += (parseFloat(getEl('services-total').value)||0) + (parseFloat(getEl('extra-costs-total').value)||0);
                 else extraLogistics += (parseFloat(getEl('air-clearance').value)||0) + (parseFloat(getEl('air-cooler').value)||0) + (parseFloat(getEl('air-dta').value)||0) + (parseFloat(getEl('air-handling').value)||0);
+                
                 const othersPerBox = (insurance + extraLogistics) / boxesTotal;
 
                 return { format, route, type, boxesTotal, wNet, wGross, freightPerBox, othersPerBox, commP: parseFloat(getEl('commission').value)/100, commBase: getEl('commission-base').value, calcBase: document.querySelector('input[name="calculation-base"]:checked').value };
@@ -372,46 +435,71 @@
             getEl('calculate-btn').addEventListener('click', () => {
                 const inp = getInputs();
                 if(!inp) return;
-                let fobShipper, fobClient, cifClient, commVal;
+                
+                let fobShipper, fobClient, cifClient, cifShipper, commVal;
                 const C = inp.commP; const F = inp.freightPerBox; const O = inp.othersPerBox;
 
                 if (inp.calcBase === 'proveedor_fob') {
                     const basePrice = parseFloat(getEl('fob-proveedor-cost').value);
-                    if(isNaN(basePrice)) return alert('Ingrese Costo FOB');
+                    if(isNaN(basePrice)) return alert('Falta Precio FOB');
                     fobShipper = basePrice;
+                    cifShipper = fobShipper + F; // Calculado directo
+                    
                     if(inp.commBase === 'fob_shipper') {
                         commVal = fobShipper * C;
                         fobClient = fobShipper + O + commVal;
                         cifClient = fobClient + F;
-                    } else { // Simplificado para cliente_cif y fob_cliente
-                        fobClient = (fobShipper + O + (inp.commBase === 'cif_cliente' ? F*C : 0)) / (1 - C);
+                    } else if (inp.commBase === 'cif_cliente') {
+                        fobClient = (fobShipper + O + F*C) / (1 - C);
                         cifClient = fobClient + F;
-                        commVal = (inp.commBase === 'cif_cliente') ? cifClient * C : fobClient * C;
+                        commVal = cifClient * C;
+                    } else { // fob_cliente
+                        fobClient = (fobShipper + O) / (1 - C);
+                        cifClient = fobClient + F;
+                        commVal = fobClient * C;
                     }
+
                 } else if (inp.calcBase === 'proveedor_cif') {
                     const cifProv = parseFloat(getEl('cif-proveedor-cost').value);
-                    if(isNaN(cifProv)) return alert('Ingrese CIF Prov');
+                    if(isNaN(cifProv)) return alert('Falta Precio CIF Prov');
+                    cifShipper = cifProv;
                     fobShipper = cifProv - F;
-                    fobClient = (fobShipper + O) / (1 - C);
-                    cifClient = fobClient + F;
-                    commVal = fobClient * C;
-                } else { 
-                    cifClient = parseFloat(getEl('cif-cliente-price').value);
-                    if(isNaN(cifClient)) return alert('Ingrese Precio Cliente');
+                    
+                    if(inp.commBase === 'fob_shipper') {
+                        commVal = fobShipper * C;
+                        fobClient = fobShipper + O + commVal;
+                        cifClient = fobClient + F;
+                    } else {
+                        // Flujo simplificado: asumimos base cliente
+                        fobClient = (fobShipper + O) / (1 - C);
+                        cifClient = fobClient + F;
+                        commVal = fobClient * C;
+                    }
+
+                } else { // cliente_cif
+                    const cifCl = parseFloat(getEl('cif-cliente-price').value);
+                    if(isNaN(cifCl)) return alert('Falta Precio Cliente');
+                    cifClient = cifCl;
                     fobClient = cifClient - F;
-                    commVal = (inp.commBase === 'cif_cliente') ? cifClient * C : fobClient * C;
+                    
+                    if (inp.commBase === 'cif_cliente') commVal = cifClient * C;
+                    else commVal = fobClient * C;
+
                     fobShipper = fobClient - commVal - O;
+                    cifShipper = fobShipper + F;
                 }
-                lastCalc = { ...inp, fobShipper, fobClient, cifClient, commVal };
+
+                lastCalc = { ...inp, fobShipper, cifShipper, fobClient, cifClient, commVal };
                 renderResults(lastCalc);
             });
 
+            // --- FORMAT ---
             function getCurrencyRate() {
                 const currency = getEl('display-currency').value;
                 const rate = parseFloat(getEl('exchange-rate').value) || 0.92;
                 return { code: currency, rate: currency === 'EUR' ? rate : 1, sym: currency === 'EUR' ? '€' : '$' };
             }
-            function fmtMoney(val) {
+            function fmt(val) {
                 const c = getCurrencyRate();
                 return c.sym + (val * c.rate).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
             }
@@ -419,84 +507,151 @@
             function renderResults(d) {
                 const grid = getEl('results-cards-container');
                 const content = getEl('detailed-results-content');
+                const wNet = d.wNet;
+
+                // [MEJORA] 4 Tarjetas explícitas como pediste
                 grid.innerHTML = `
-                    <div class="price-box border-b-4 border-gray-400"><p class="text-[10px] uppercase font-bold text-gray-500">FOB Shipper</p><p class="text-2xl font-black text-gray-800">${fmtMoney(d.fobShipper)}</p><p class="text-xs text-blue-600 font-bold border-t mt-1 pt-1">${fmtMoney(d.fobShipper/d.wNet)} <span class="font-normal text-gray-400">/Kg Neto</span></p></div>
-                    <div class="price-box border-b-4 border-indigo-500"><p class="text-[10px] uppercase font-bold text-gray-500">FOB Cliente</p><p class="text-2xl font-black text-indigo-700">${fmtMoney(d.fobClient)}</p></div>
-                    <div class="price-box border-b-4 border-green-500"><p class="text-[10px] uppercase font-bold text-gray-500">CIF Cliente</p><p class="text-2xl font-black text-green-700">${fmtMoney(d.cifClient)}</p><p class="text-xs text-green-700 font-bold border-t mt-1 pt-1">${fmtMoney(d.cifClient/d.wNet)} <span class="font-normal text-gray-400">/Kg Neto</span></p></div>
-                    <div class="price-box border-b-4 border-gray-300 bg-gray-100"><p class="text-[10px] uppercase font-bold text-gray-500">Flete Unit.</p><p class="text-xl font-bold text-gray-600">${fmtMoney(d.freightPerBox)}</p></div>
+                    <div class="price-box border-b-4 border-gray-400">
+                        <p class="text-[10px] uppercase font-bold text-gray-500">FOB Shipper</p>
+                        <p class="text-2xl font-black text-gray-800">${fmt(d.fobShipper)}</p>
+                        <p class="text-xs font-bold border-t mt-1 pt-1 text-gray-600">${fmt(d.fobShipper/wNet)} <span class="font-normal text-gray-400">/Kg Net</span></p>
+                    </div>
+                    <div class="price-box border-b-4 border-gray-400">
+                        <p class="text-[10px] uppercase font-bold text-gray-500">CIF Shipper</p>
+                        <p class="text-2xl font-black text-gray-800">${fmt(d.cifShipper)}</p>
+                        <p class="text-xs font-bold border-t mt-1 pt-1 text-gray-600">${fmt(d.cifShipper/wNet)} <span class="font-normal text-gray-400">/Kg Net</span></p>
+                    </div>
+                    <div class="price-box border-b-4 border-indigo-500">
+                        <p class="text-[10px] uppercase font-bold text-gray-500">FOB Cliente</p>
+                        <p class="text-2xl font-black text-indigo-700">${fmt(d.fobClient)}</p>
+                        <p class="text-xs text-indigo-600 font-bold border-t mt-1 pt-1">${fmt(d.fobClient/wNet)} <span class="font-normal text-gray-400">/Kg Net</span></p>
+                    </div>
+                    <div class="price-box border-b-4 border-green-500">
+                        <p class="text-[10px] uppercase font-bold text-gray-500">CIF Cliente</p>
+                        <p class="text-2xl font-black text-green-700">${fmt(d.cifClient)}</p>
+                        <p class="text-xs text-green-700 font-bold border-t mt-1 pt-1">${fmt(d.cifClient/wNet)} <span class="font-normal text-gray-400">/Kg Net</span></p>
+                    </div>
                 `;
+
                 content.innerHTML = `
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div><p class="font-bold border-b mb-2 uppercase text-xs">Estructura por Caja</p>
-                            <div class="flex justify-between"><span>Precio FOB Proveedor:</span> <span>${fmtMoney(d.fobShipper)}</span></div>
-                            <div class="flex justify-between text-xs text-gray-500"><span>(+) Gastos Logísticos:</span> <span>${fmtMoney(d.othersPerBox)}</span></div>
-                            <div class="flex justify-between text-xs text-gray-500"><span>(+) Comisión (${(d.commP*100).toFixed(2)}%):</span> <span>${fmtMoney(d.commVal)}</span></div>
-                            <div class="flex justify-between font-semibold border-t pt-1 mt-1"><span>= FOB Cliente:</span> <span>${fmtMoney(d.fobClient)}</span></div>
-                            <div class="flex justify-between text-xs text-gray-500"><span>(+) Flete:</span> <span>${fmtMoney(d.freightPerBox)}</span></div>
-                            <div class="flex justify-between font-bold text-green-700 border-t pt-1 mt-1"><span>= CIF Cliente:</span> <span>${fmtMoney(d.cifClient)}</span></div>
+                            <div class="flex justify-between"><span>Precio FOB Proveedor:</span> <span>${fmt(d.fobShipper)}</span></div>
+                            <div class="flex justify-between text-xs text-gray-500"><span>(+) Gastos Logísticos:</span> <span>${fmt(d.othersPerBox)}</span></div>
+                            <div class="flex justify-between text-xs text-gray-500"><span>(+) Comisión (${(d.commP*100).toFixed(2)}%):</span> <span>${fmt(d.commVal)}</span></div>
+                            <div class="flex justify-between font-semibold border-t pt-1 mt-1"><span>= FOB Cliente:</span> <span>${fmt(d.fobClient)}</span></div>
+                            <div class="flex justify-between text-xs text-gray-500"><span>(+) Flete Internacional:</span> <span>${fmt(d.freightPerBox)}</span></div>
+                            <div class="flex justify-between font-bold text-green-700 border-t pt-1 mt-1"><span>= CIF Cliente:</span> <span>${fmt(d.cifClient)}</span></div>
                         </div>
                         <div><p class="font-bold border-b mb-2 uppercase text-xs">Totales Operación (${d.boxesTotal} Cajas)</p>
-                            <div class="flex justify-between"><span>Total Pago Proveedor:</span> <span>${fmtMoney(d.fobShipper * d.boxesTotal)}</span></div>
-                            <div class="flex justify-between"><span>Total Logística:</span> <span>${fmtMoney(d.othersPerBox * d.boxesTotal)}</span></div>
-                            <div class="flex justify-between"><span>Total Comisión:</span> <span>${fmtMoney(d.commVal * d.boxesTotal)}</span></div>
-                            <div class="flex justify-between"><span>Total Flete:</span> <span>${fmtMoney(d.freightPerBox * d.boxesTotal)}</span></div>
-                            <div class="flex justify-between font-black text-lg border-t pt-2 mt-2"><span>TOTAL CIF:</span> <span>${fmtMoney(d.cifClient * d.boxesTotal)}</span></div>
+                            <div class="flex justify-between"><span>Total Pago Proveedor:</span> <span>${fmt(d.fobShipper * d.boxesTotal)}</span></div>
+                            <div class="flex justify-between"><span>Total Logística:</span> <span>${fmt(d.othersPerBox * d.boxesTotal)}</span></div>
+                            <div class="flex justify-between"><span>Total Comisión:</span> <span>${fmt(d.commVal * d.boxesTotal)}</span></div>
+                            <div class="flex justify-between"><span>Total Flete:</span> <span>${fmt(d.freightPerBox * d.boxesTotal)}</span></div>
+                            <div class="flex justify-between font-black text-lg border-t pt-2 mt-2"><span>TOTAL CIF:</span> <span>${fmt(d.cifClient * d.boxesTotal)}</span></div>
                         </div>
                     </div>
-                    <div class="mt-4 text-xs text-gray-400 text-center">Neto ${d.wNet}kg | Bruto ${d.wGross}kg | Tasa: ${getEl('exchange-rate').value}</div>
                 `;
                 getEl('detailed-results-card').classList.remove('hidden');
             }
 
+            // [MEJORA] Agregar a tabla con columnas separadas
             getEl('add-to-table-btn').addEventListener('click', () => {
                 if(!lastCalc) return;
                 const tbody = getEl('results-tbody');
                 const row = document.createElement('tr');
-                row.className = 'hover:bg-gray-50';
-                row.innerHTML = `<td class="px-4 py-3 whitespace-nowrap text-sm font-bold text-gray-800">${lastCalc.format.speciesName} ${lastCalc.format.name}<br><span class="text-xs font-normal text-gray-500">Neto: ${lastCalc.wNet}kg</span></td><td class="px-4 py-3 whitespace-nowrap text-xs text-gray-500">Com: ${(lastCalc.commP*100).toFixed(2)}%<br>${lastCalc.commBase}</td><td class="px-4 py-3 whitespace-nowrap text-right text-sm font-medium text-blue-600">${fmtMoney(lastCalc.fobShipper)}<br><span class="badge-weight badge-net">Net: ${fmtMoney(lastCalc.fobShipper/lastCalc.wNet)}</span></td><td class="px-4 py-3 whitespace-nowrap text-right text-sm font-medium text-green-600">${fmtMoney(lastCalc.cifClient)}<br><span class="badge-weight badge-net">Net: ${fmtMoney(lastCalc.cifClient/lastCalc.wNet)}</span></td><td class="px-2 py-3 text-center"><button onclick="this.closest('tr').remove()" class="text-red-500 font-bold">×</button></td>`;
+                row.className = "hover:bg-gray-50";
+                
+                // Columnas explícitas FOB Caja, FOB Kg, CIF Caja, CIF Kg
+                row.innerHTML = `
+                    <td class="px-4 py-3 text-sm font-bold text-gray-800">${lastCalc.format.speciesName}<br><span class="text-xs font-normal text-gray-500">${lastCalc.format.name}</span></td>
+                    <td class="px-4 py-3 text-xs text-gray-500">Com:${(lastCalc.commP*100).toFixed(2)}%<br>${lastCalc.commBase}</td>
+                    
+                    <td class="px-4 py-3 text-right text-sm text-blue-700 font-medium bg-blue-50 border-r border-white">${fmt(lastCalc.fobShipper)}</td>
+                    <td class="px-4 py-3 text-right text-sm text-blue-700 font-medium bg-blue-50">${fmt(lastCalc.fobShipper/lastCalc.wNet)}</td>
+                    
+                    <td class="px-4 py-3 text-right text-sm text-green-700 font-bold bg-green-50 border-r border-white">${fmt(lastCalc.cifClient)}</td>
+                    <td class="px-4 py-3 text-right text-sm text-green-700 font-bold bg-green-50">${fmt(lastCalc.cifClient/lastCalc.wNet)}</td>
+                    
+                    <td class="px-2 py-3 text-center"><button onclick="this.closest('tr').remove()" class="text-red-500 font-bold">×</button></td>
+                `;
                 tbody.appendChild(row);
                 getEl('results-table-card').classList.remove('hidden');
             });
 
             getEl('clear-table-btn').addEventListener('click', () => { getEl('results-tbody').innerHTML = ''; getEl('results-table-card').classList.add('hidden'); });
+            
             getEl('copy-table-btn').addEventListener('click', () => {
-                const table = getEl('results-tbody');
-                if (table.rows.length === 0) return alert('Tabla vacía');
-                let tsv = 'Producto\tConfig\tFOB Prov\tCIF Cliente\n';
-                for (const row of table.rows) {
-                    let cells = []; for (let i = 0; i < row.cells.length - 1; i++) cells.push(row.cells[i].innerText.replace(/\n/g, ' ')); tsv += cells.join('\t') + '\n';
-                }
+                const rows = document.querySelectorAll('#results-tbody tr');
+                if(rows.length===0) return alert('Vacío');
+                let tsv = "Producto\tConfig\tFOB Caja\tFOB Kg\tCIF Caja\tCIF Kg\n";
+                rows.forEach(r => {
+                    const c = r.querySelectorAll('td');
+                    // Extraer texto y limpiar
+                    const vals = [c[0].innerText, c[1].innerText, c[2].innerText, c[3].innerText, c[4].innerText, c[5].innerText];
+                    tsv += vals.map(v => v.replace(/\n/g, ' ')).join('\t') + '\n';
+                });
                 const ta = document.createElement('textarea'); ta.value = tsv; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); alert('Copiado');
             });
 
             window.exportToPDF = function() {
                 const doc = new jsPDF();
                 const cur = getCurrencyRate();
-                doc.setFontSize(18); doc.setTextColor(40); doc.text("COTIZACIÓN DE EXPORTACIÓN", 14, 20);
-                doc.setFontSize(10); doc.setTextColor(100); doc.text(`Fecha: ${new Date().toLocaleDateString()} | Moneda: ${cur.code} | Tasa: ${cur.rate}`, 14, 28);
+                doc.setFontSize(18); doc.setTextColor(40); doc.text("REPORTE COMPARATIVO DE EXPORTACIÓN", 14, 20);
+                doc.setFontSize(10); doc.setTextColor(100); doc.text(`Fecha: ${new Date().toLocaleDateString()} | Moneda: ${cur.code} (${cur.rate})`, 14, 28);
+                
                 let startY = 35;
-                if (lastCalc && !getEl('detailed-results-card').classList.contains('hidden')) {
-                    const d = lastCalc;
-                    doc.setFontSize(12); doc.setTextColor(0); doc.setFont(undefined, 'bold'); doc.text("1. DETALLE DEL CÁLCULO ACTUAL", 14, startY);
-                    doc.setFontSize(10); doc.setFont(undefined, 'normal'); doc.setTextColor(80); startY += 6;
-                    doc.text(`Producto: ${d.format.speciesName} - ${d.format.name}`, 14, startY);
-                    doc.text(`Ruta: ${d.route.origin} > ${d.route.destination}`, 14, startY + 5);
-                    doc.text(`Logística: ${d.boxesTotal} Cajas | Peso Neto: ${d.wNet}kg | Peso Bruto: ${d.wGross}kg`, 14, startY + 10);
-                    const bodyData = [["Precio FOB Shipper", fmtMoney(d.fobShipper), fmtMoney(d.fobShipper * d.boxesTotal)], ["Gastos Logísticos", fmtMoney(d.othersPerBox), fmtMoney(d.othersPerBox * d.boxesTotal)], ["Comisión Agente", fmtMoney(d.commVal), fmtMoney(d.commVal * d.boxesTotal)], ["Flete Internacional", fmtMoney(d.freightPerBox), fmtMoney(d.freightPerBox * d.boxesTotal)], [{content: "TOTAL CIF CLIENTE", styles: {fontStyle: 'bold', fillColor: [220, 252, 231]}}, {content: fmtMoney(d.cifClient), styles: {fontStyle: 'bold'}}, {content: fmtMoney(d.cifClient * d.boxesTotal), styles: {fontStyle: 'bold'}}]];
-                    doc.autoTable({ startY: startY + 15, head: [['Concepto', 'Por Caja', 'Total Envío']], body: bodyData, theme: 'grid', headStyles: { fillColor: [75, 85, 99] } });
+
+                // 1. Detalle Actual si existe
+                if(lastCalc && !getEl('detailed-results-card').classList.contains('hidden')) {
+                    doc.setFontSize(12); doc.setTextColor(0); doc.setFont(undefined, 'bold');
+                    doc.text("1. DESGLOSE TÉCNICO (ÚLTIMO CÁLCULO)", 14, startY);
+                    doc.setFontSize(10); doc.setFont(undefined, 'normal'); doc.setTextColor(80);
+                    startY += 6;
+                    doc.text(`Producto: ${lastCalc.format.speciesName} - ${lastCalc.format.name}`, 14, startY);
+                    doc.text(`Ruta: ${lastCalc.route.origin} > ${lastCalc.route.destination}`, 14, startY + 5);
+                    doc.text(`Logística: ${lastCalc.boxesTotal} Cajas | Peso Neto: ${lastCalc.wNet}kg`, 14, startY + 10);
+                    
+                    const body = [
+                        ["FOB Shipper", fmt(lastCalc.fobShipper), fmt(lastCalc.fobShipper/lastCalc.wNet) + "/kg"],
+                        ["CIF Shipper", fmt(lastCalc.cifShipper), fmt(lastCalc.cifShipper/lastCalc.wNet) + "/kg"],
+                        ["FOB Cliente", fmt(lastCalc.fobClient), fmt(lastCalc.fobClient/lastCalc.wNet) + "/kg"],
+                        [{content:"CIF Cliente", styles:{fontStyle:'bold', fillColor:[220,252,231]}}, {content:fmt(lastCalc.cifClient), styles:{fontStyle:'bold'}}, {content:fmt(lastCalc.cifClient/lastCalc.wNet)+"/kg", styles:{fontStyle:'bold'}}]
+                    ];
+                    doc.autoTable({ startY: startY+15, head:[['Indicador', 'Valor Caja', 'Valor Kg Neto']], body: body, theme: 'grid' });
                     startY = doc.lastAutoTable.finalY + 15;
                 }
+
+                // 2. Tabla Comparativa (Lo que pediste: Detalle por fila)
                 const trs = document.querySelectorAll('#results-tbody tr');
-                if (trs.length > 0) {
-                    doc.setFontSize(12); doc.setTextColor(0); doc.setFont(undefined, 'bold'); doc.text("2. TABLA COMPARATIVA", 14, startY);
+                if(trs.length > 0) {
+                    doc.setFontSize(12); doc.setTextColor(0); doc.setFont(undefined, 'bold');
+                    doc.text("2. TABLA COMPARATIVA DE ESCENARIOS", 14, startY);
+                    
                     const rows = [];
-                    trs.forEach(tr => { const tds = tr.querySelectorAll('td'); rows.push([tds[0].innerText.replace('\n', ' '), tds[1].innerText.replace('\n', ' '), tds[2].innerText.replace('\n', ' '), tds[3].innerText.replace('\n', ' ')]); });
-                    doc.autoTable({ startY: startY + 5, head: [['Producto', 'Config', 'FOB Prov', 'CIF Cliente']], body: rows, theme: 'striped', headStyles: { fillColor: [79, 70, 229] } });
+                    trs.forEach(tr => {
+                        const c = tr.querySelectorAll('td');
+                        rows.push([
+                            c[0].innerText.replace('\n',' '), 
+                            c[1].innerText.replace('\n',' '), 
+                            c[2].innerText, c[3].innerText, // FOB Box, FOB Kg
+                            c[4].innerText, c[5].innerText  // CIF Box, CIF Kg
+                        ]);
+                    });
+
+                    doc.autoTable({
+                        startY: startY + 5,
+                        head: [['Producto', 'Configuración', 'FOB (Caja)', 'FOB (Kg)', 'CIF (Caja)', 'CIF (Kg)']],
+                        body: rows,
+                        theme: 'striped',
+                        headStyles: { fillColor: [63, 81, 181] },
+                        columnStyles: { 4: {fontStyle:'bold'}, 5: {fontStyle:'bold'} }
+                    });
                 }
-                doc.save(`Cotizacion_${new Date().getTime()}.pdf`);
+                doc.save(`Reporte_Export_${new Date().getTime()}.pdf`);
             };
 
-            init(); toggleBaseInputs(); toggleShippingMode();
+            init();
         });
     </script>
 </body>

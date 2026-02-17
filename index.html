@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculadora de Exportación Pro v9</title>
+    <title>Calculadora de Exportación Pro v11</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
@@ -51,7 +51,7 @@
             <div class="flex flex-col md:flex-row justify-between items-center mb-4 gap-4">
                 <div>
                     <h1 class="text-3xl font-bold text-gray-900 tracking-tight">Cotizador de Exportación</h1>
-                    <p class="text-gray-500 text-sm mt-1">Gestión Multi-Divisa (Visualización Dual)</p>
+                    <p class="text-gray-500 text-sm mt-1">Gestión Multi-Divisa & Puntos de Venta</p>
                 </div>
             </div>
 
@@ -192,7 +192,7 @@
                             <div id="manual-maritime-wrapper">
                                 <label class="text-blue-600">Costo Flete FCL</label>
                                 <div class="input-group">
-                                    <input type="number" id="manual-maritime-cost" placeholder="Total" step="0.01">
+                                    <input type="number" id="manual-maritime-cost" placeholder="Total (Puede ser 0)" step="0.01">
                                     <select id="manual-maritime-curr" class="currency-selector"><option>USD</option><option>EUR</option><option value="TMP" class="tmp-currency-label">TMP</option></select>
                                 </div>
                             </div>
@@ -322,9 +322,13 @@
             // Convierte input a USD para cálculo interno, y registra si se usó otra moneda
             function getValInUSD(inputId, currId) {
                 const val = parseFloat(getEl(inputId).value) || 0;
+                // [FIX] Validar si es negativo (aunque permitimos 0)
+                if (val < 0) return -1; 
+
                 const curr = getEl(currId) ? getEl(currId).value : 'USD'; 
                 
-                if (curr !== 'USD') detectedAltCurrency = curr; // Detectamos uso de otra moneda
+                // Si el usuario usa moneda alternativa, la registramos para mostrar dualidad
+                if (curr !== 'USD') detectedAltCurrency = curr;
 
                 if (curr === 'EUR') return val / getRate('EUR');
                 if (curr === 'TMP') return val / getRate('TMP');
@@ -415,7 +419,7 @@
 
             // --- CÁLCULO ---
             function getInputs() {
-                detectedAltCurrency = null; // Resetear detección
+                detectedAltCurrency = null; // Resetear detección al inicio de cada cálculo
                 
                 const type = document.querySelector('input[name="shipping-type"]:checked').value;
                 const wNet = parseFloat(weightNetInput.value) || 0;
@@ -493,9 +497,10 @@
                 let fobShipper, fobClient, cifClient, cifShipper, commVal;
                 const C = inp.commP; const F = inp.freightPerBox; const O = inp.othersPerBox;
 
+                // PRECIO INPUT CON CURRENCY
                 if (inp.calcBase === 'proveedor_fob') {
                     const basePrice = getValInUSD('fob-proveedor-cost', 'fob-proveedor-currency');
-                    if(basePrice <= 0) return alert('Ingrese Costo FOB');
+                    if(basePrice < 0) return alert('Revise Costo FOB');
                     fobShipper = basePrice;
                     cifShipper = fobShipper + F;
                     if(inp.commBase === 'fob_shipper') { commVal = fobShipper * C; fobClient = fobShipper + O + commVal; cifClient = fobClient + F; }
@@ -503,12 +508,12 @@
                     else { fobClient = (fobShipper + O) / (1 - C); cifClient = fobClient + F; commVal = fobClient * C; }
                 } else if (inp.calcBase === 'proveedor_cif') {
                     const cifProv = getValInUSD('cif-proveedor-cost', 'cif-proveedor-currency');
-                    if(cifProv <= 0) return alert('Ingrese CIF Prov');
+                    if(cifProv < 0) return alert('Revise CIF Prov');
                     cifShipper = cifProv; fobShipper = cifProv - F;
                     fobClient = (fobShipper + O) / (1 - C); cifClient = fobClient + F; commVal = fobClient * C;
                 } else if (inp.calcBase === 'cliente_fob') { 
                     const fobCl = getValInUSD('fob-cliente-price', 'fob-cliente-currency');
-                    if(fobCl <= 0) return alert('Ingrese Precio FOB Cliente');
+                    if(fobCl < 0) return alert('Revise FOB Cliente');
                     fobClient = fobCl;
                     cifClient = fobClient + F;
                     if (inp.commBase === 'fob_shipper') {
@@ -524,7 +529,7 @@
                     cifShipper = fobShipper + F;
                 } else { 
                     const cifCl = getValInUSD('cif-cliente-price', 'cif-cliente-currency');
-                    if(cifCl <= 0) return alert('Ingrese Precio Cliente');
+                    if(cifCl < 0) return alert('Revise Precio Cliente');
                     cifClient = cifCl; fobClient = cifClient - F;
                     if (inp.commBase === 'cif_cliente') commVal = cifClient * C; else commVal = fobClient * C;
                     fobShipper = fobClient - commVal - O; cifShipper = fobShipper + F;
@@ -534,26 +539,31 @@
                 renderResults(lastCalc);
             });
 
-            // --- LOGICA DE VISUALIZACIÓN DUAL ---
+            // --- DISPLAY LOGIC (DUAL CURRENCY) ---
             function getDisplayConfigs(detectedCode) {
                 const mainCode = getEl('display-currency').value;
-                // Config Principal
-                let main = { code: mainCode, rate: 1, sym: '$' };
-                if (mainCode === 'EUR') main = { code: 'EUR', rate: getRate('EUR'), sym: '€' };
-                if (mainCode === 'TMP') { const c = getEl('code-tmp').value; main = { code: c, rate: getRate('TMP'), sym: c+' ' }; }
+                const eurRate = parseFloat(getEl('rate-eur').value) || 1;
+                const tmpRate = parseFloat(getEl('rate-tmp').value) || 1;
+                const tmpCode = getEl('code-tmp').value || 'TMP';
 
-                // Config Secundaria (Solo si detectamos uso de otra moneda diferente a la principal)
-                let sec = null;
-                if (detectedCode && detectedCode !== mainCode) {
-                    if (detectedCode === 'USD') sec = { code: 'USD', rate: 1, sym: '$' };
-                    if (detectedCode === 'EUR') sec = { code: 'EUR', rate: getRate('EUR'), sym: '€' };
-                    if (detectedCode === 'TMP') { const c = getEl('code-tmp').value; sec = { code: c, rate: getRate('TMP'), sym: c+' ' }; }
+                let main = { code: 'USD', r: 1, s: '$' };
+                let sec = { code: 'EUR', r: eurRate, s: '€' }; // Default sec
+
+                if(mainCode === 'EUR') {
+                    main = { code: 'EUR', r: eurRate, s: '€' };
+                    sec = { code: 'USD', r: 1/eurRate, s: '$' };
+                } else if(mainCode === 'TMP') {
+                    main = { code: tmpCode, r: tmpRate, s: tmpCode+' ' };
+                    sec = { code: 'USD', r: 1/tmpRate, s: '$' };
+                } else {
+                    // Si el principal es USD, y el usuario usó TMP, mostramos TMP como secundario
+                    if (detectedCode === 'TMP') sec = { code: tmpCode, r: tmpRate, s: tmpCode+' ' };
                 }
                 return { main, sec };
             }
             
             function fmt(val, conf) {
-                return conf.sym + (val * conf.rate).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                return conf.s + (val * conf.r).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
             }
 
             function renderResults(d) {
@@ -562,20 +572,21 @@
                 const wNet = d.wNet;
                 const cf = getDisplayConfigs(d.detectedAlt); 
 
-                // Helper para mostrar 1 o 2 monedas
+                // Helper para mostrar 1 o 2 monedas en las tarjetas
                 const showVals = (valUSD) => {
-                    let html = `<p class="text-2xl font-black text-gray-800">${fmt(valUSD, cf.main)}</p>`;
-                    if (cf.sec) {
-                        html += `<p class="text-xs text-gray-500 mt-1">(${fmt(valUSD, cf.sec)})</p>`;
-                    }
-                    return html;
+                    return `<p class="text-2xl font-black text-gray-800">${fmt(valUSD, cf.main)}</p>
+                            <p class="text-xs text-gray-400 mt-1 dual-val-sec">${fmt(valUSD, cf.sec)} ${cf.sec.code}</p>`;
+                };
+                // Helper para Kilos Duales
+                const showKg = (valUSD) => {
+                    return `${fmt(valUSD/wNet, cf.main)} <span class="text-gray-400 font-normal">(${fmt(valUSD/wNet, cf.sec)} ${cf.sec.code})</span> /Kg Net`;
                 };
 
                 grid.innerHTML = `
-                    <div class="price-box border-b-4 border-gray-400"><p class="text-[10px] uppercase font-bold text-gray-500">FOB Shipper</p>${showVals(d.fobShipper)}<p class="text-xs text-blue-600 font-bold border-t mt-1 pt-1">${fmt(d.fobShipper/wNet, cf.main)} /Kg</p></div>
-                    <div class="price-box border-b-4 border-gray-400"><p class="text-[10px] uppercase font-bold text-gray-500">CIF Shipper</p>${showVals(d.cifShipper)}<p class="text-xs text-blue-600 font-bold border-t mt-1 pt-1">${fmt(d.cifShipper/wNet, cf.main)} /Kg</p></div>
-                    <div class="price-box border-b-4 border-indigo-500"><p class="text-[10px] uppercase font-bold text-gray-500">FOB Cliente</p>${showVals(d.fobClient)}<p class="text-xs text-indigo-600 font-bold border-t mt-1 pt-1">${fmt(d.fobClient/wNet, cf.main)} /Kg</p></div>
-                    <div class="price-box border-b-4 border-green-500"><p class="text-[10px] uppercase font-bold text-gray-500">CIF Cliente</p>${showVals(d.cifClient)}<p class="text-xs text-green-700 font-bold border-t mt-1 pt-1">${fmt(d.cifClient/wNet, cf.main)} /Kg</p></div>
+                    <div class="price-box border-b-4 border-gray-400"><p class="text-[10px] uppercase font-bold text-gray-500">FOB Shipper</p>${showVals(d.fobShipper)}<p class="text-xs text-blue-600 font-bold border-t mt-1 pt-1">${showKg(d.fobShipper)}</p></div>
+                    <div class="price-box border-b-4 border-gray-400"><p class="text-[10px] uppercase font-bold text-gray-500">CIF Shipper</p>${showVals(d.cifShipper)}<p class="text-xs text-blue-600 font-bold border-t mt-1 pt-1">${showKg(d.cifShipper)}</p></div>
+                    <div class="price-box border-b-4 border-indigo-500"><p class="text-[10px] uppercase font-bold text-gray-500">FOB Cliente</p>${showVals(d.fobClient)}<p class="text-xs text-indigo-600 font-bold border-t mt-1 pt-1">${showKg(d.fobClient)}</p></div>
+                    <div class="price-box border-b-4 border-green-500"><p class="text-[10px] uppercase font-bold text-gray-500">CIF Cliente</p>${showVals(d.cifClient)}<p class="text-xs text-green-700 font-bold border-t mt-1 pt-1">${showKg(d.cifClient)}</p></div>
                 `;
 
                 content.innerHTML = `
@@ -620,27 +631,24 @@
                     totalCif += d.cifClient * d.boxesTotal;
                     const shipIcon = d.type === 'maritime' ? '🚢' : '✈️';
 
-                    // Formateo dual para la tabla
-                    const dual = (val) => {
-                        let t = fmt(val, cf.main);
-                        if(cf.sec) t += `<br><span class="text-[9px] text-gray-400">${fmt(val, cf.sec)}</span>`;
-                        return t;
-                    };
+                    // Formateo dual tabla
+                    const dual = (val) => `<span class="table-dual-main">${fmt(val, cf.main)} ${cf.main.code}</span><br><span class="table-dual-sec">(${fmt(val, cf.sec)} ${cf.sec.code})</span>`;
+                    const dualKg = (val) => `<span class="table-dual-main">${fmt(val/d.wNet, cf.main)}/kg</span><br><span class="table-dual-sec">(${fmt(val/d.wNet, cf.sec)})</span>`;
 
                     row.innerHTML = `
                         <td class="px-3 py-3 text-sm font-bold text-gray-800">${shipIcon} ${d.format.speciesName}<br><span class="text-xs font-normal text-gray-500">${d.format.name}</span></td>
                         <td class="px-3 py-3 text-xs text-gray-600">${d.variety}<br>${d.boxesTotal} Cajas</td>
-                        <td class="px-3 py-3 text-right text-sm text-blue-700 font-medium bg-blue-50">${dual(d.fobShipper)}</td>
-                        <td class="px-3 py-3 text-right text-sm text-blue-700 font-medium bg-blue-50 border-l border-white">${fmt(d.fobShipper/d.wNet, cf.main)}</td>
-                        <td class="px-3 py-3 text-right text-sm text-green-700 font-bold bg-green-50">${dual(d.cifClient)}</td>
-                        <td class="px-3 py-3 text-right text-sm text-green-700 font-bold bg-green-50 border-l border-white">${fmt(d.cifClient/d.wNet, cf.main)}</td>
+                        <td class="px-3 py-3 text-right text-sm bg-blue-50 border-white border-r">${dual(d.fobShipper)}</td>
+                        <td class="px-3 py-3 text-right text-sm bg-blue-50 text-blue-800 font-medium">${dualKg(d.fobShipper)}</td>
+                        <td class="px-3 py-3 text-right text-sm bg-green-50 border-white border-r">${dual(d.cifClient)}</td>
+                        <td class="px-3 py-3 text-right text-sm bg-green-50 text-green-800 font-medium">${dualKg(d.cifClient)}</td>
                         <td class="px-3 py-3 text-right text-sm font-bold text-gray-800 bg-gray-50">${fmt(d.cifClient*d.boxesTotal, cf.main)}</td>
                         <td class="px-2 py-3 text-center"><button onclick="removeItem(${index})" class="text-red-500 font-bold hover:bg-red-100 rounded px-2">×</button></td>
                     `;
                     tbody.appendChild(row);
                 });
 
-                // Total siempre en moneda de visualización actual del header, no histórico
+                // Total siempre en moneda de visualización actual del header
                 const currentMain = getDisplayConfigs(null).main;
                 getEl('table-total-cif').innerText = fmt(totalCif, currentMain);
                 getEl('results-table-card').classList.remove('hidden');
@@ -657,33 +665,25 @@
                 doc.text("COTIZACIÓN DE EXPORTACIÓN", 14, 20);
                 doc.setFontSize(10); doc.setTextColor(100); doc.setFont(undefined, 'normal');
                 doc.text(`Fecha: ${now.toLocaleDateString()} ${now.toLocaleTimeString()}`, 14, 28);
+                
+                // Usamos la config del primer item para el encabezado general, o la del header
+                const cfGlobal = getDisplayConfigs(null);
+                doc.text(`Moneda Principal: ${cfGlobal.main.code} | Ref: ${cfGlobal.sec.code}`, 14, 33);
 
                 let startY = 40;
 
-                // 1. TABLA MAESTRA
-                // Usamos la config del primer item como referencia base, o del header
-                // Para PDF, vamos a mostrar la moneda principal elegida en el header
-                const cfGlobal = getDisplayConfigs(null);
-                
-                doc.text(`Moneda Reporte: ${cfGlobal.main.code} (Tasa usada: ${cfGlobal.main.rate})`, 14, 33);
-
                 const tableRows = quoteHistory.map(d => {
-                    const cf = getDisplayConfigs(d.detectedAlt); // Config específica de ese item (si tenia moneda alt)
                     const typeLabel = d.type === 'maritime' ? '[MAR]' : '[AIR]';
+                    const cf = getDisplayConfigs(d.detectedAlt);
+                    const txtD = (val) => `${fmt(val, cf.main)}\n(${fmt(val, cf.sec)})`;
+                    const txtKg = (val) => `${fmt(val/d.wNet, cf.main)}/kg\n(${fmt(val/d.wNet, cf.sec)})`;
                     
-                    // Función texto dual simple para PDF
-                    const txtD = (val) => {
-                        let t = fmt(val, cf.main);
-                        if(cf.sec) t += `\n(${fmt(val, cf.sec)})`;
-                        return t;
-                    };
-
                     return [
                         `${d.format.speciesName}\n${d.format.name}\n${typeLabel}`,
                         d.variety,
                         `${d.boxesTotal}`,
-                        `${txtD(d.fobShipper)}\n${fmt(d.fobShipper/d.wNet, cf.main)}/kg`,
-                        `${txtD(d.cifClient)}\n${fmt(d.cifClient/d.wNet, cf.main)}/kg`,
+                        `${txtD(d.fobShipper)}\n${txtKg(d.fobShipper)}`,
+                        `${txtD(d.cifClient)}\n${txtKg(d.cifClient)}`,
                         fmt(d.cifClient * d.boxesTotal, cf.main)
                     ];
                 });

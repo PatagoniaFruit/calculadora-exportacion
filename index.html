@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculadora de Exportación Pro v14</title>
+    <title>Calculadora de Exportación Pro v15</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
@@ -318,7 +318,7 @@
                 return 1;
             }
 
-            // Convierte input a USD y detecta si se usó moneda alterna
+            // Convierte input a USD y detecta moneda alterna
             function getValInUSD(inputId, currId) {
                 const input = getEl(inputId);
                 const val = parseFloat(input.value); 
@@ -327,10 +327,12 @@
 
                 const curr = getEl(currId) ? getEl(currId).value : 'USD'; 
                 
-                // [FIX CRÍTICO] Detección robusta: Si usamos TMP, marca detectado inmediatamente.
-                // Prioridad: Si hay TMP, gana. Si hay EUR y no hay TMP, gana EUR.
-                if (curr === 'TMP') detectedAltCurrency = 'TMP';
-                else if (curr === 'EUR' && detectedAltCurrency !== 'TMP') detectedAltCurrency = 'EUR';
+                // [CRITICO] Si la moneda usada no es USD, la guardamos como detectada para usarla en el display
+                if (curr !== 'USD') {
+                    // Prioridad: TMP > EUR. Si ya hay TMP detectado, no lo sobrescribimos con EUR.
+                    if (curr === 'TMP') detectedAltCurrency = 'TMP';
+                    else if (curr === 'EUR' && detectedAltCurrency !== 'TMP') detectedAltCurrency = 'EUR';
+                }
 
                 if (curr === 'EUR') return val / getRate('EUR');
                 if (curr === 'TMP') return val / getRate('TMP');
@@ -449,7 +451,7 @@
                     const mOrig = getEl('manual-route-origin').value || 'Origen';
                     const mDest = getEl('manual-route-dest').value || 'Destino';
                     if(type === 'maritime') {
-                        // FLETE PUEDE SER 0 (PERMITIDO)
+                        // FLETE PUEDE SER 0
                         const cost = getValInUSD('manual-maritime-cost', 'manual-maritime-curr');
                         if(cost < 0) { alert('Costo Flete negativo no permitido'); return null; }
                         route = { id: 'manual', origin: mOrig, destination: mDest, cost: cost };
@@ -641,6 +643,7 @@
                     totalCif += d.cifClient * d.boxesTotal;
                     const shipIcon = d.type === 'maritime' ? '🚢' : '✈️';
 
+                    // Formateo dual tabla
                     const dual = (val) => `<span class="table-dual-main">${fmt(val, cf.main)} ${cf.main.c}</span><br><span class="table-dual-sec">(${fmt(val, cf.sec)} ${cf.sec.c})</span>`;
                     const dualKg = (val) => `<span class="table-dual-main">${fmt(val/d.wNet, cf.main)}/kg</span><br><span class="table-dual-sec">(${fmt(val/d.wNet, cf.sec)})</span>`;
 
@@ -657,6 +660,7 @@
                     tbody.appendChild(row);
                 });
 
+                // Total siempre en moneda de visualización actual del header
                 const currentMain = getDisplayConfigs(null).main;
                 getEl('table-total-cif').innerText = fmt(totalCif, currentMain);
                 getEl('results-table-card').classList.remove('hidden');
@@ -719,6 +723,7 @@
                     const typeLabel = d.type === 'maritime' ? '[ENVÍO MARÍTIMO]' : '[ENVÍO AÉREO]';
                     doc.text(`#${i+1}. ${d.format.speciesName} - ${d.format.name} (${d.variety}) - ${typeLabel}`, 14, startY + 5);
                     
+                    // Función para celda dual en detalle
                     const dualCell = (val) => `${fmt(val, cf.main)}\n(${fmt(val, cf.sec)} ${cf.sec.c})`;
                     
                     const detailBody = [

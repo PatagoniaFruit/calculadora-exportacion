@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculadora de Exportación Pro v19</title>
+    <title>Calculadora de Exportación Pro v20</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
@@ -12,6 +12,7 @@
         body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
         .card { background-color: white; border-radius: 0.75rem; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); padding: 1.5rem; margin-bottom: 1.5rem; }
         
+        /* Botones */
         .btn { display: inline-block; padding: 0.75rem 1.5rem; border-radius: 0.5rem; font-weight: 600; text-align: center; cursor: pointer; transition: all 0.2s; }
         .btn-primary { background-color: #4f46e5; color: white; box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.4); }
         .btn-primary:hover { background-color: #4338ca; transform: translateY(-1px); }
@@ -44,7 +45,7 @@
         /* Modal */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 50; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
         .modal-overlay.active { opacity: 1; pointer-events: auto; }
-        .modal-content { background: white; width: 95%; max-width: 700px; border-radius: 0.75rem; padding: 2rem; transform: scale(0.95); transition: transform 0.2s; max-height: 90vh; overflow-y: auto; }
+        .modal-content { background: white; width: 95%; max-width: 800px; border-radius: 0.75rem; padding: 2rem; transform: scale(0.95); transition: transform 0.2s; max-height: 90vh; overflow-y: auto; }
         .modal-overlay.active .modal-content { transform: scale(1); }
     </style>
 </head>
@@ -55,13 +56,13 @@
             <div class="flex flex-col md:flex-row justify-between items-center mb-4 gap-4">
                 <div>
                     <h1 class="text-3xl font-bold text-gray-900 tracking-tight">Cotizador de Exportación</h1>
-                    <p class="text-gray-500 text-sm mt-1">Gestión Comercial y Operativa</p>
+                    <p class="text-gray-500 text-sm mt-1">Gestión Multi-Divisa & Puntos de Venta</p>
                 </div>
             </div>
 
             <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
                 <div>
-                    <label class="text-indigo-600 mb-1">Moneda Principal:</label>
+                    <label class="text-indigo-600 mb-1">Moneda Pantalla:</label>
                     <select id="display-currency" class="py-1 px-3 border border-gray-300 rounded font-bold text-gray-800 text-sm w-full bg-gray-50">
                         <option value="USD">Dólar (USD)</option>
                         <option value="EUR">Euro (EUR)</option>
@@ -186,54 +187,69 @@
             </div>
 
             <div id="results-table-card" class="card hidden">
-                <div class="flex justify-between items-center mb-6">
+                <div class="flex justify-between items-end mb-6">
                     <h2 class="text-xl font-bold text-gray-800">Constructor de Cotización</h2>
-                    <div class="space-x-2">
-                        <button onclick="clearHistory()" class="text-red-600 text-sm hover:underline font-bold">Borrar Todo</button>
-                        <button onclick="exportToPDF()" class="btn btn-primary bg-slate-800 hover:bg-slate-700 text-sm">Descargar Reporte General</button>
+                    <div class="flex flex-col items-end gap-2 w-full md:w-auto">
+                        <input type="text" id="internal-ref" placeholder="Referencia / Cód. Interno" class="p-2 border rounded text-sm w-60">
+                        <div class="flex gap-2">
+                            <button onclick="downloadTechnicalReport()" class="btn btn-dark text-sm">Descargar Reporte Técnico</button>
+                            <button onclick="openModal()" class="btn btn-primary bg-indigo-600 hover:bg-indigo-700 text-sm">Generar Oferta / Cierre</button>
+                        </div>
                     </div>
                 </div>
                 <div class="overflow-x-auto rounded-lg border border-gray-200 mb-6">
                     <table class="min-w-full divide-y divide-gray-200 text-sm" id="quote-table">
                         <thead class="bg-gray-100">
                             <tr>
+                                <th class="px-3 py-3 text-center w-10"><input type="checkbox" id="check-all" onchange="toggleAll(this)"></th>
                                 <th class="px-3 py-3 text-left font-bold uppercase text-xs text-gray-600">Producto</th>
                                 <th class="px-3 py-3 text-left font-bold uppercase text-xs text-gray-600">Detalles</th>
                                 <th class="px-3 py-3 text-right font-bold text-blue-700 uppercase text-xs bg-blue-50">Compra (Caja)</th>
                                 <th class="px-3 py-3 text-right font-bold text-green-700 uppercase text-xs bg-green-50">Venta (Caja)</th>
                                 <th class="px-3 py-3 text-right font-bold uppercase text-xs text-gray-700 bg-gray-50">Total Línea</th>
-                                <th class="px-2 py-3 text-center uppercase text-xs text-gray-600">Acción</th>
+                                <th class="px-2 py-3 text-center uppercase text-xs text-gray-600">Borrar</th>
                             </tr>
                         </thead>
                         <tbody id="results-tbody" class="bg-white divide-y divide-gray-200"></tbody>
                         <tfoot class="bg-gray-100 font-bold">
                             <tr>
-                                <td colspan="5" class="px-4 py-3 text-right uppercase text-gray-600">Total Cotización:</td>
+                                <td colspan="6" class="px-4 py-3 text-right uppercase text-gray-600">Total Cotización:</td>
                                 <td class="px-4 py-3 text-right text-lg text-green-800" id="table-total-cif">0.00</td>
                             </tr>
                         </tfoot>
                     </table>
                 </div>
+                <div class="text-right"><button onclick="clearHistory()" class="text-red-600 text-xs hover:underline font-bold">Borrar Todo</button></div>
             </div>
 
             <div id="pdf-modal" class="modal-overlay">
                 <div class="modal-content">
                     <div class="flex justify-between items-center mb-6">
-                        <h3 class="text-2xl font-bold text-gray-900">Generar Documento Formal</h3>
+                        <h3 class="text-2xl font-bold text-gray-900">Generar Documento Comercial</h3>
                         <button onclick="closeModal()" class="text-gray-400 hover:text-red-500 text-2xl font-bold">&times;</button>
                     </div>
 
-                    <div class="mb-6">
-                        <label class="mb-2 block text-sm font-bold text-gray-700">Seleccione Tipo:</label>
-                        <div class="grid grid-cols-2 gap-4">
-                            <label class="cursor-pointer border-2 border-transparent hover:border-blue-500 bg-blue-50 rounded-lg p-4 flex items-center gap-3 transition-all has-[:checked]:border-blue-600 has-[:checked]:bg-blue-100">
-                                <input type="radio" name="doc-type" value="client" checked class="w-4 h-4 text-blue-600" onchange="updateModalTexts()">
-                                <div><span class="block font-bold text-blue-900">Oferta Cliente (Client Quote)</span><span class="block text-xs text-blue-600">Idioma: Inglés | Precios: Venta</span></div>
-                            </label>
-                            <label class="cursor-pointer border-2 border-transparent hover:border-indigo-500 bg-indigo-50 rounded-lg p-4 flex items-center gap-3 transition-all has-[:checked]:border-indigo-600 has-[:checked]:bg-indigo-100">
-                                <input type="radio" name="doc-type" value="provider" class="w-4 h-4 text-indigo-600" onchange="updateModalTexts()">
-                                <div><span class="block font-bold text-indigo-900">Cierre Proveedor (Order)</span><span class="block text-xs text-indigo-600">Idioma: Español | Precios: Compra</span></div>
-                            </label>
+                    <div class="mb-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="mb-2 block text-sm font-bold text-gray-700">Tipo de Documento:</label>
+                            <div class="flex gap-2">
+                                <label class="flex-1 cursor-pointer border hover:border-blue-500 bg-blue-50 rounded p-2 flex items-center gap-2">
+                                    <input type="radio" name="doc-type" value="client" checked onchange="updateModalTexts()">
+                                    <span class="text-sm font-bold text-blue-900">Oferta Cliente</span>
+                                </label>
+                                <label class="flex-1 cursor-pointer border hover:border-indigo-500 bg-indigo-50 rounded p-2 flex items-center gap-2">
+                                    <input type="radio" name="doc-type" value="provider" onchange="updateModalTexts()">
+                                    <span class="text-sm font-bold text-indigo-900">Cierre Prov.</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="mb-2 block text-sm font-bold text-gray-700">Moneda del Documento:</label>
+                            <select id="doc-currency" class="w-full border p-2 rounded bg-white">
+                                <option value="USD">Dólar (USD)</option>
+                                <option value="EUR">Euro (EUR)</option>
+                                <option value="TMP" class="tmp-currency-label">Moneda Temporal</option>
+                            </select>
                         </div>
                     </div>
 
@@ -247,7 +263,7 @@
                     <div class="mb-6"><label id="lbl-payment">Términos de Pago</label><textarea id="doc-payment" rows="2" class="w-full border-gray-300 rounded text-sm"></textarea></div>
                     <div class="mb-6"><label id="lbl-window">Ventana de Embarque</label><textarea id="doc-window" rows="2" class="w-full border-gray-300 rounded text-sm"></textarea></div>
 
-                    <button onclick="generatePDF()" class="btn btn-dark w-full py-4 text-lg shadow-xl">Descargar PDF</button>
+                    <button onclick="generateCommercialDocument()" class="btn btn-primary w-full py-4 text-lg shadow-xl">Descargar Documento PDF</button>
                 </div>
             </div>
 
@@ -263,7 +279,6 @@
             let lastCalc = null;
             let quoteHistory = [];
             let detectedAltCurrency = null; 
-            let currentDocIndex = null;
 
             const getEl = (id) => document.getElementById(id);
             const speciesSelect = getEl('species');
@@ -515,6 +530,7 @@
                 renderResults(lastCalc);
             });
 
+            // --- DISPLAY LOGIC ---
             function getDisplayConfigs(detectedCode) {
                 const mainCode = getEl('display-currency').value;
                 const eurRate = parseFloat(getEl('rate-eur').value) || 1;
@@ -538,7 +554,6 @@
             }
             
             function fmt(val, conf) {
-                if(!conf || isNaN(val)) return '';
                 return conf.s + (val * conf.r).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
             }
 
@@ -597,6 +612,10 @@
 
             window.clearHistory = () => { quoteHistory = []; renderQuoteTable(); getEl('results-table-card').classList.add('hidden'); }
 
+            window.toggleAll = (source) => {
+                document.querySelectorAll('.row-check').forEach(cb => cb.checked = source.checked);
+            }
+
             function renderQuoteTable() {
                 const tbody = getEl('results-tbody');
                 tbody.innerHTML = '';
@@ -613,13 +632,13 @@
                         const dual = (val) => `<span class="font-bold text-gray-800">${fmt(val, cf.main)} ${cf.main.c}</span><br><span class="text-xs text-gray-500">(${fmt(val, cf.sec)} ${cf.sec.c})</span>`;
 
                         row.innerHTML = `
+                            <td class="px-3 py-3 text-center"><input type="checkbox" class="row-check" value="${index}"></td>
                             <td class="px-3 py-3 text-sm font-bold text-gray-800">${shipIcon} ${d.format.speciesName}<br><span class="text-xs font-normal text-gray-500">${d.format.name}</span></td>
                             <td class="px-3 py-3 text-xs text-gray-600">${d.variety}<br>${d.boxesTotal} Cajas</td>
                             <td class="px-3 py-3 text-right text-sm bg-blue-50 border-white border-r">${dual(d.fobShipper)}</td>
                             <td class="px-3 py-3 text-right text-sm bg-green-50 border-white border-r">${dual(d.cifClient)}</td>
                             <td class="px-3 py-3 text-right text-sm font-bold text-gray-800 bg-gray-50">${fmt(d.cifClient*d.boxesTotal, cf.main)}</td>
                             <td class="px-2 py-3 text-center">
-                                <button onclick="openModal(${index})" class="text-blue-600 hover:text-blue-800 text-lg mr-2" title="Generar Oferta">📄</button>
                                 <button onclick="removeItem(${index})" class="text-red-500 hover:text-red-700 font-bold" title="Borrar">×</button>
                             </td>
                         `;
@@ -635,12 +654,13 @@
             window.removeItem = (index) => { quoteHistory.splice(index, 1); renderQuoteTable(); }
 
             // MODAL
-            window.openModal = (index) => {
-                currentDocIndex = index;
+            window.openModal = () => {
+                const checks = document.querySelectorAll('.row-check:checked');
+                if(checks.length === 0) return alert("Seleccione al menos una línea para generar la oferta.");
                 getEl('pdf-modal').classList.add('active');
                 updateModalTexts();
             }
-            window.closeModal = () => { getEl('pdf-modal').classList.remove('active'); currentDocIndex = null; }
+            window.closeModal = () => getEl('pdf-modal').classList.remove('active');
             
             window.updateModalTexts = () => {
                 const type = document.querySelector('input[name="doc-type"]:checked').value;
@@ -667,58 +687,85 @@
                 }
             }
 
-            window.generatePDF = () => {
-                if(currentDocIndex === null) return;
-                const d = quoteHistory[currentDocIndex];
+            window.generateCommercialDocument = () => {
+                const selectedChecks = Array.from(document.querySelectorAll('.row-check:checked'));
+                if(selectedChecks.length === 0) return;
+
+                const doc = new jsPDF();
                 const type = document.querySelector('input[name="doc-type"]:checked').value;
-                
+                const docCurrency = getEl('doc-currency').value;
+                const refCode = getEl('internal-ref').value;
+                const now = new Date();
+
+                // Currency Rate for Doc
+                let docRate = 1; let docSym = '$';
+                const eurRate = parseFloat(getEl('rate-eur').value) || 1;
+                const tmpRate = parseFloat(getEl('rate-tmp').value) || 1;
+                const tmpCode = getEl('code-tmp').value || 'TMP';
+
+                if(docCurrency === 'EUR') { docRate = eurRate; docSym = '€'; }
+                if(docCurrency === 'TMP') { docRate = tmpRate; docSym = tmpCode+' '; }
+
+                // Helper fmt doc
+                const fmtDoc = (valUSD) => {
+                    // Si es USD->USD (val), Si es USD->EUR (val/tasa), Si USD->TMP (val/tasa)
+                    let finalVal = valUSD; 
+                    if(docCurrency !== 'USD') finalVal = valUSD / docRate;
+                    return docSym + finalVal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                }
+
+                // DATA
                 const validDate = getEl('doc-validity').value;
                 const origin = getEl('doc-origin').value;
                 const incoterm = getEl('doc-incoterm').value;
                 const pod = getEl('doc-pod').value;
                 const payment = getEl('doc-payment').value;
                 const shipWindow = getEl('doc-window').value;
-
-                // PDF Setup
-                const doc = new jsPDF();
-                const cf = getDisplayConfigs(d.detectedAlt);
                 const title = type === 'client' ? "COMMERCIAL QUOTATION" : "OFERTA PROVEEDOR";
-                
+
                 // HEADER
-                doc.setFontSize(20); doc.setTextColor(0); doc.setFont(undefined, 'bold');
-                doc.text("PATAGONIA FRUITS", 14, 20);
-                doc.setFontSize(14); doc.setTextColor(type === 'client' ? 40 : 100);
-                doc.text(title, 14, 30);
+                doc.setFillColor(type === 'client' ? 30 : 79, 64, type === 'client' ? 175 : 229); 
+                doc.rect(0, 0, 210, 40, 'F');
+                doc.setTextColor(255); doc.setFontSize(24); doc.setFont(undefined, 'bold');
+                doc.text("PATAGONIA FRUITS", 14, 25);
+                
+                doc.setFontSize(10); doc.text(title, 14, 35);
+                if(refCode) doc.text(`REF: ${refCode}`, 150, 25);
 
                 // DATE TABLE
                 const headers = type === 'client' ? [['Date', 'Valid Until']] : [['Fecha', 'Validez']];
                 const dates = [[new Date().toLocaleDateString(), validDate]];
-                doc.autoTable({ startY: 15, margin: {left: 130}, head: headers, body: dates, theme: 'grid', styles: {halign: 'center', fontSize: 10} });
+                doc.autoTable({ startY: 45, margin: {left: 130}, head: headers, body: dates, theme: 'grid', styles: {halign: 'center', fontSize: 10} });
+
+                let startY = 65;
 
                 // MAIN TABLE
                 const tableHeaders = type === 'client' 
                     ? [['Product', 'Size', 'Pack', 'Qty', 'UoM', 'Price (Unit)', 'Total']]
                     : [['Producto', 'Calibre', 'Pack', 'Cant', 'UoM', 'Precio (Unit)', 'Total']];
                 
-                // Logic: Client gets Sale Price (CIF/FOB Client), Provider gets Buy Price (FOB Shipper)
-                const unitPrice = type === 'client' ? d.cifClient : d.fobShipper; 
-                const totalLine = unitPrice * d.boxesTotal;
-                
-                const txtP = `${fmt(unitPrice, cf.main)}\n(${fmt(unitPrice, cf.sec)})`;
-                const txtT = `${fmt(totalLine, cf.main)}\n(${fmt(totalLine, cf.sec)})`;
+                let grandTotalUSD = 0;
+                const tableBody = selectedChecks.map(cb => {
+                    const d = quoteHistory[cb.value];
+                    const unitPriceUSD = type === 'client' ? d.cifClient : d.fobShipper;
+                    const totalLineUSD = unitPriceUSD * d.boxesTotal;
+                    grandTotalUSD += totalLineUSD;
 
-                const tableBody = [[
-                    d.format.speciesName,
-                    d.variety,
-                    d.format.name,
-                    d.boxesTotal,
-                    'boxes',
-                    txtP,
-                    txtT
-                ]];
+                    return [
+                        d.format.speciesName,
+                        d.variety,
+                        d.format.name,
+                        d.boxesTotal,
+                        'boxes',
+                        fmtDoc(unitPriceUSD),
+                        fmtDoc(totalLineUSD)
+                    ];
+                });
+
+                tableBody.push([{content: 'TOTAL', colSpan: 6, styles:{halign:'right', fontStyle:'bold'}}, {content: fmtDoc(grandTotalUSD), styles:{fontStyle:'bold'}}]);
 
                 doc.autoTable({
-                    startY: 45,
+                    startY: startY,
                     head: tableHeaders,
                     body: tableBody,
                     theme: 'striped',
@@ -745,17 +792,46 @@
                 doc.setFontSize(8); doc.setTextColor(150);
                 doc.text("Patagonia Fruits | Export Division", 14, footerY);
 
-                doc.save(`Document_${title}_${Date.now()}.pdf`);
+                doc.save(`${title}_${refCode || 'Doc'}.pdf`);
                 closeModal();
             }
 
-            window.exportToPDF = function() {
+            // OLD TECHNICAL REPORT (Restored)
+            window.downloadTechnicalReport = function() {
                 if(quoteHistory.length === 0) return alert("Tabla vacía");
                 const doc = new jsPDF();
-                doc.text("Reporte General", 14, 20);
-                const rows = quoteHistory.map(d => [d.format.speciesName, d.boxesTotal, fmt(d.fobShipper * d.boxesTotal, getDisplayConfigs(d.detectedAlt).main)]);
-                doc.autoTable({ startY: 30, head: [['Producto', 'Cajas', 'Total']], body: rows });
-                doc.save('Reporte_General.pdf');
+                const now = new Date();
+                const ref = getEl('internal-ref').value;
+                const cf = getDisplayConfigs(null);
+
+                doc.setFontSize(18); doc.text("REPORTE TÉCNICO INTERNO", 14, 20);
+                doc.setFontSize(10); doc.text(`Fecha: ${now.toLocaleDateString()} | REF: ${ref}`, 14, 28);
+                
+                let startY = 40;
+                quoteHistory.forEach((d, i) => {
+                    if(startY > 260) { doc.addPage(); startY = 20; }
+                    const cfItem = getDisplayConfigs(d.detectedAlt);
+                    doc.setFontSize(10); doc.setTextColor(0);
+                    doc.text(`${i+1}. ${d.format.speciesName} - ${d.variety} (${d.boxesTotal} Cajas)`, 14, startY);
+                    
+                    const body = [
+                        ["Concepto", "Valor Caja", "Total"],
+                        ["FOB Shipper", fmt(d.fobShipper, cfItem.main), fmt(d.fobShipper*d.boxesTotal, cfItem.main)],
+                        ["Logística", fmt(d.othersPerBox, cfItem.main), fmt(d.othersPerBox*d.boxesTotal, cfItem.main)],
+                        ["Flete", fmt(d.freightPerBox, cfItem.main), fmt(d.freightPerBox*d.boxesTotal, cfItem.main)],
+                        ["CIF Cliente", fmt(d.cifClient, cfItem.main), fmt(d.cifClient*d.boxesTotal, cfItem.main)],
+                    ];
+                    
+                    doc.autoTable({
+                        startY: startY + 2,
+                        head: [body[0]],
+                        body: body.slice(1),
+                        theme: 'grid',
+                        styles: {fontSize: 8}
+                    });
+                    startY = doc.lastAutoTable.finalY + 10;
+                });
+                doc.save(`Reporte_Tecnico_${ref}.pdf`);
             }
 
             init(); toggleBaseInputs(); toggleShippingMode(); updateBaseHelpText();

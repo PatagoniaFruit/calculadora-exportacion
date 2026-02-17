@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculadora de Exportación Pro v11</title>
+    <title>Calculadora de Exportación Pro v12</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
@@ -40,8 +40,8 @@
         input[value="air"]:checked + .ship-option { background-color: #fff7ed; border-color: #f97316; color: #9a3412; box-shadow: 0 4px 6px -1px rgba(249, 115, 22, 0.2); }
         .base-option input:checked + span { background-color: white; color: #4f46e5; box-shadow: 0 1px 3px rgba(0,0,0,0.1); font-weight: 800; border: 1px solid #e0e7ff; }
 
-        .badge-weight { font-size: 0.65rem; padding: 2px 5px; border-radius: 4px; font-weight: 700; display: inline-block; margin-top: 2px; }
-        .badge-net { background-color: #dcfce7; color: #166534; }
+        /* Dualidad Visual */
+        .dual-val-sec { font-size: 0.75em; color: #6b7280; display: block; margin-top: 2px; font-weight: 500;}
     </style>
 </head>
 <body class="bg-gray-100 text-gray-800 p-4 sm:p-8">
@@ -57,7 +57,7 @@
 
             <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
                 <div>
-                    <label class="text-indigo-600 mb-1">Ver Resultados En:</label>
+                    <label class="text-indigo-600 mb-1">Moneda Principal (Reporte):</label>
                     <select id="display-currency" class="py-1 px-3 border border-gray-300 rounded font-bold text-gray-800 text-sm w-full bg-gray-50">
                         <option value="USD">Dólar (USD)</option>
                         <option value="EUR">Euro (EUR)</option>
@@ -113,16 +113,11 @@
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
                     <div>
                         <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center"><span class="bg-indigo-100 text-indigo-700 w-6 h-6 rounded-full flex items-center justify-center text-xs mr-2">3</span>Datos del Producto</h3>
-                        
                         <div class="grid grid-cols-2 gap-4 mb-4">
                             <div><label>Especie</label><select id="species" class="w-full rounded-md"></select></div>
                             <div id="format-select-wrapper"><label>Formato</label><select id="format" class="w-full rounded-md"></select></div>
                         </div>
-
-                        <div class="mb-4">
-                            <label>Variedad / Calibre / Marca</label>
-                            <input type="text" id="variety-caliber" placeholder="Ej: Duke / 18mm / Premium Label" class="w-full rounded-md border-indigo-200">
-                        </div>
+                        <div class="mb-4"><label>Variedad / Calibre / Marca</label><input type="text" id="variety-caliber" placeholder="Ej: Duke / 18mm / Premium" class="w-full rounded-md border-indigo-200"></div>
 
                         <div id="manual-product-wrapper" class="hidden mb-4 p-4 border border-dashed border-gray-300 rounded-lg bg-gray-50">
                             <div class="grid grid-cols-2 gap-3 mb-3"><input type="text" id="manual-species-name" placeholder="Especie" class="w-full rounded-md"><input type="text" id="manual-format-name" placeholder="Formato" class="w-full rounded-md"></div>
@@ -137,31 +132,19 @@
                         <div class="mb-6 p-4 bg-indigo-50 rounded-lg border border-indigo-100">
                             <div id="input-fob-proveedor-wrapper">
                                 <label class="text-indigo-900">Costo Compra FOB (Por Caja)</label>
-                                <div class="input-group">
-                                    <input type="number" id="fob-proveedor-cost" placeholder="0.00" step="0.01" class="font-bold text-indigo-700">
-                                    <select id="fob-proveedor-currency" class="currency-selector"><option value="USD">USD</option><option value="EUR">EUR</option><option value="TMP" class="tmp-currency-label">TMP</option></select>
-                                </div>
+                                <div class="input-group"><input type="number" id="fob-proveedor-cost" placeholder="0.00" step="0.01" class="font-bold text-indigo-700"><select id="fob-proveedor-currency"><option value="USD">USD</option><option value="EUR">EUR</option><option value="TMP" class="tmp-currency-label">TMP</option></select></div>
                             </div>
                             <div id="input-cif-proveedor-wrapper" class="hidden">
                                 <label class="text-indigo-900">Costo Compra CIF (Por Caja)</label>
-                                <div class="input-group">
-                                    <input type="number" id="cif-proveedor-cost" placeholder="0.00" step="0.01" class="font-bold text-indigo-700">
-                                    <select id="cif-proveedor-currency" class="currency-selector"><option value="USD">USD</option><option value="EUR">EUR</option><option value="TMP" class="tmp-currency-label">TMP</option></select>
-                                </div>
+                                <div class="input-group"><input type="number" id="cif-proveedor-cost" placeholder="0.00" step="0.01" class="font-bold text-indigo-700"><select id="cif-proveedor-currency"><option value="USD">USD</option><option value="EUR">EUR</option><option value="TMP" class="tmp-currency-label">TMP</option></select></div>
                             </div>
                             <div id="input-fob-cliente-wrapper" class="hidden">
                                 <label class="text-indigo-900">Precio Venta FOB (Por Caja)</label>
-                                <div class="input-group">
-                                    <input type="number" id="fob-cliente-price" placeholder="0.00" step="0.01" class="font-bold text-indigo-700">
-                                    <select id="fob-cliente-currency" class="currency-selector"><option value="USD">USD</option><option value="EUR">EUR</option><option value="TMP" class="tmp-currency-label">TMP</option></select>
-                                </div>
+                                <div class="input-group"><input type="number" id="fob-cliente-price" placeholder="0.00" step="0.01" class="font-bold text-indigo-700"><select id="fob-cliente-currency"><option value="USD">USD</option><option value="EUR">EUR</option><option value="TMP" class="tmp-currency-label">TMP</option></select></div>
                             </div>
                             <div id="input-cif-cliente-wrapper" class="hidden">
                                 <label class="text-indigo-900">Precio Venta CIF (Por Caja)</label>
-                                <div class="input-group">
-                                    <input type="number" id="cif-cliente-price" placeholder="0.00" step="0.01" class="font-bold text-indigo-700">
-                                    <select id="cif-cliente-currency" class="currency-selector"><option value="USD">USD</option><option value="EUR">EUR</option><option value="TMP" class="tmp-currency-label">TMP</option></select>
-                                </div>
+                                <div class="input-group"><input type="number" id="cif-cliente-price" placeholder="0.00" step="0.01" class="font-bold text-indigo-700"><select id="cif-cliente-currency"><option value="USD">USD</option><option value="EUR">EUR</option><option value="TMP" class="tmp-currency-label">TMP</option></select></div>
                             </div>
                         </div>
 
@@ -177,10 +160,10 @@
                         <div id="air-options" class="hidden mb-4 p-4 bg-orange-50 border border-orange-200 rounded-lg">
                             <div class="mb-3"><label>N° Cajas Aéreo</label><input type="number" id="air-boxes" placeholder="Ej: 360" class="w-full rounded-md"></div>
                             <div class="grid grid-cols-2 gap-3">
-                                <div><label class="text-xs">Clearance</label><div class="input-group"><input type="number" id="air-clearance" step="0.01"><select id="air-clearance-curr" class="currency-selector"><option>USD</option><option>EUR</option><option value="TMP" class="tmp-currency-label">TMP</option></select></div></div>
-                                <div><label class="text-xs">Cooler</label><div class="input-group"><input type="number" id="air-cooler" step="0.01"><select id="air-cooler-curr" class="currency-selector"><option>USD</option><option>EUR</option><option value="TMP" class="tmp-currency-label">TMP</option></select></div></div>
-                                <div><label class="text-xs">DTA</label><div class="input-group"><input type="number" id="air-dta" step="0.01"><select id="air-dta-curr" class="currency-selector"><option>USD</option><option>EUR</option><option value="TMP" class="tmp-currency-label">TMP</option></select></div></div>
-                                <div><label class="text-xs">Handling</label><div class="input-group"><input type="number" id="air-handling" step="0.01"><select id="air-handling-curr" class="currency-selector"><option>USD</option><option>EUR</option><option value="TMP" class="tmp-currency-label">TMP</option></select></div></div>
+                                <div><label class="text-xs">Clearance</label><div class="input-group"><input type="number" id="air-clearance" step="0.01"><select id="air-clearance-curr"><option>USD</option><option>EUR</option><option value="TMP" class="tmp-currency-label">TMP</option></select></div></div>
+                                <div><label class="text-xs">Cooler</label><div class="input-group"><input type="number" id="air-cooler" step="0.01"><select id="air-cooler-curr"><option>USD</option><option>EUR</option><option value="TMP" class="tmp-currency-label">TMP</option></select></div></div>
+                                <div><label class="text-xs">DTA</label><div class="input-group"><input type="number" id="air-dta" step="0.01"><select id="air-dta-curr"><option>USD</option><option>EUR</option><option value="TMP" class="tmp-currency-label">TMP</option></select></div></div>
+                                <div><label class="text-xs">Handling</label><div class="input-group"><input type="number" id="air-handling" step="0.01"><select id="air-handling-curr"><option>USD</option><option>EUR</option><option value="TMP" class="tmp-currency-label">TMP</option></select></div></div>
                             </div>
                         </div>
 
@@ -188,46 +171,20 @@
 
                         <div id="manual-freight-wrapper" class="hidden p-4 border border-dashed border-gray-300 rounded-lg bg-gray-50 mb-4">
                             <div class="grid grid-cols-2 gap-3 mb-3"><div><label>Origen</label><input type="text" id="manual-route-origin" class="w-full rounded-md"></div><div><label>Destino</label><input type="text" id="manual-route-dest" class="w-full rounded-md"></div></div>
-                            
                             <div id="manual-maritime-wrapper">
                                 <label class="text-blue-600">Costo Flete FCL</label>
-                                <div class="input-group">
-                                    <input type="number" id="manual-maritime-cost" placeholder="Total (Puede ser 0)" step="0.01">
-                                    <select id="manual-maritime-curr" class="currency-selector"><option>USD</option><option>EUR</option><option value="TMP" class="tmp-currency-label">TMP</option></select>
-                                </div>
+                                <div class="input-group"><input type="number" id="manual-maritime-cost" placeholder="Total (Puede ser 0)" step="0.01"><select id="manual-maritime-curr"><option>USD</option><option>EUR</option><option value="TMP" class="tmp-currency-label">TMP</option></select></div>
                             </div>
-                            
                             <div id="manual-air-wrapper" class="hidden">
                                 <label class="text-orange-600">Tarifa Aérea (x Kg)</label>
-                                <div class="input-group">
-                                    <input type="number" id="manual-air-rate" placeholder="Rate/Kg" step="0.01">
-                                    <select id="manual-air-curr" class="currency-selector"><option>USD</option><option>EUR</option><option value="TMP" class="tmp-currency-label">TMP</option></select>
-                                </div>
+                                <div class="input-group"><input type="number" id="manual-air-rate" placeholder="Rate/Kg" step="0.01"><select id="manual-air-curr"><option>USD</option><option>EUR</option><option value="TMP" class="tmp-currency-label">TMP</option></select></div>
                             </div>
                         </div>
 
                         <div class="grid grid-cols-2 gap-4 mb-4">
-                            <div>
-                                <label>Seguro (Total)</label>
-                                <div class="input-group">
-                                    <input type="number" id="insurance-total" value="235" step="0.01">
-                                    <select id="insurance-curr" class="currency-selector"><option>USD</option><option>EUR</option><option value="TMP" class="tmp-currency-label">TMP</option></select>
-                                </div>
-                            </div>
-                            <div id="maritime-costs">
-                                <label>Servicios FCL</label>
-                                <div class="input-group">
-                                    <input type="number" id="services-total" value="500" step="0.01">
-                                    <select id="services-curr" class="currency-selector"><option>USD</option><option>EUR</option><option value="TMP" class="tmp-currency-label">TMP</option></select>
-                                </div>
-                            </div>
-                            <div id="maritime-extra">
-                                <label>Costos Extra FCL</label>
-                                <div class="input-group">
-                                    <input type="number" id="extra-costs-total" value="300" step="0.01">
-                                    <select id="extra-costs-curr" class="currency-selector"><option>USD</option><option>EUR</option><option value="TMP" class="tmp-currency-label">TMP</option></select>
-                                </div>
-                            </div>
+                            <div><label>Seguro (Total)</label><div class="input-group"><input type="number" id="insurance-total" value="235" step="0.01"><select id="insurance-curr"><option>USD</option><option>EUR</option><option value="TMP" class="tmp-currency-label">TMP</option></select></div></div>
+                            <div id="maritime-costs"><label>Servicios FCL</label><div class="input-group"><input type="number" id="services-total" value="500" step="0.01"><select id="services-curr"><option>USD</option><option>EUR</option><option value="TMP" class="tmp-currency-label">TMP</option></select></div></div>
+                            <div id="maritime-extra"><label>Costos Extra FCL</label><div class="input-group"><input type="number" id="extra-costs-total" value="300" step="0.01"><select id="extra-costs-curr"><option>USD</option><option>EUR</option><option value="TMP" class="tmp-currency-label">TMP</option></select></div></div>
                         </div>
 
                         <button id="calculate-btn" class="btn btn-primary w-full mt-8 py-3 text-lg shadow-lg hover:shadow-xl transform transition">CALCULAR</button>
@@ -286,7 +243,7 @@
             
             let lastCalc = null;
             let quoteHistory = [];
-            let detectedAltCurrency = null; // Para guardar si se usó EUR/TMP
+            let detectedAltCurrency = null; // Moneda secundaria detectada
 
             const getEl = (id) => document.getElementById(id);
             const speciesSelect = getEl('species');
@@ -305,37 +262,40 @@
                 updateTmpLabels();
             }
 
-            // Moneda Temporal Label
             tmpCodeInput.addEventListener('input', updateTmpLabels);
             function updateTmpLabels() {
                 const code = tmpCodeInput.value || 'TMP';
                 document.querySelectorAll('.tmp-currency-label').forEach(opt => opt.textContent = code.toUpperCase());
             }
 
-            // Helper para obtener tasa
             function getRate(code) {
                 if(code === 'EUR') return parseFloat(getEl('rate-eur').value) || 1;
                 if(code === 'TMP') return parseFloat(getEl('rate-tmp').value) || 1;
                 return 1;
             }
 
-            // Convierte input a USD para cálculo interno, y registra si se usó otra moneda
+            // Convierte input a USD y detecta si se usó moneda alterna
             function getValInUSD(inputId, currId) {
-                const val = parseFloat(getEl(inputId).value) || 0;
-                // [FIX] Validar si es negativo (aunque permitimos 0)
-                if (val < 0) return -1; 
+                const input = getEl(inputId);
+                const val = parseFloat(input.value); 
+                // [FIX] Permitir 0 explícitamente para flete FOB Cliente
+                if (isNaN(val)) return 0;
 
                 const curr = getEl(currId) ? getEl(currId).value : 'USD'; 
                 
-                // Si el usuario usa moneda alternativa, la registramos para mostrar dualidad
-                if (curr !== 'USD') detectedAltCurrency = curr;
+                // Prioridad: Si hay una moneda temporal usada, esa manda como secundaria. Sino, EUR.
+                if (curr !== 'USD') {
+                    // Si ya detectamos TMP, no lo cambiamos a EUR. Si es el primero, lo asignamos.
+                    if (!detectedAltCurrency) detectedAltCurrency = curr;
+                    else if (curr === 'TMP') detectedAltCurrency = 'TMP'; // TMP tiene prioridad sobre EUR si se mezclan
+                }
 
                 if (curr === 'EUR') return val / getRate('EUR');
                 if (curr === 'TMP') return val / getRate('TMP');
                 return val;
             }
 
-            // LISTENERS
+            // --- LISTENERS ---
             speciesSelect.addEventListener('change', (e) => {
                 const isManual = e.target.value === 'manual';
                 getEl('manual-product-wrapper').classList.toggle('hidden', !isManual);
@@ -364,6 +324,7 @@
 
             document.querySelectorAll('input[name="shipping-type"]').forEach(r => r.addEventListener('change', toggleShippingMode));
             document.querySelectorAll('input[name="calculation-base"]').forEach(r => r.addEventListener('change', toggleBaseInputs));
+            
             routeSelect.addEventListener('change', (e) => {
                 getEl('manual-freight-wrapper').classList.toggle('hidden', e.target.value !== 'manual');
                 const type = document.querySelector('input[name="shipping-type"]:checked').value;
@@ -419,7 +380,7 @@
 
             // --- CÁLCULO ---
             function getInputs() {
-                detectedAltCurrency = null; // Resetear detección al inicio de cada cálculo
+                detectedAltCurrency = null; // Reset
                 
                 const type = document.querySelector('input[name="shipping-type"]:checked').value;
                 const wNet = parseFloat(weightNetInput.value) || 0;
@@ -447,13 +408,13 @@
                     const mOrig = getEl('manual-route-origin').value || 'Origen';
                     const mDest = getEl('manual-route-dest').value || 'Destino';
                     if(type === 'maritime') {
-                        // FLETE PUEDE SER 0 (PERMITIDO)
+                        // [FIX] Validamos que sea número, pero permitimos 0
                         const cost = getValInUSD('manual-maritime-cost', 'manual-maritime-curr');
-                        if(cost < 0) { alert('Costo Flete negativo no permitido'); return null; }
+                        if(cost < 0) { alert('Costo Flete negativo'); return null; }
                         route = { id: 'manual', origin: mOrig, destination: mDest, cost: cost };
                     } else {
                         const rate = getValInUSD('manual-air-rate', 'manual-air-curr');
-                        if(rate < 0) { alert('Tarifa Aérea negativa'); return null; }
+                        if(rate < 0) { alert('Tarifa negativa'); return null; }
                         route = { id: 'manual', origin: mOrig, destination: mDest, ratePerKg: rate };
                     }
                 } else {
@@ -497,7 +458,7 @@
                 let fobShipper, fobClient, cifClient, cifShipper, commVal;
                 const C = inp.commP; const F = inp.freightPerBox; const O = inp.othersPerBox;
 
-                // PRECIO INPUT CON CURRENCY
+                // LOGICA DE CALCULO (USD Base)
                 if (inp.calcBase === 'proveedor_fob') {
                     const basePrice = getValInUSD('fob-proveedor-cost', 'fob-proveedor-currency');
                     if(basePrice < 0) return alert('Revise Costo FOB');
@@ -511,7 +472,7 @@
                     if(cifProv < 0) return alert('Revise CIF Prov');
                     cifShipper = cifProv; fobShipper = cifProv - F;
                     fobClient = (fobShipper + O) / (1 - C); cifClient = fobClient + F; commVal = fobClient * C;
-                } else if (inp.calcBase === 'cliente_fob') { 
+                } else if (inp.calcBase === 'cliente_fob') { // FOB CLIENTE
                     const fobCl = getValInUSD('fob-cliente-price', 'fob-cliente-currency');
                     if(fobCl < 0) return alert('Revise FOB Cliente');
                     fobClient = fobCl;
@@ -546,18 +507,22 @@
                 const tmpRate = parseFloat(getEl('rate-tmp').value) || 1;
                 const tmpCode = getEl('code-tmp').value || 'TMP';
 
+                // Configurar Principal
                 let main = { code: 'USD', r: 1, s: '$' };
-                let sec = { code: 'EUR', r: eurRate, s: '€' }; // Default sec
+                if(mainCode === 'EUR') main = { code: 'EUR', r: eurRate, s: '€' };
+                if(mainCode === 'TMP') main = { code: tmpCode, r: tmpRate, s: tmpCode+' ' };
 
-                if(mainCode === 'EUR') {
-                    main = { code: 'EUR', r: eurRate, s: '€' };
-                    sec = { code: 'USD', r: 1/eurRate, s: '$' };
-                } else if(mainCode === 'TMP') {
-                    main = { code: tmpCode, r: tmpRate, s: tmpCode+' ' };
-                    sec = { code: 'USD', r: 1/tmpRate, s: '$' };
-                } else {
-                    // Si el principal es USD, y el usuario usó TMP, mostramos TMP como secundario
+                // Configurar Secundaria (Espejo)
+                let sec = null;
+                // Si el usuario usó una moneda distinta a la principal para ingresar datos, esa es la secundaria
+                if (detectedCode && detectedCode !== mainCode) {
+                    if (detectedCode === 'USD') sec = { code: 'USD', r: 1, s: '$' };
+                    if (detectedCode === 'EUR') sec = { code: 'EUR', r: eurRate, s: '€' };
                     if (detectedCode === 'TMP') sec = { code: tmpCode, r: tmpRate, s: tmpCode+' ' };
+                } else {
+                    // Si no detectamos uso explícito (todo fue en la moneda principal), mostramos la "otra" por defecto
+                    if (mainCode === 'USD') sec = { code: 'EUR', r: eurRate, s: '€' };
+                    else sec = { code: 'USD', r: 1/main.r, s: '$' };
                 }
                 return { main, sec };
             }
@@ -666,9 +631,8 @@
                 doc.setFontSize(10); doc.setTextColor(100); doc.setFont(undefined, 'normal');
                 doc.text(`Fecha: ${now.toLocaleDateString()} ${now.toLocaleTimeString()}`, 14, 28);
                 
-                // Usamos la config del primer item para el encabezado general, o la del header
                 const cfGlobal = getDisplayConfigs(null);
-                doc.text(`Moneda Principal: ${cfGlobal.main.code} | Ref: ${cfGlobal.sec.code}`, 14, 33);
+                doc.text(`Moneda Reporte: ${cfGlobal.main.code} (Ref: ${cfGlobal.sec.code})`, 14, 33);
 
                 let startY = 40;
 
@@ -702,7 +666,7 @@
 
                 startY = doc.lastAutoTable.finalY + 15;
                 doc.setFontSize(12); doc.setTextColor(0); doc.setFont(undefined, 'bold');
-                doc.text("DETALLE TÉCNICO POR ÍTEM", 14, startY);
+                doc.text("DETALLE TÉCNICO POR ÍTEM (Dual)", 14, startY);
                 startY += 5;
 
                 quoteHistory.forEach((d, i) => {
@@ -712,14 +676,17 @@
                     const typeLabel = d.type === 'maritime' ? '[ENVÍO MARÍTIMO]' : '[ENVÍO AÉREO]';
                     doc.text(`#${i+1}. ${d.format.speciesName} - ${d.format.name} (${d.variety}) - ${typeLabel}`, 14, startY + 5);
                     
+                    // Función para celda dual en detalle
+                    const dualCell = (val) => `${fmt(val, cf.main)}\n(${fmt(val, cf.sec)})`;
+                    
                     const detailBody = [
-                        ["Precio Compra (FOB)", fmt(d.fobShipper, cf.main), `${fmt(d.fobShipper/d.wNet, cf.main)}/kg`, fmt(d.fobShipper * d.boxesTotal, cf.main)],
-                        ["(+) Seguro", fmt(d.insurancePerBox, cf.main), "-", fmt(d.insurancePerBox * d.boxesTotal, cf.main)],
-                        ["(+) Gastos Locales", fmt(d.localServicesPerBox, cf.main), "-", fmt(d.localServicesPerBox * d.boxesTotal, cf.main)],
-                        ["(+) Comisión Agente", fmt(d.commVal, cf.main), "-", fmt(d.commVal * d.boxesTotal, cf.main)],
-                        [{content: "(=) Precio Venta FOB", styles:{fontStyle:'bold'}}, {content:fmt(d.fobClient, cf.main), styles:{fontStyle:'bold'}}, {content:fmt(d.fobClient/d.wNet, cf.main)+"/kg", styles:{fontStyle:'bold'}}, {content:fmt(d.fobClient * d.boxesTotal, cf.main), styles:{fontStyle:'bold'}}],
-                        ["(+) Flete Internacional", fmt(d.freightPerBox, cf.main), "-", fmt(d.freightPerBox * d.boxesTotal, cf.main)],
-                        [{content: "(=) PRECIO VENTA CIF", styles:{fontStyle:'bold', fillColor:[220, 252, 231]}}, {content: fmt(d.cifClient, cf.main), styles:{fontStyle:'bold'}}, {content: `${fmt(d.cifClient/d.wNet, cf.main)}/kg`, styles:{fontStyle:'bold'}}, {content: fmt(d.cifClient * d.boxesTotal, cf.main), styles:{fontStyle:'bold', fillColor:[220, 252, 231]}}]
+                        ["Precio Compra (FOB)", dualCell(d.fobShipper), `${fmt(d.fobShipper/d.wNet, cf.main)}/kg`, dualCell(d.fobShipper * d.boxesTotal)],
+                        ["(+) Seguro", dualCell(d.insurancePerBox), "-", dualCell(d.insurancePerBox * d.boxesTotal)],
+                        ["(+) Gastos Locales", dualCell(d.localServicesPerBox), "-", dualCell(d.localServicesPerBox * d.boxesTotal)],
+                        ["(+) Comisión Agente", dualCell(d.commVal), "-", dualCell(d.commVal * d.boxesTotal)],
+                        [{content: "(=) Precio Venta FOB", styles:{fontStyle:'bold'}}, {content:dualCell(d.fobClient), styles:{fontStyle:'bold'}}, {content:fmt(d.fobClient/d.wNet, cf.main)+"/kg", styles:{fontStyle:'bold'}}, {content:dualCell(d.fobClient * d.boxesTotal), styles:{fontStyle:'bold'}}],
+                        ["(+) Flete Internacional", dualCell(d.freightPerBox), "-", dualCell(d.freightPerBox * d.boxesTotal)],
+                        [{content: "(=) PRECIO VENTA CIF", styles:{fontStyle:'bold', fillColor:[220, 252, 231]}}, {content: dualCell(d.cifClient), styles:{fontStyle:'bold'}}, {content: `${fmt(d.cifClient/d.wNet, cf.main)}/kg`, styles:{fontStyle:'bold'}}, {content: dualCell(d.cifClient * d.boxesTotal), styles:{fontStyle:'bold', fillColor:[220, 252, 231]}}]
                     ];
                     doc.autoTable({ startY: startY + 8, head: [['Concepto', 'Valor Caja', 'Valor Kg Neto', 'Total']], body: detailBody, theme: 'grid', styles: { fontSize: 8 }, headStyles: { fillColor: [200, 200, 200], textColor: 50 }, margin: { left: 14 } });
                     startY = doc.lastAutoTable.finalY + 10;

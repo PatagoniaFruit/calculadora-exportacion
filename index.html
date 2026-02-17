@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculadora de Exportación Pro v13</title>
+    <title>Calculadora de Exportación Pro v14</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
@@ -138,19 +138,31 @@
                         <div class="mb-6 p-4 bg-indigo-50 rounded-lg border border-indigo-100">
                             <div id="input-fob-proveedor-wrapper">
                                 <label class="text-indigo-900">Costo Compra FOB (Por Caja)</label>
-                                <div class="input-group"><input type="number" id="fob-proveedor-cost" placeholder="0.00" step="0.01" class="font-bold text-indigo-700"><select id="fob-proveedor-currency" class="currency-selector"><option value="USD">USD</option><option value="EUR">EUR</option><option value="TMP" class="tmp-currency-label">TMP</option></select></div>
+                                <div class="input-group">
+                                    <input type="number" id="fob-proveedor-cost" placeholder="0.00" step="0.01" class="font-bold text-indigo-700">
+                                    <select id="fob-proveedor-currency" class="currency-selector"><option value="USD">USD</option><option value="EUR">EUR</option><option value="TMP" class="tmp-currency-label">TMP</option></select>
+                                </div>
                             </div>
                             <div id="input-cif-proveedor-wrapper" class="hidden">
                                 <label class="text-indigo-900">Costo Compra CIF (Por Caja)</label>
-                                <div class="input-group"><input type="number" id="cif-proveedor-cost" placeholder="0.00" step="0.01" class="font-bold text-indigo-700"><select id="cif-proveedor-currency" class="currency-selector"><option value="USD">USD</option><option value="EUR">EUR</option><option value="TMP" class="tmp-currency-label">TMP</option></select></div>
+                                <div class="input-group">
+                                    <input type="number" id="cif-proveedor-cost" placeholder="0.00" step="0.01" class="font-bold text-indigo-700">
+                                    <select id="cif-proveedor-currency" class="currency-selector"><option value="USD">USD</option><option value="EUR">EUR</option><option value="TMP" class="tmp-currency-label">TMP</option></select>
+                                </div>
                             </div>
                             <div id="input-fob-cliente-wrapper" class="hidden">
                                 <label class="text-indigo-900">Precio Venta FOB (Por Caja)</label>
-                                <div class="input-group"><input type="number" id="fob-cliente-price" placeholder="0.00" step="0.01" class="font-bold text-indigo-700"><select id="fob-cliente-currency" class="currency-selector"><option value="USD">USD</option><option value="EUR">EUR</option><option value="TMP" class="tmp-currency-label">TMP</option></select></div>
+                                <div class="input-group">
+                                    <input type="number" id="fob-cliente-price" placeholder="0.00" step="0.01" class="font-bold text-indigo-700">
+                                    <select id="fob-cliente-currency" class="currency-selector"><option value="USD">USD</option><option value="EUR">EUR</option><option value="TMP" class="tmp-currency-label">TMP</option></select>
+                                </div>
                             </div>
                             <div id="input-cif-cliente-wrapper" class="hidden">
                                 <label class="text-indigo-900">Precio Venta CIF (Por Caja)</label>
-                                <div class="input-group"><input type="number" id="cif-cliente-price" placeholder="0.00" step="0.01" class="font-bold text-indigo-700"><select id="cif-cliente-currency" class="currency-selector"><option value="USD">USD</option><option value="EUR">EUR</option><option value="TMP" class="tmp-currency-label">TMP</option></select></div>
+                                <div class="input-group">
+                                    <input type="number" id="cif-cliente-price" placeholder="0.00" step="0.01" class="font-bold text-indigo-700">
+                                    <select id="cif-cliente-currency" class="currency-selector"><option value="USD">USD</option><option value="EUR">EUR</option><option value="TMP" class="tmp-currency-label">TMP</option></select>
+                                </div>
                             </div>
                         </div>
 
@@ -177,20 +189,46 @@
 
                         <div id="manual-freight-wrapper" class="hidden p-4 border border-dashed border-gray-300 rounded-lg bg-gray-50 mb-4">
                             <div class="grid grid-cols-2 gap-3 mb-3"><div><label>Origen</label><input type="text" id="manual-route-origin" class="w-full rounded-md"></div><div><label>Destino</label><input type="text" id="manual-route-dest" class="w-full rounded-md"></div></div>
+                            
                             <div id="manual-maritime-wrapper">
                                 <label class="text-blue-600">Costo Flete FCL</label>
-                                <div class="input-group"><input type="number" id="manual-maritime-cost" placeholder="Total (Puede ser 0)" step="0.01"><select id="manual-maritime-curr" class="currency-selector"><option>USD</option><option>EUR</option><option value="TMP" class="tmp-currency-label">TMP</option></select></div>
+                                <div class="input-group">
+                                    <input type="number" id="manual-maritime-cost" placeholder="Total (Puede ser 0)" step="0.01">
+                                    <select id="manual-maritime-curr" class="currency-selector"><option>USD</option><option>EUR</option><option value="TMP" class="tmp-currency-label">TMP</option></select>
+                                </div>
                             </div>
+                            
                             <div id="manual-air-wrapper" class="hidden">
                                 <label class="text-orange-600">Tarifa Aérea (x Kg)</label>
-                                <div class="input-group"><input type="number" id="manual-air-rate" placeholder="Rate/Kg" step="0.01"><select id="manual-air-curr" class="currency-selector"><option>USD</option><option>EUR</option><option value="TMP" class="tmp-currency-label">TMP</option></select></div>
+                                <div class="input-group">
+                                    <input type="number" id="manual-air-rate" placeholder="Rate/Kg" step="0.01">
+                                    <select id="manual-air-curr" class="currency-selector"><option>USD</option><option>EUR</option><option value="TMP" class="tmp-currency-label">TMP</option></select>
+                                </div>
                             </div>
                         </div>
 
                         <div class="grid grid-cols-2 gap-4 mb-4">
-                            <div><label>Seguro (Total)</label><div class="input-group"><input type="number" id="insurance-total" value="235" step="0.01"><select id="insurance-curr" class="currency-selector"><option>USD</option><option>EUR</option><option value="TMP" class="tmp-currency-label">TMP</option></select></div></div>
-                            <div id="maritime-costs"><label>Servicios FCL</label><div class="input-group"><input type="number" id="services-total" value="500" step="0.01"><select id="services-curr" class="currency-selector"><option>USD</option><option>EUR</option><option value="TMP" class="tmp-currency-label">TMP</option></select></div></div>
-                            <div id="maritime-extra"><label>Costos Extra FCL</label><div class="input-group"><input type="number" id="extra-costs-total" value="300" step="0.01"><select id="extra-costs-curr" class="currency-selector"><option>USD</option><option>EUR</option><option value="TMP" class="tmp-currency-label">TMP</option></select></div></div>
+                            <div>
+                                <label>Seguro (Total)</label>
+                                <div class="input-group">
+                                    <input type="number" id="insurance-total" value="235" step="0.01">
+                                    <select id="insurance-curr" class="currency-selector"><option>USD</option><option>EUR</option><option value="TMP" class="tmp-currency-label">TMP</option></select>
+                                </div>
+                            </div>
+                            <div id="maritime-costs">
+                                <label>Servicios FCL</label>
+                                <div class="input-group">
+                                    <input type="number" id="services-total" value="500" step="0.01">
+                                    <select id="services-curr" class="currency-selector"><option>USD</option><option>EUR</option><option value="TMP" class="tmp-currency-label">TMP</option></select>
+                                </div>
+                            </div>
+                            <div id="maritime-extra">
+                                <label>Costos Extra FCL</label>
+                                <div class="input-group">
+                                    <input type="number" id="extra-costs-total" value="300" step="0.01">
+                                    <select id="extra-costs-curr" class="currency-selector"><option>USD</option><option>EUR</option><option value="TMP" class="tmp-currency-label">TMP</option></select>
+                                </div>
+                            </div>
                         </div>
 
                         <button id="calculate-btn" class="btn btn-primary w-full mt-8 py-3 text-lg shadow-lg hover:shadow-xl transform transition">CALCULAR</button>
@@ -284,15 +322,15 @@
             function getValInUSD(inputId, currId) {
                 const input = getEl(inputId);
                 const val = parseFloat(input.value); 
-                if (isNaN(val)) return 0; // [FIX] Permitir 0
+                // Permite 0 para flete
+                if (isNaN(val)) return 0;
 
                 const curr = getEl(currId) ? getEl(currId).value : 'USD'; 
                 
-                // Prioridad: Si hay una moneda temporal usada, esa manda como secundaria.
-                if (curr !== 'USD') {
-                    if (!detectedAltCurrency) detectedAltCurrency = curr;
-                    else if (curr === 'TMP') detectedAltCurrency = 'TMP'; // TMP tiene prioridad
-                }
+                // [FIX CRÍTICO] Detección robusta: Si usamos TMP, marca detectado inmediatamente.
+                // Prioridad: Si hay TMP, gana. Si hay EUR y no hay TMP, gana EUR.
+                if (curr === 'TMP') detectedAltCurrency = 'TMP';
+                else if (curr === 'EUR' && detectedAltCurrency !== 'TMP') detectedAltCurrency = 'EUR';
 
                 if (curr === 'EUR') return val / getRate('EUR');
                 if (curr === 'TMP') return val / getRate('TMP');
@@ -411,6 +449,7 @@
                     const mOrig = getEl('manual-route-origin').value || 'Origen';
                     const mDest = getEl('manual-route-dest').value || 'Destino';
                     if(type === 'maritime') {
+                        // FLETE PUEDE SER 0 (PERMITIDO)
                         const cost = getValInUSD('manual-maritime-cost', 'manual-maritime-curr');
                         if(cost < 0) { alert('Costo Flete negativo no permitido'); return null; }
                         route = { id: 'manual', origin: mOrig, destination: mDest, cost: cost };
@@ -557,12 +596,12 @@
 
                 // Helper para el desglose de texto dual
                 const showLineDual = (valUSD) => {
-                    return `${fmt(valUSD, cf.main)} <span class="text-dual">(${fmt(valUSD, cf.sec)})</span>`;
+                    return `${fmt(valUSD, cf.main)} <span class="text-dual">(${fmt(valUSD, cf.sec)} ${cf.sec.c})</span>`;
                 };
 
                 content.innerHTML = `
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <div><p class="font-bold border-b mb-2 uppercase text-xs">Estructura por Caja</p>
+                        <div><p class="font-bold border-b mb-2 uppercase text-xs">Estructura por Caja (${cf.main.c})</p>
                             <div class="flex justify-between"><span>Precio FOB Proveedor:</span> <span>${showLineDual(d.fobShipper)}</span></div>
                             <div class="flex justify-between text-xs text-gray-500"><span>(+) Gastos Logísticos:</span> <span>${showLineDual(d.othersPerBox)}</span></div>
                             <div class="flex justify-between text-xs text-gray-500"><span>(+) Comisión (${(d.commP*100).toFixed(2)}%):</span> <span>${showLineDual(d.commVal)}</span></div>
@@ -643,7 +682,7 @@
                 const tableRows = quoteHistory.map(d => {
                     const typeLabel = d.type === 'maritime' ? '[MAR]' : '[AIR]';
                     const cf = getDisplayConfigs(d.detectedAlt);
-                    const txtD = (val) => `${fmt(val, cf.main)}\n(${fmt(val, cf.sec)})`;
+                    const txtD = (val) => `${fmt(val, cf.main)}\n(${fmt(val, cf.sec)} ${cf.sec.c})`;
                     const txtKg = (val) => `${fmt(val/d.wNet, cf.main)}/kg\n(${fmt(val/d.wNet, cf.sec)})`;
                     
                     return [
@@ -680,8 +719,7 @@
                     const typeLabel = d.type === 'maritime' ? '[ENVÍO MARÍTIMO]' : '[ENVÍO AÉREO]';
                     doc.text(`#${i+1}. ${d.format.speciesName} - ${d.format.name} (${d.variety}) - ${typeLabel}`, 14, startY + 5);
                     
-                    // Función para celda dual en detalle
-                    const dualCell = (val) => `${fmt(val, cf.main)}\n(${fmt(val, cf.sec)})`;
+                    const dualCell = (val) => `${fmt(val, cf.main)}\n(${fmt(val, cf.sec)} ${cf.sec.c})`;
                     
                     const detailBody = [
                         ["Precio Compra (FOB)", dualCell(d.fobShipper), `${fmt(d.fobShipper/d.wNet, cf.main)}/kg`, dualCell(d.fobShipper * d.boxesTotal)],

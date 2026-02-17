@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculadora de Exportación Pro v15</title>
+    <title>Calculadora de Exportación Pro v16</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
@@ -52,7 +52,7 @@
             <div class="flex flex-col md:flex-row justify-between items-center mb-4 gap-4">
                 <div>
                     <h1 class="text-3xl font-bold text-gray-900 tracking-tight">Cotizador de Exportación</h1>
-                    <p class="text-gray-500 text-sm mt-1">Gestión Multi-Divisa (Visualización Dual)</p>
+                    <p class="text-gray-500 text-sm mt-1">Gestión Multi-Divisa & Puntos de Venta</p>
                 </div>
             </div>
 
@@ -287,7 +287,7 @@
             
             let lastCalc = null;
             let quoteHistory = [];
-            let detectedAltCurrency = null; // Moneda secundaria detectada
+            let detectedAltCurrency = null; 
 
             const getEl = (id) => document.getElementById(id);
             const speciesSelect = getEl('species');
@@ -318,19 +318,16 @@
                 return 1;
             }
 
-            // Convierte input a USD y detecta moneda alterna
             function getValInUSD(inputId, currId) {
                 const input = getEl(inputId);
                 const val = parseFloat(input.value); 
-                // Permite 0 para flete
-                if (isNaN(val)) return 0;
+                if (isNaN(val)) return 0; // Permitir 0
 
                 const curr = getEl(currId) ? getEl(currId).value : 'USD'; 
                 
-                // [CRITICO] Si la moneda usada no es USD, la guardamos como detectada para usarla en el display
+                // DETECCIÓN DE MONEDA ALTERNATIVA
                 if (curr !== 'USD') {
-                    // Prioridad: TMP > EUR. Si ya hay TMP detectado, no lo sobrescribimos con EUR.
-                    if (curr === 'TMP') detectedAltCurrency = 'TMP';
+                    if (curr === 'TMP') detectedAltCurrency = 'TMP'; // TMP siempre gana prioridad
                     else if (curr === 'EUR' && detectedAltCurrency !== 'TMP') detectedAltCurrency = 'EUR';
                 }
 
@@ -339,7 +336,7 @@
                 return val;
             }
 
-            // --- LISTENERS ---
+            // LISTENERS
             speciesSelect.addEventListener('change', (e) => {
                 const isManual = e.target.value === 'manual';
                 getEl('manual-product-wrapper').classList.toggle('hidden', !isManual);
@@ -421,9 +418,8 @@
                 else txt.innerHTML = 'CIF Cliente: Partimos del precio final de venta que negociamos con el cliente.';
             }
 
-            // --- CÁLCULO ---
             function getInputs() {
-                detectedAltCurrency = null; // Reset
+                detectedAltCurrency = null; // RESETEO CRÍTICO
                 
                 const type = document.querySelector('input[name="shipping-type"]:checked').value;
                 const wNet = parseFloat(weightNetInput.value) || 0;
@@ -451,8 +447,8 @@
                     const mOrig = getEl('manual-route-origin').value || 'Origen';
                     const mDest = getEl('manual-route-dest').value || 'Destino';
                     if(type === 'maritime') {
-                        // FLETE PUEDE SER 0
                         const cost = getValInUSD('manual-maritime-cost', 'manual-maritime-curr');
+                        // Flete 0 permitido
                         if(cost < 0) { alert('Costo Flete negativo no permitido'); return null; }
                         route = { id: 'manual', origin: mOrig, destination: mDest, cost: cost };
                     } else {
@@ -501,7 +497,7 @@
                 let fobShipper, fobClient, cifClient, cifShipper, commVal;
                 const C = inp.commP; const F = inp.freightPerBox; const O = inp.othersPerBox;
 
-                // PRECIO INPUT CON CURRENCY
+                // CÁLCULO PRINCIPAL
                 if (inp.calcBase === 'proveedor_fob') {
                     const basePrice = getValInUSD('fob-proveedor-cost', 'fob-proveedor-currency');
                     if(basePrice < 0) return alert('Revise Costo FOB');
@@ -539,31 +535,31 @@
                     fobShipper = fobClient - commVal - O; cifShipper = fobShipper + F;
                 }
 
+                // Aquí forzamos la actualización del detectedAlt si cambió en el último paso (precio)
+                inp.detectedAlt = detectedAltCurrency;
+
                 lastCalc = { ...inp, fobShipper, cifShipper, fobClient, cifClient, commVal };
                 renderResults(lastCalc);
             });
 
-            // --- DISPLAY LOGIC (DUAL CURRENCY) ---
+            // --- DISPLAY LOGIC ---
             function getDisplayConfigs(detectedCode) {
                 const mainCode = getEl('display-currency').value;
                 const eurRate = parseFloat(getEl('rate-eur').value) || 1;
                 const tmpRate = parseFloat(getEl('rate-tmp').value) || 1;
                 const tmpCode = getEl('code-tmp').value || 'TMP';
 
-                // Configurar Principal
                 let main = { c: 'USD', r: 1, s: '$' };
                 if(mainCode === 'EUR') main = { c: 'EUR', r: eurRate, s: '€' };
                 if(mainCode === 'TMP') main = { c: tmpCode, r: tmpRate, s: tmpCode+' ' };
 
-                // Configurar Secundaria (Espejo)
                 let sec = null;
-                // Si el usuario usó una moneda distinta a la principal para ingresar datos, esa es la secundaria
+                // Lógica de Prioridad para Moneda Secundaria
                 if (detectedCode && detectedCode !== mainCode) {
                     if (detectedCode === 'USD') sec = { c: 'USD', r: 1, s: '$' };
                     if (detectedCode === 'EUR') sec = { c: 'EUR', r: eurRate, s: '€' };
                     if (detectedCode === 'TMP') sec = { c: tmpCode, r: tmpRate, s: tmpCode+' ' };
                 } else {
-                    // Si no detectamos uso explícito (todo fue en la moneda principal), mostramos la "otra" por defecto
                     if (mainCode === 'USD') sec = { c: 'EUR', r: eurRate, s: '€' };
                     else sec = { c: 'USD', r: 1/main.r, s: '$' };
                 }
@@ -580,7 +576,6 @@
                 const wNet = d.wNet;
                 const cf = getDisplayConfigs(d.detectedAlt); 
 
-                // Helper para mostrar 1 o 2 monedas en las tarjetas
                 const showVals = (valUSD) => {
                     return `<p class="text-2xl font-black text-gray-800">${fmt(valUSD, cf.main)}</p>
                             <p class="text-xs text-gray-400 mt-1 dual-val-sec">${fmt(valUSD, cf.sec)} ${cf.sec.c}</p>`;
@@ -596,7 +591,6 @@
                     <div class="price-box border-b-4 border-green-500"><p class="text-[10px] uppercase font-bold text-gray-500">CIF Cliente</p>${showVals(d.cifClient)}<p class="text-xs text-green-700 font-bold border-t mt-1 pt-1">${showKg(d.cifClient)}</p></div>
                 `;
 
-                // Helper para el desglose de texto dual
                 const showLineDual = (valUSD) => {
                     return `${fmt(valUSD, cf.main)} <span class="text-dual">(${fmt(valUSD, cf.sec)} ${cf.sec.c})</span>`;
                 };
@@ -643,7 +637,6 @@
                     totalCif += d.cifClient * d.boxesTotal;
                     const shipIcon = d.type === 'maritime' ? '🚢' : '✈️';
 
-                    // Formateo dual tabla
                     const dual = (val) => `<span class="table-dual-main">${fmt(val, cf.main)} ${cf.main.c}</span><br><span class="table-dual-sec">(${fmt(val, cf.sec)} ${cf.sec.c})</span>`;
                     const dualKg = (val) => `<span class="table-dual-main">${fmt(val/d.wNet, cf.main)}/kg</span><br><span class="table-dual-sec">(${fmt(val/d.wNet, cf.sec)})</span>`;
 
@@ -660,7 +653,6 @@
                     tbody.appendChild(row);
                 });
 
-                // Total siempre en moneda de visualización actual del header
                 const currentMain = getDisplayConfigs(null).main;
                 getEl('table-total-cif').innerText = fmt(totalCif, currentMain);
                 getEl('results-table-card').classList.remove('hidden');
@@ -713,7 +705,7 @@
 
                 startY = doc.lastAutoTable.finalY + 15;
                 doc.setFontSize(12); doc.setTextColor(0); doc.setFont(undefined, 'bold');
-                doc.text("DETALLE TÉCNICO POR ÍTEM (Dual)", 14, startY);
+                doc.text("DETALLE TÉCNICO POR ÍTEM", 14, startY);
                 startY += 5;
 
                 quoteHistory.forEach((d, i) => {
@@ -723,7 +715,6 @@
                     const typeLabel = d.type === 'maritime' ? '[ENVÍO MARÍTIMO]' : '[ENVÍO AÉREO]';
                     doc.text(`#${i+1}. ${d.format.speciesName} - ${d.format.name} (${d.variety}) - ${typeLabel}`, 14, startY + 5);
                     
-                    // Función para celda dual en detalle
                     const dualCell = (val) => `${fmt(val, cf.main)}\n(${fmt(val, cf.sec)} ${cf.sec.c})`;
                     
                     const detailBody = [

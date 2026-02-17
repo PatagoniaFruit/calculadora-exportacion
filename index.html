@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculadora de Exportación Pro v20</title>
+    <title>Calculadora de Exportación Pro v21</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
@@ -16,11 +16,10 @@
         .btn { display: inline-block; padding: 0.75rem 1.5rem; border-radius: 0.5rem; font-weight: 600; text-align: center; cursor: pointer; transition: all 0.2s; }
         .btn-primary { background-color: #4f46e5; color: white; box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.4); }
         .btn-primary:hover { background-color: #4338ca; transform: translateY(-1px); }
-        .btn-secondary { background-color: #f3f4f6; color: #374151; border: 1px solid #d1d5db; }
         .btn-success { background-color: #10b981; color: white; box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.4); } 
         .btn-success:hover { background-color: #059669; }
-        .btn-danger { color: #ef4444; font-weight: bold;} .btn-danger:hover { color: #dc2626; background-color: #fee2e2; border-radius: 4px; padding: 2px 6px;}
         .btn-dark { background-color: #1f2937; color: white; } .btn-dark:hover { background-color: #111827; }
+        .btn-danger { color: #ef4444; font-weight: bold;} .btn-danger:hover { color: #dc2626; background-color: #fee2e2; border-radius: 4px; padding: 2px 6px;}
 
         input, select, textarea { width: 100%; padding: 0.6rem; border-radius: 0.375rem; border: 1px solid #d1d5db; background-color: #fff; font-size: 0.9rem; }
         input:focus, select:focus, textarea:focus { outline: none; border-color: #4f46e5; ring: 2px solid #e0e7ff; z-index: 10; }
@@ -192,8 +191,8 @@
                     <div class="flex flex-col items-end gap-2 w-full md:w-auto">
                         <input type="text" id="internal-ref" placeholder="Referencia / Cód. Interno" class="p-2 border rounded text-sm w-60">
                         <div class="flex gap-2">
-                            <button onclick="downloadTechnicalReport()" class="btn btn-dark text-sm">Descargar Reporte Técnico</button>
-                            <button onclick="openModal()" class="btn btn-primary bg-indigo-600 hover:bg-indigo-700 text-sm">Generar Oferta / Cierre</button>
+                            <button onclick="downloadTechnicalReport()" class="btn btn-dark text-sm shadow-md">Descargar Reporte Técnico</button>
+                            <button onclick="openModal()" class="btn btn-primary bg-indigo-600 hover:bg-indigo-700 text-sm shadow-md">Generar Oferta / Cierre</button>
                         </div>
                     </div>
                 </div>
@@ -207,16 +206,10 @@
                                 <th class="px-3 py-3 text-right font-bold text-blue-700 uppercase text-xs bg-blue-50">Compra (Caja)</th>
                                 <th class="px-3 py-3 text-right font-bold text-green-700 uppercase text-xs bg-green-50">Venta (Caja)</th>
                                 <th class="px-3 py-3 text-right font-bold uppercase text-xs text-gray-700 bg-gray-50">Total Línea</th>
-                                <th class="px-2 py-3 text-center uppercase text-xs text-gray-600">Borrar</th>
+                                <th class="px-2 py-3 text-center uppercase text-xs text-gray-600">Acción</th>
                             </tr>
                         </thead>
                         <tbody id="results-tbody" class="bg-white divide-y divide-gray-200"></tbody>
-                        <tfoot class="bg-gray-100 font-bold">
-                            <tr>
-                                <td colspan="6" class="px-4 py-3 text-right uppercase text-gray-600">Total Cotización:</td>
-                                <td class="px-4 py-3 text-right text-lg text-green-800" id="table-total-cif">0.00</td>
-                            </tr>
-                        </tfoot>
                     </table>
                 </div>
                 <div class="text-right"><button onclick="clearHistory()" class="text-red-600 text-xs hover:underline font-bold">Borrar Todo</button></div>
@@ -229,17 +222,17 @@
                         <button onclick="closeModal()" class="text-gray-400 hover:text-red-500 text-2xl font-bold">&times;</button>
                     </div>
 
-                    <div class="mb-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="mb-4 grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <label class="mb-2 block text-sm font-bold text-gray-700">Tipo de Documento:</label>
                             <div class="flex gap-2">
                                 <label class="flex-1 cursor-pointer border hover:border-blue-500 bg-blue-50 rounded p-2 flex items-center gap-2">
                                     <input type="radio" name="doc-type" value="client" checked onchange="updateModalTexts()">
-                                    <span class="text-sm font-bold text-blue-900">Oferta Cliente</span>
+                                    <span class="text-sm font-bold text-blue-900">Oferta Cliente (Blue)</span>
                                 </label>
-                                <label class="flex-1 cursor-pointer border hover:border-indigo-500 bg-indigo-50 rounded p-2 flex items-center gap-2">
+                                <label class="flex-1 cursor-pointer border hover:border-green-500 bg-green-50 rounded p-2 flex items-center gap-2">
                                     <input type="radio" name="doc-type" value="provider" onchange="updateModalTexts()">
-                                    <span class="text-sm font-bold text-indigo-900">Cierre Prov.</span>
+                                    <span class="text-sm font-bold text-green-900">Cierre Prov. (Green)</span>
                                 </label>
                             </div>
                         </div>
@@ -251,6 +244,11 @@
                                 <option value="TMP" class="tmp-currency-label">Moneda Temporal</option>
                             </select>
                         </div>
+                    </div>
+
+                    <div class="mb-6 border rounded bg-gray-50 p-3">
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Ítems Seleccionados (Ajustar Cantidades)</label>
+                        <div id="modal-items-list" class="space-y-2 max-h-40 overflow-y-auto"></div>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
@@ -530,7 +528,6 @@
                 renderResults(lastCalc);
             });
 
-            // --- DISPLAY LOGIC ---
             function getDisplayConfigs(detectedCode) {
                 const mainCode = getEl('display-currency').value;
                 const eurRate = parseFloat(getEl('rate-eur').value) || 1;
@@ -554,6 +551,7 @@
             }
             
             function fmt(val, conf) {
+                if(!conf || isNaN(val)) return '';
                 return conf.s + (val * conf.r).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
             }
 
@@ -655,8 +653,29 @@
 
             // MODAL
             window.openModal = () => {
-                const checks = document.querySelectorAll('.row-check:checked');
-                if(checks.length === 0) return alert("Seleccione al menos una línea para generar la oferta.");
+                const checks = Array.from(document.querySelectorAll('.row-check:checked'));
+                if(checks.length === 0) return alert("Seleccione al menos una línea.");
+                
+                const list = getEl('modal-items-list');
+                list.innerHTML = '';
+                
+                checks.forEach((cb, i) => {
+                    const item = quoteHistory[cb.value];
+                    const div = document.createElement('div');
+                    div.className = "flex justify-between items-center border-b pb-2";
+                    div.innerHTML = `
+                        <div class="text-sm">
+                            <span class="font-bold text-gray-800">${item.format.speciesName} - ${item.variety}</span><br>
+                            <span class="text-xs text-gray-500">${item.format.name}</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <label class="text-xs font-bold">Cant:</label>
+                            <input type="number" class="item-qty-input border rounded p-1 w-20 text-right font-bold" data-index="${cb.value}" value="${item.boxesTotal}">
+                        </div>
+                    `;
+                    list.appendChild(div);
+                });
+
                 getEl('pdf-modal').classList.add('active');
                 updateModalTexts();
             }
@@ -688,8 +707,8 @@
             }
 
             window.generateCommercialDocument = () => {
-                const selectedChecks = Array.from(document.querySelectorAll('.row-check:checked'));
-                if(selectedChecks.length === 0) return;
+                const inputs = document.querySelectorAll('.item-qty-input');
+                if(inputs.length === 0) return;
 
                 const doc = new jsPDF();
                 const type = document.querySelector('input[name="doc-type"]:checked').value;
@@ -706,15 +725,13 @@
                 if(docCurrency === 'EUR') { docRate = eurRate; docSym = '€'; }
                 if(docCurrency === 'TMP') { docRate = tmpRate; docSym = tmpCode+' '; }
 
-                // Helper fmt doc
                 const fmtDoc = (valUSD) => {
-                    // Si es USD->USD (val), Si es USD->EUR (val/tasa), Si USD->TMP (val/tasa)
                     let finalVal = valUSD; 
-                    if(docCurrency !== 'USD') finalVal = valUSD / docRate;
+                    // Si la moneda es distinta a USD, dividimos el valor base USD por la tasa
+                    if(docCurrency !== 'USD') finalVal = valUSD * docRate; 
                     return docSym + finalVal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
                 }
 
-                // DATA
                 const validDate = getEl('doc-validity').value;
                 const origin = getEl('doc-origin').value;
                 const incoterm = getEl('doc-incoterm').value;
@@ -723,43 +740,44 @@
                 const shipWindow = getEl('doc-window').value;
                 const title = type === 'client' ? "COMMERCIAL QUOTATION" : "OFERTA PROVEEDOR";
 
-                // HEADER
-                doc.setFillColor(type === 'client' ? 30 : 79, 64, type === 'client' ? 175 : 229); 
+                // HEADER COLORS
+                doc.setFillColor(type === 'client' ? 41 : 39, type === 'client' ? 128 : 174, type === 'client' ? 185 : 96); // Blue vs Green
                 doc.rect(0, 0, 210, 40, 'F');
                 doc.setTextColor(255); doc.setFontSize(24); doc.setFont(undefined, 'bold');
                 doc.text("PATAGONIA FRUITS", 14, 25);
-                
                 doc.setFontSize(10); doc.text(title, 14, 35);
                 if(refCode) doc.text(`REF: ${refCode}`, 150, 25);
 
-                // DATE TABLE
                 const headers = type === 'client' ? [['Date', 'Valid Until']] : [['Fecha', 'Validez']];
                 const dates = [[new Date().toLocaleDateString(), validDate]];
                 doc.autoTable({ startY: 45, margin: {left: 130}, head: headers, body: dates, theme: 'grid', styles: {halign: 'center', fontSize: 10} });
 
                 let startY = 65;
-
-                // MAIN TABLE
                 const tableHeaders = type === 'client' 
                     ? [['Product', 'Size', 'Pack', 'Qty', 'UoM', 'Price (Unit)', 'Total']]
                     : [['Producto', 'Calibre', 'Pack', 'Cant', 'UoM', 'Precio (Unit)', 'Total']];
                 
                 let grandTotalUSD = 0;
-                const tableBody = selectedChecks.map(cb => {
-                    const d = quoteHistory[cb.value];
+                const tableBody = [];
+
+                inputs.forEach(input => {
+                    const idx = input.getAttribute('data-index');
+                    const d = quoteHistory[idx];
+                    const qty = parseInt(input.value); // Quantity from Modal Input
+                    
                     const unitPriceUSD = type === 'client' ? d.cifClient : d.fobShipper;
-                    const totalLineUSD = unitPriceUSD * d.boxesTotal;
+                    const totalLineUSD = unitPriceUSD * qty;
                     grandTotalUSD += totalLineUSD;
 
-                    return [
+                    tableBody.push([
                         d.format.speciesName,
                         d.variety,
                         d.format.name,
-                        d.boxesTotal,
+                        qty,
                         'boxes',
                         fmtDoc(unitPriceUSD),
                         fmtDoc(totalLineUSD)
-                    ];
+                    ]);
                 });
 
                 tableBody.push([{content: 'TOTAL', colSpan: 6, styles:{halign:'right', fontStyle:'bold'}}, {content: fmtDoc(grandTotalUSD), styles:{fontStyle:'bold'}}]);
@@ -769,11 +787,10 @@
                     head: tableHeaders,
                     body: tableBody,
                     theme: 'striped',
-                    headStyles: {fillColor: type === 'client' ? [30, 64, 175] : [79, 70, 229]},
+                    headStyles: {fillColor: type === 'client' ? [41, 128, 185] : [39, 174, 96]},
                     styles: {valign: 'middle'}
                 });
 
-                // TERMS
                 const termsY = doc.lastAutoTable.finalY + 15;
                 const labels = type === 'client' ? ['ORIGIN', 'INCOTERM', 'POD', 'PAYMENT TERMS', 'SHIPMENT WINDOW'] : ['ORIGEN', 'INCOTERM', 'POD', 'TÉRMINOS PAGO', 'VENTANA EMBARQUE'];
                 const termsData = [
@@ -796,38 +813,54 @@
                 closeModal();
             }
 
-            // OLD TECHNICAL REPORT (Restored)
+            // RESTORED TECHNICAL REPORT
             window.downloadTechnicalReport = function() {
                 if(quoteHistory.length === 0) return alert("Tabla vacía");
                 const doc = new jsPDF();
                 const now = new Date();
                 const ref = getEl('internal-ref').value;
-                const cf = getDisplayConfigs(null);
 
                 doc.setFontSize(18); doc.text("REPORTE TÉCNICO INTERNO", 14, 20);
                 doc.setFontSize(10); doc.text(`Fecha: ${now.toLocaleDateString()} | REF: ${ref}`, 14, 28);
                 
                 let startY = 40;
+                
+                // Master Table
+                const masterRows = quoteHistory.map(d => {
+                    const cf = getDisplayConfigs(d.detectedAlt);
+                    return [d.format.speciesName, d.boxesTotal, fmt(d.fobShipper, cf.main), fmt(d.cifClient, cf.main), fmt(d.cifClient*d.boxesTotal, cf.main)];
+                });
+                doc.autoTable({ startY, head: [['Producto', 'Cajas', 'FOB Unit', 'CIF Unit', 'Total']], body: masterRows, theme:'grid', headStyles:{fillColor:[50,50,50]} });
+                startY = doc.lastAutoTable.finalY + 15;
+
+                doc.setFontSize(12); doc.text("DETALLE TÉCNICO POR ÍTEM", 14, startY);
+                startY += 5;
+
                 quoteHistory.forEach((d, i) => {
-                    if(startY > 260) { doc.addPage(); startY = 20; }
-                    const cfItem = getDisplayConfigs(d.detectedAlt);
-                    doc.setFontSize(10); doc.setTextColor(0);
-                    doc.text(`${i+1}. ${d.format.speciesName} - ${d.variety} (${d.boxesTotal} Cajas)`, 14, startY);
+                    if(startY > 250) { doc.addPage(); startY = 20; }
+                    const cf = getDisplayConfigs(d.detectedAlt);
+                    doc.setFontSize(10); doc.setTextColor(0, 0, 150);
+                    doc.text(`#${i+1}. ${d.format.speciesName} - ${d.variety} (${d.type === 'maritime' ? 'MAR' : 'AIR'})`, 14, startY);
                     
+                    const dual = (val) => `${fmt(val, cf.main)}\n(${fmt(val, cf.sec)})`;
+                    const dualKg = (val) => `${fmt(val/d.wNet, cf.main)}/kg\n(${fmt(val/d.wNet, cf.sec)})`;
+
                     const body = [
-                        ["Concepto", "Valor Caja", "Total"],
-                        ["FOB Shipper", fmt(d.fobShipper, cfItem.main), fmt(d.fobShipper*d.boxesTotal, cfItem.main)],
-                        ["Logística", fmt(d.othersPerBox, cfItem.main), fmt(d.othersPerBox*d.boxesTotal, cfItem.main)],
-                        ["Flete", fmt(d.freightPerBox, cfItem.main), fmt(d.freightPerBox*d.boxesTotal, cfItem.main)],
-                        ["CIF Cliente", fmt(d.cifClient, cfItem.main), fmt(d.cifClient*d.boxesTotal, cfItem.main)],
+                        ["Precio Compra (FOB)", dual(d.fobShipper), dualKg(d.fobShipper), dual(d.fobShipper*d.boxesTotal)],
+                        ["(+) Logística", dual(d.othersPerBox), "-", dual(d.othersPerBox*d.boxesTotal)],
+                        ["(+) Comisión", dual(d.commVal), "-", dual(d.commVal*d.boxesTotal)],
+                        ["(=) FOB Venta", dual(d.fobClient), dualKg(d.fobClient), dual(d.fobClient*d.boxesTotal)],
+                        ["(+) Flete", dual(d.freightPerBox), "-", dual(d.freightPerBox*d.boxesTotal)],
+                        [{content:"(=) CIF Venta", styles:{fillColor:[220,255,220], fontStyle:'bold'}}, dual(d.cifClient), dualKg(d.cifClient), dual(d.cifClient*d.boxesTotal)],
                     ];
                     
                     doc.autoTable({
                         startY: startY + 2,
-                        head: [body[0]],
-                        body: body.slice(1),
+                        head: [['Concepto', 'Valor Caja', 'Valor Kg', 'Total']],
+                        body: body,
                         theme: 'grid',
-                        styles: {fontSize: 8}
+                        styles: {fontSize: 8, valign:'middle'},
+                        columnStyles: {0: {cellWidth: 40}}
                     });
                     startY = doc.lastAutoTable.finalY + 10;
                 });

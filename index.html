@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculadora de Exportación Pro v16</title>
+    <title>Calculadora de Exportación Pro v18</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
@@ -12,6 +12,7 @@
         body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
         .card { background-color: white; border-radius: 0.75rem; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); padding: 1.5rem; margin-bottom: 1.5rem; }
         
+        /* Botones */
         .btn { display: inline-block; padding: 0.75rem 1.5rem; border-radius: 0.5rem; font-weight: 600; text-align: center; cursor: pointer; transition: all 0.2s; }
         .btn-primary { background-color: #4f46e5; color: white; box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.4); }
         .btn-primary:hover { background-color: #4338ca; transform: translateY(-1px); }
@@ -19,30 +20,34 @@
         .btn-success { background-color: #10b981; color: white; box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.4); } 
         .btn-success:hover { background-color: #059669; }
         .btn-danger { color: #ef4444; font-weight: bold;} .btn-danger:hover { color: #dc2626; background-color: #fee2e2; border-radius: 4px; padding: 2px 6px;}
+        .btn-dark { background-color: #1f2937; color: white; } .btn-dark:hover { background-color: #111827; }
 
-        input, select { width: 100%; padding: 0.6rem; border-radius: 0.375rem; border: 1px solid #d1d5db; background-color: #fff; font-size: 0.9rem; }
-        input:focus, select:focus { outline: none; border-color: #4f46e5; ring: 2px solid #e0e7ff; z-index: 10; }
+        /* Inputs */
+        input, select, textarea { width: 100%; padding: 0.6rem; border-radius: 0.375rem; border: 1px solid #d1d5db; background-color: #fff; font-size: 0.9rem; }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: #4f46e5; ring: 2px solid #e0e7ff; z-index: 10; }
         label { font-size: 0.75rem; font-weight: 700; color: #4b5563; margin-bottom: 0.25rem; display: block; text-transform: uppercase; letter-spacing: 0.05em; }
 
         .input-group { display: flex; border-radius: 0.375rem; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); }
         .input-group input { flex: 1; border-radius: 0.375rem 0 0 0.375rem; border-right: 0; }
         .input-group select { width: 70px; border-radius: 0 0.375rem 0.375rem 0; background-color: #f9fafb; font-weight: 600; color: #4b5563; border-left: 1px solid #d1d5db; cursor: pointer; }
-        .input-group select:hover { background-color: #f3f4f6; }
 
         .price-box { background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 0.75rem; padding: 1rem; text-align: center; transition: transform 0.2s; }
         .price-box:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
         
         .segment-group { display: flex; background-color: #f1f5f9; padding: 4px; border-radius: 0.5rem; gap: 4px; }
         .ship-option { flex: 1; cursor: pointer; border: 2px solid transparent; border-radius: 0.5rem; padding: 0.75rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem; transition: all 0.2s; background-color: #f8fafc; color: #64748b; }
-        .ship-option:hover { background-color: #e2e8f0; }
         
         input[value="maritime"]:checked + .ship-option { background-color: #eff6ff; border-color: #3b82f6; color: #1e40af; box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2); }
         input[value="air"]:checked + .ship-option { background-color: #fff7ed; border-color: #f97316; color: #9a3412; box-shadow: 0 4px 6px -1px rgba(249, 115, 22, 0.2); }
         .base-option input:checked + span { background-color: white; color: #4f46e5; box-shadow: 0 1px 3px rgba(0,0,0,0.1); font-weight: 800; border: 1px solid #e0e7ff; }
 
-        .badge-weight { font-size: 0.65rem; padding: 2px 5px; border-radius: 4px; font-weight: 700; display: inline-block; margin-top: 2px; }
-        .badge-net { background-color: #dcfce7; color: #166534; }
         .text-dual { color: #9ca3af; font-size: 0.85em; font-weight: normal; }
+
+        /* Modal */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 50; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+        .modal-content { background: white; width: 95%; max-width: 700px; border-radius: 0.75rem; padding: 2rem; transform: scale(0.95); transition: transform 0.2s; max-height: 90vh; overflow-y: auto; }
+        .modal-overlay.active .modal-content { transform: scale(1); }
     </style>
 </head>
 <body class="bg-gray-100 text-gray-800 p-4 sm:p-8">
@@ -52,7 +57,7 @@
             <div class="flex flex-col md:flex-row justify-between items-center mb-4 gap-4">
                 <div>
                     <h1 class="text-3xl font-bold text-gray-900 tracking-tight">Cotizador de Exportación</h1>
-                    <p class="text-gray-500 text-sm mt-1">Gestión Multi-Divisa & Puntos de Venta</p>
+                    <p class="text-gray-500 text-sm mt-1">Patagonia Fruits - Sistema Comercial</p>
                 </div>
             </div>
 
@@ -114,16 +119,11 @@
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
                     <div>
                         <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center"><span class="bg-indigo-100 text-indigo-700 w-6 h-6 rounded-full flex items-center justify-center text-xs mr-2">3</span>Datos del Producto</h3>
-                        
                         <div class="grid grid-cols-2 gap-4 mb-4">
                             <div><label>Especie</label><select id="species" class="w-full rounded-md"></select></div>
                             <div id="format-select-wrapper"><label>Formato</label><select id="format" class="w-full rounded-md"></select></div>
                         </div>
-
-                        <div class="mb-4">
-                            <label>Variedad / Calibre / Marca</label>
-                            <input type="text" id="variety-caliber" placeholder="Ej: Duke / 18mm / Premium Label" class="w-full rounded-md border-indigo-200">
-                        </div>
+                        <div class="mb-4"><label>Variedad / Calibre / Marca</label><input type="text" id="variety-caliber" placeholder="Ej: Duke / 18mm / Premium Label" class="w-full rounded-md border-indigo-200"></div>
 
                         <div id="manual-product-wrapper" class="hidden mb-4 p-4 border border-dashed border-gray-300 rounded-lg bg-gray-50">
                             <div class="grid grid-cols-2 gap-3 mb-3"><input type="text" id="manual-species-name" placeholder="Especie" class="w-full rounded-md"><input type="text" id="manual-format-name" placeholder="Formato" class="w-full rounded-md"></div>
@@ -136,34 +136,10 @@
                         </div>
 
                         <div class="mb-6 p-4 bg-indigo-50 rounded-lg border border-indigo-100">
-                            <div id="input-fob-proveedor-wrapper">
-                                <label class="text-indigo-900">Costo Compra FOB (Por Caja)</label>
-                                <div class="input-group">
-                                    <input type="number" id="fob-proveedor-cost" placeholder="0.00" step="0.01" class="font-bold text-indigo-700">
-                                    <select id="fob-proveedor-currency" class="currency-selector"><option value="USD">USD</option><option value="EUR">EUR</option><option value="TMP" class="tmp-currency-label">TMP</option></select>
-                                </div>
-                            </div>
-                            <div id="input-cif-proveedor-wrapper" class="hidden">
-                                <label class="text-indigo-900">Costo Compra CIF (Por Caja)</label>
-                                <div class="input-group">
-                                    <input type="number" id="cif-proveedor-cost" placeholder="0.00" step="0.01" class="font-bold text-indigo-700">
-                                    <select id="cif-proveedor-currency" class="currency-selector"><option value="USD">USD</option><option value="EUR">EUR</option><option value="TMP" class="tmp-currency-label">TMP</option></select>
-                                </div>
-                            </div>
-                            <div id="input-fob-cliente-wrapper" class="hidden">
-                                <label class="text-indigo-900">Precio Venta FOB (Por Caja)</label>
-                                <div class="input-group">
-                                    <input type="number" id="fob-cliente-price" placeholder="0.00" step="0.01" class="font-bold text-indigo-700">
-                                    <select id="fob-cliente-currency" class="currency-selector"><option value="USD">USD</option><option value="EUR">EUR</option><option value="TMP" class="tmp-currency-label">TMP</option></select>
-                                </div>
-                            </div>
-                            <div id="input-cif-cliente-wrapper" class="hidden">
-                                <label class="text-indigo-900">Precio Venta CIF (Por Caja)</label>
-                                <div class="input-group">
-                                    <input type="number" id="cif-cliente-price" placeholder="0.00" step="0.01" class="font-bold text-indigo-700">
-                                    <select id="cif-cliente-currency" class="currency-selector"><option value="USD">USD</option><option value="EUR">EUR</option><option value="TMP" class="tmp-currency-label">TMP</option></select>
-                                </div>
-                            </div>
+                            <div id="input-fob-proveedor-wrapper"><label class="text-indigo-900">Costo Compra FOB (Por Caja)</label><div class="input-group"><input type="number" id="fob-proveedor-cost" placeholder="0.00" step="0.01" class="font-bold text-indigo-700"><select id="fob-proveedor-currency" class="currency-selector"><option value="USD">USD</option><option value="EUR">EUR</option><option value="TMP" class="tmp-currency-label">TMP</option></select></div></div>
+                            <div id="input-cif-proveedor-wrapper" class="hidden"><label class="text-indigo-900">Costo Compra CIF (Por Caja)</label><div class="input-group"><input type="number" id="cif-proveedor-cost" placeholder="0.00" step="0.01" class="font-bold text-indigo-700"><select id="cif-proveedor-currency" class="currency-selector"><option value="USD">USD</option><option value="EUR">EUR</option><option value="TMP" class="tmp-currency-label">TMP</option></select></div></div>
+                            <div id="input-fob-cliente-wrapper" class="hidden"><label class="text-indigo-900">Precio Venta FOB (Por Caja)</label><div class="input-group"><input type="number" id="fob-cliente-price" placeholder="0.00" step="0.01" class="font-bold text-indigo-700"><select id="fob-cliente-currency" class="currency-selector"><option value="USD">USD</option><option value="EUR">EUR</option><option value="TMP" class="tmp-currency-label">TMP</option></select></div></div>
+                            <div id="input-cif-cliente-wrapper" class="hidden"><label class="text-indigo-900">Precio Venta CIF (Por Caja)</label><div class="input-group"><input type="number" id="cif-cliente-price" placeholder="0.00" step="0.01" class="font-bold text-indigo-700"><select id="cif-cliente-currency" class="currency-selector"><option value="USD">USD</option><option value="EUR">EUR</option><option value="TMP" class="tmp-currency-label">TMP</option></select></div></div>
                         </div>
 
                         <div class="grid grid-cols-2 gap-4">
@@ -189,46 +165,14 @@
 
                         <div id="manual-freight-wrapper" class="hidden p-4 border border-dashed border-gray-300 rounded-lg bg-gray-50 mb-4">
                             <div class="grid grid-cols-2 gap-3 mb-3"><div><label>Origen</label><input type="text" id="manual-route-origin" class="w-full rounded-md"></div><div><label>Destino</label><input type="text" id="manual-route-dest" class="w-full rounded-md"></div></div>
-                            
-                            <div id="manual-maritime-wrapper">
-                                <label class="text-blue-600">Costo Flete FCL</label>
-                                <div class="input-group">
-                                    <input type="number" id="manual-maritime-cost" placeholder="Total (Puede ser 0)" step="0.01">
-                                    <select id="manual-maritime-curr" class="currency-selector"><option>USD</option><option>EUR</option><option value="TMP" class="tmp-currency-label">TMP</option></select>
-                                </div>
-                            </div>
-                            
-                            <div id="manual-air-wrapper" class="hidden">
-                                <label class="text-orange-600">Tarifa Aérea (x Kg)</label>
-                                <div class="input-group">
-                                    <input type="number" id="manual-air-rate" placeholder="Rate/Kg" step="0.01">
-                                    <select id="manual-air-curr" class="currency-selector"><option>USD</option><option>EUR</option><option value="TMP" class="tmp-currency-label">TMP</option></select>
-                                </div>
-                            </div>
+                            <div id="manual-maritime-wrapper"><label class="text-blue-600">Costo Flete FCL</label><div class="input-group"><input type="number" id="manual-maritime-cost" placeholder="Total (Puede ser 0)" step="0.01"><select id="manual-maritime-curr" class="currency-selector"><option>USD</option><option>EUR</option><option value="TMP" class="tmp-currency-label">TMP</option></select></div></div>
+                            <div id="manual-air-wrapper" class="hidden"><label class="text-orange-600">Tarifa Aérea (x Kg)</label><div class="input-group"><input type="number" id="manual-air-rate" placeholder="Rate/Kg" step="0.01"><select id="manual-air-curr" class="currency-selector"><option>USD</option><option>EUR</option><option value="TMP" class="tmp-currency-label">TMP</option></select></div></div>
                         </div>
 
                         <div class="grid grid-cols-2 gap-4 mb-4">
-                            <div>
-                                <label>Seguro (Total)</label>
-                                <div class="input-group">
-                                    <input type="number" id="insurance-total" value="235" step="0.01">
-                                    <select id="insurance-curr" class="currency-selector"><option>USD</option><option>EUR</option><option value="TMP" class="tmp-currency-label">TMP</option></select>
-                                </div>
-                            </div>
-                            <div id="maritime-costs">
-                                <label>Servicios FCL</label>
-                                <div class="input-group">
-                                    <input type="number" id="services-total" value="500" step="0.01">
-                                    <select id="services-curr" class="currency-selector"><option>USD</option><option>EUR</option><option value="TMP" class="tmp-currency-label">TMP</option></select>
-                                </div>
-                            </div>
-                            <div id="maritime-extra">
-                                <label>Costos Extra FCL</label>
-                                <div class="input-group">
-                                    <input type="number" id="extra-costs-total" value="300" step="0.01">
-                                    <select id="extra-costs-curr" class="currency-selector"><option>USD</option><option>EUR</option><option value="TMP" class="tmp-currency-label">TMP</option></select>
-                                </div>
-                            </div>
+                            <div><label>Seguro (Total)</label><div class="input-group"><input type="number" id="insurance-total" value="235" step="0.01"><select id="insurance-curr" class="currency-selector"><option>USD</option><option>EUR</option><option value="TMP" class="tmp-currency-label">TMP</option></select></div></div>
+                            <div id="maritime-costs"><label>Servicios FCL</label><div class="input-group"><input type="number" id="services-total" value="500" step="0.01"><select id="services-curr" class="currency-selector"><option>USD</option><option>EUR</option><option value="TMP" class="tmp-currency-label">TMP</option></select></div></div>
+                            <div id="maritime-extra"><label>Costos Extra FCL</label><div class="input-group"><input type="number" id="extra-costs-total" value="300" step="0.01"><select id="extra-costs-curr" class="currency-selector"><option>USD</option><option>EUR</option><option value="TMP" class="tmp-currency-label">TMP</option></select></div></div>
                         </div>
 
                         <button id="calculate-btn" class="btn btn-primary w-full mt-8 py-3 text-lg shadow-lg hover:shadow-xl transform transition">CALCULAR</button>
@@ -248,7 +192,7 @@
                     <h2 class="text-xl font-bold text-gray-800">Constructor de Cotización</h2>
                     <div class="space-x-2">
                         <button onclick="clearHistory()" class="text-red-600 text-sm hover:underline font-bold">Borrar Todo</button>
-                        <button onclick="exportToPDF()" class="btn btn-primary bg-slate-800 hover:bg-slate-700 text-sm">Descargar PDF Profesional</button>
+                        <button onclick="openModal()" class="btn btn-primary bg-slate-800 hover:bg-slate-700 text-sm">Generar Oferta / Cierre</button>
                     </div>
                 </div>
                 <div class="overflow-x-auto rounded-lg border border-gray-200">
@@ -258,24 +202,81 @@
                                 <th class="px-3 py-3 text-left font-bold uppercase text-xs text-gray-600">Producto</th>
                                 <th class="px-3 py-3 text-left font-bold uppercase text-xs text-gray-600">Detalles</th>
                                 <th class="px-3 py-3 text-right font-bold text-blue-700 uppercase text-xs bg-blue-50">Compra (Caja)</th>
-                                <th class="px-3 py-3 text-right font-bold text-blue-700 uppercase text-xs bg-blue-50">Compra (Kg)</th>
                                 <th class="px-3 py-3 text-right font-bold text-green-700 uppercase text-xs bg-green-50">Venta (Caja)</th>
-                                <th class="px-3 py-3 text-right font-bold text-green-700 uppercase text-xs bg-green-50">Venta (Kg)</th>
                                 <th class="px-3 py-3 text-right font-bold uppercase text-xs text-gray-700 bg-gray-50">Total Línea</th>
                                 <th class="px-2 py-3"></th>
                             </tr>
                         </thead>
                         <tbody id="results-tbody" class="bg-white divide-y divide-gray-200"></tbody>
-                        <tfoot class="bg-gray-100 font-bold">
-                            <tr>
-                                <td colspan="6" class="px-4 py-3 text-right uppercase text-gray-600">Total Cotización:</td>
-                                <td class="px-4 py-3 text-right text-lg text-green-800" id="table-total-cif">0.00</td>
-                                <td></td>
-                            </tr>
-                        </tfoot>
                     </table>
                 </div>
             </div>
+
+            <div id="pdf-modal" class="modal-overlay">
+                <div class="modal-content">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-2xl font-bold text-gray-900">Generar Documento Comercial</h3>
+                        <button onclick="closeModal()" class="text-gray-400 hover:text-red-500 text-2xl font-bold">&times;</button>
+                    </div>
+
+                    <div class="mb-6">
+                        <label class="mb-2 block text-sm font-bold text-gray-700">Seleccione Tipo de Documento:</label>
+                        <div class="grid grid-cols-2 gap-4">
+                            <label class="cursor-pointer border-2 border-transparent hover:border-blue-500 bg-blue-50 rounded-lg p-4 flex items-center gap-3 transition-all has-[:checked]:border-blue-600 has-[:checked]:bg-blue-100">
+                                <input type="radio" name="doc-type" value="client" checked class="w-4 h-4 text-blue-600" onchange="updateModalTexts()">
+                                <div>
+                                    <span class="block font-bold text-blue-900">Oferta Cliente (Client Quote)</span>
+                                    <span class="block text-xs text-blue-600">Idioma: Inglés | Precios: Venta (CIF/FOB)</span>
+                                </div>
+                            </label>
+                            <label class="cursor-pointer border-2 border-transparent hover:border-indigo-500 bg-indigo-50 rounded-lg p-4 flex items-center gap-3 transition-all has-[:checked]:border-indigo-600 has-[:checked]:bg-indigo-100">
+                                <input type="radio" name="doc-type" value="provider" class="w-4 h-4 text-indigo-600" onchange="updateModalTexts()">
+                                <div>
+                                    <span class="block font-bold text-indigo-900">Cierre Proveedor (Order)</span>
+                                    <span class="block text-xs text-indigo-600">Idioma: Español | Precios: Compra (FOB)</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div>
+                            <label id="lbl-date">Fecha Validez</label>
+                            <input type="date" id="doc-validity" class="w-full border-gray-300 rounded">
+                        </div>
+                        <div>
+                            <label id="lbl-origin">Origen</label>
+                            <input type="text" id="doc-origin" value="Perú" class="w-full border-gray-300 rounded">
+                        </div>
+                        <div>
+                            <label id="lbl-incoterm">Incoterm</label>
+                            <select id="doc-incoterm" class="w-full border-gray-300 rounded">
+                                <option value="CIF">CIF</option>
+                                <option value="FOB">FOB</option>
+                                <option value="CFR">CFR</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label id="lbl-pod">Puerto Destino (POD)</label>
+                            <input type="text" id="doc-pod" class="w-full border-gray-300 rounded">
+                        </div>
+                    </div>
+
+                    <div class="mb-6">
+                        <label id="lbl-payment">Términos de Pago</label>
+                        <textarea id="doc-payment" rows="2" class="w-full border-gray-300 rounded text-sm"></textarea>
+                    </div>
+                    <div class="mb-6">
+                        <label id="lbl-window">Ventana de Embarque</label>
+                        <textarea id="doc-window" rows="2" class="w-full border-gray-300 rounded text-sm"></textarea>
+                    </div>
+
+                    <button onclick="generatePDF()" class="btn btn-dark w-full py-4 text-lg shadow-xl">
+                        Descargar PDF
+                    </button>
+                </div>
+            </div>
+
         </main>
     </div>
 
@@ -304,6 +305,9 @@
                 renderRoutes();
                 updateBaseHelpText();
                 updateTmpLabels();
+                // Set Modal Defaults
+                getEl('doc-validity').valueAsDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
+                updateModalTexts();
             }
 
             tmpCodeInput.addEventListener('input', updateTmpLabels);
@@ -321,13 +325,13 @@
             function getValInUSD(inputId, currId) {
                 const input = getEl(inputId);
                 const val = parseFloat(input.value); 
-                if (isNaN(val)) return 0; // Permitir 0
+                if (isNaN(val)) return 0;
 
                 const curr = getEl(currId) ? getEl(currId).value : 'USD'; 
                 
-                // DETECCIÓN DE MONEDA ALTERNATIVA
+                // [FIX CRÍTICO] Detección de Moneda
                 if (curr !== 'USD') {
-                    if (curr === 'TMP') detectedAltCurrency = 'TMP'; // TMP siempre gana prioridad
+                    if (curr === 'TMP') detectedAltCurrency = 'TMP';
                     else if (curr === 'EUR' && detectedAltCurrency !== 'TMP') detectedAltCurrency = 'EUR';
                 }
 
@@ -418,8 +422,9 @@
                 else txt.innerHTML = 'CIF Cliente: Partimos del precio final de venta que negociamos con el cliente.';
             }
 
+            // --- CÁLCULO ---
             function getInputs() {
-                detectedAltCurrency = null; // RESETEO CRÍTICO
+                detectedAltCurrency = null; // Reset
                 
                 const type = document.querySelector('input[name="shipping-type"]:checked').value;
                 const wNet = parseFloat(weightNetInput.value) || 0;
@@ -448,7 +453,6 @@
                     const mDest = getEl('manual-route-dest').value || 'Destino';
                     if(type === 'maritime') {
                         const cost = getValInUSD('manual-maritime-cost', 'manual-maritime-curr');
-                        // Flete 0 permitido
                         if(cost < 0) { alert('Costo Flete negativo no permitido'); return null; }
                         route = { id: 'manual', origin: mOrig, destination: mDest, cost: cost };
                     } else {
@@ -497,7 +501,7 @@
                 let fobShipper, fobClient, cifClient, cifShipper, commVal;
                 const C = inp.commP; const F = inp.freightPerBox; const O = inp.othersPerBox;
 
-                // CÁLCULO PRINCIPAL
+                // CÁLCULO
                 if (inp.calcBase === 'proveedor_fob') {
                     const basePrice = getValInUSD('fob-proveedor-cost', 'fob-proveedor-currency');
                     if(basePrice < 0) return alert('Revise Costo FOB');
@@ -535,9 +539,7 @@
                     fobShipper = fobClient - commVal - O; cifShipper = fobShipper + F;
                 }
 
-                // Aquí forzamos la actualización del detectedAlt si cambió en el último paso (precio)
-                inp.detectedAlt = detectedAltCurrency;
-
+                inp.detectedAlt = detectedAltCurrency; 
                 lastCalc = { ...inp, fobShipper, cifShipper, fobClient, cifClient, commVal };
                 renderResults(lastCalc);
             });
@@ -554,7 +556,6 @@
                 if(mainCode === 'TMP') main = { c: tmpCode, r: tmpRate, s: tmpCode+' ' };
 
                 let sec = null;
-                // Lógica de Prioridad para Moneda Secundaria
                 if (detectedCode && detectedCode !== mainCode) {
                     if (detectedCode === 'USD') sec = { c: 'USD', r: 1, s: '$' };
                     if (detectedCode === 'EUR') sec = { c: 'EUR', r: eurRate, s: '€' };
@@ -581,7 +582,7 @@
                             <p class="text-xs text-gray-400 mt-1 dual-val-sec">${fmt(valUSD, cf.sec)} ${cf.sec.c}</p>`;
                 };
                 const showKg = (valUSD) => {
-                    return `${fmt(valUSD/wNet, cf.main)} <span class="text-gray-400 font-normal">(${fmt(valUSD/wNet, cf.sec)} ${cf.sec.c})</span> /Kg Net`;
+                    return `${fmt(valUSD/wNet, cf.main)} <span class="text-gray-400 font-normal">(${fmt(valUSD/wNet, cf.sec)} ${cf.sec.c})</span> /Kg`;
                 };
 
                 grid.innerHTML = `
@@ -660,77 +661,127 @@
 
             window.removeItem = (index) => { quoteHistory.splice(index, 1); renderQuoteTable(); }
 
-            window.exportToPDF = function() {
-                if(quoteHistory.length === 0) return alert("Agrega ítems a la tabla primero");
+            // MODAL LOGIC
+            window.openModal = () => getEl('pdf-modal').classList.add('active');
+            window.closeModal = () => getEl('pdf-modal').classList.remove('active');
+            
+            window.updateModalTexts = () => {
+                const type = document.querySelector('input[name="doc-type"]:checked').value;
+                if(type === 'client') {
+                    getEl('lbl-date').innerText = 'Valid Until';
+                    getEl('lbl-origin').innerText = 'Origin';
+                    getEl('lbl-incoterm').innerText = 'Incoterm';
+                    getEl('lbl-pod').innerText = 'POD (Port of Destination)';
+                    getEl('lbl-payment').innerText = 'Payment Terms';
+                    getEl('lbl-window').innerText = 'Shipment Window';
+                    getEl('doc-origin').value = 'Peru';
+                    getEl('doc-payment').value = '50% against shipping documents 50% 30 days upon arrival';
+                    getEl('doc-window').value = 'Offer valid for ETD week 10-13';
+                } else {
+                    getEl('lbl-date').innerText = 'Validez';
+                    getEl('lbl-origin').innerText = 'Origen';
+                    getEl('lbl-incoterm').innerText = 'Incoterm';
+                    getEl('lbl-pod').innerText = 'Puerto Destino';
+                    getEl('lbl-payment').innerText = 'Términos de Pago';
+                    getEl('lbl-window').innerText = 'Ventana de Embarque';
+                    getEl('doc-origin').value = 'Perú';
+                    getEl('doc-payment').value = '50% contra documentos, 50% al arribo.';
+                    getEl('doc-window').value = 'Semana 10-13';
+                }
+            }
+
+            // PDF GENERATION
+            window.generatePDF = () => {
+                if(quoteHistory.length === 0) return alert("Tabla vacía");
                 const doc = new jsPDF();
                 const now = new Date();
+                const type = document.querySelector('input[name="doc-type"]:checked').value;
                 
-                doc.setFontSize(22); doc.setTextColor(40); doc.setFont(undefined, 'bold');
-                doc.text("COTIZACIÓN DE EXPORTACIÓN", 14, 20);
-                doc.setFontSize(10); doc.setTextColor(100); doc.setFont(undefined, 'normal');
-                doc.text(`Fecha: ${now.toLocaleDateString()} ${now.toLocaleTimeString()}`, 14, 28);
+                // DATA FROM MODAL
+                const validDate = getEl('doc-validity').value;
+                const origin = getEl('doc-origin').value;
+                const incoterm = getEl('doc-incoterm').value;
+                const pod = getEl('doc-pod').value;
+                const payment = getEl('doc-payment').value;
+                const shipWindow = getEl('doc-window').value;
+
+                // HEADER
+                doc.setFontSize(20); doc.setTextColor(0); doc.setFont(undefined, 'bold');
+                doc.text("PATAGONIA FRUITS", 14, 20);
                 
-                const cfGlobal = getDisplayConfigs(null);
-                doc.text(`Moneda Reporte: ${cfGlobal.main.c} (Ref: ${cfGlobal.sec.c})`, 14, 33);
+                doc.setFontSize(14); doc.setTextColor(type === 'client' ? 40 : 100);
+                doc.text(type === 'client' ? "COMMERCIAL QUOTATION" : "OFERTA PROVEEDOR", 14, 30);
 
-                let startY = 40;
+                // DATE TABLE (RIGHT)
+                const headers = type === 'client' ? [['Date', 'Valid Until']] : [['Fecha', 'Validez']];
+                const dates = [[now.toLocaleDateString(), validDate]];
+                
+                doc.autoTable({
+                    startY: 15, margin: {left: 130},
+                    head: headers, body: dates,
+                    theme: 'grid', styles: {halign: 'center', fontSize: 10}
+                });
 
-                const tableRows = quoteHistory.map(d => {
-                    const typeLabel = d.type === 'maritime' ? '[MAR]' : '[AIR]';
+                let startY = 45;
+
+                // MAIN TABLE
+                const tableHeaders = type === 'client' 
+                    ? [['Product', 'Size', 'Pack', 'Qty', 'UoM', 'Price (Unit)', 'Total']]
+                    : [['Producto', 'Calibre', 'Pack', 'Cant', 'UoM', 'Precio (Unit)', 'Total']];
+                
+                const tableBody = quoteHistory.map(d => {
                     const cf = getDisplayConfigs(d.detectedAlt);
-                    const txtD = (val) => `${fmt(val, cf.main)}\n(${fmt(val, cf.sec)} ${cf.sec.c})`;
-                    const txtKg = (val) => `${fmt(val/d.wNet, cf.main)}/kg\n(${fmt(val/d.wNet, cf.sec)})`;
+                    // Select Price: Client=CIF/FOB_Client, Provider=FOB_Shipper
+                    const unitPrice = type === 'client' ? d.cifClient : d.fobShipper;
+                    const totalLine = unitPrice * d.boxesTotal;
                     
                     return [
-                        `${d.format.speciesName}\n${d.format.name}\n${typeLabel}`,
+                        d.format.speciesName,
                         d.variety,
-                        `${d.boxesTotal}`,
-                        `${txtD(d.fobShipper)}\n${txtKg(d.fobShipper)}`,
-                        `${txtD(d.cifClient)}\n${txtKg(d.cifClient)}`,
-                        fmt(d.cifClient * d.boxesTotal, cf.main)
+                        d.format.name,
+                        d.boxesTotal,
+                        'boxes',
+                        `${fmt(unitPrice, cf.main)}\n${fmt(unitPrice, cf.sec)}`,
+                        fmt(totalLine, cf.main)
                     ];
                 });
 
-                const grandTotal = quoteHistory.reduce((sum, d) => sum + (d.cifClient * d.boxesTotal), 0);
-                tableRows.push([{content: 'TOTAL OPERACIÓN', colSpan: 5, styles: {halign: 'right', fontStyle: 'bold'}}, {content: fmt(grandTotal, cfGlobal.main), styles: {fontStyle: 'bold'}}]);
+                // Grand Total
+                const grandTotal = quoteHistory.reduce((s,d) => s + ((type==='client'?d.cifClient:d.fobShipper)*d.boxesTotal), 0);
+                const mainCf = getDisplayConfigs(null).main;
+                tableBody.push([{content: 'TOTAL', colSpan: 6, styles:{halign:'right', fontStyle:'bold'}}, {content: fmt(grandTotal, mainCf), styles:{fontStyle:'bold'}}]);
 
                 doc.autoTable({
                     startY: startY,
-                    head: [['Producto', 'Var/Calibre', 'Cant', 'Compra (FOB)', 'Venta (CIF)', 'Total']],
-                    body: tableRows,
+                    head: tableHeaders,
+                    body: tableBody,
                     theme: 'striped',
-                    headStyles: { fillColor: [55, 65, 81] }, 
-                    styles: { valign: 'middle', fontSize: 8 }
+                    headStyles: {fillColor: type === 'client' ? [30, 64, 175] : [79, 70, 229]},
+                    styles: {valign: 'middle'}
                 });
 
-                startY = doc.lastAutoTable.finalY + 15;
-                doc.setFontSize(12); doc.setTextColor(0); doc.setFont(undefined, 'bold');
-                doc.text("DETALLE TÉCNICO POR ÍTEM", 14, startY);
-                startY += 5;
+                // TERMS TABLE
+                const termsY = doc.lastAutoTable.finalY + 15;
+                const termsData = type === 'client' 
+                    ? [['ORIGIN', origin], ['INCOTERM', incoterm], ['POD', pod], ['PAYMENT TERMS', payment], ['SHIPMENT WINDOW', shipWindow]]
+                    : [['ORIGEN', origin], ['INCOTERM', incoterm], ['POD', pod], ['TÉRMINOS DE PAGO', payment], ['VENTANA EMBARQUE', shipWindow]];
 
-                quoteHistory.forEach((d, i) => {
-                    if (startY > 250) { doc.addPage(); startY = 20; }
-                    const cf = getDisplayConfigs(d.detectedAlt);
-                    doc.setFontSize(10); doc.setTextColor(79, 70, 229); 
-                    const typeLabel = d.type === 'maritime' ? '[ENVÍO MARÍTIMO]' : '[ENVÍO AÉREO]';
-                    doc.text(`#${i+1}. ${d.format.speciesName} - ${d.format.name} (${d.variety}) - ${typeLabel}`, 14, startY + 5);
-                    
-                    const dualCell = (val) => `${fmt(val, cf.main)}\n(${fmt(val, cf.sec)} ${cf.sec.c})`;
-                    
-                    const detailBody = [
-                        ["Precio Compra (FOB)", dualCell(d.fobShipper), `${fmt(d.fobShipper/d.wNet, cf.main)}/kg`, dualCell(d.fobShipper * d.boxesTotal)],
-                        ["(+) Seguro", dualCell(d.insurancePerBox), "-", dualCell(d.insurancePerBox * d.boxesTotal)],
-                        ["(+) Gastos Locales", dualCell(d.localServicesPerBox), "-", dualCell(d.localServicesPerBox * d.boxesTotal)],
-                        ["(+) Comisión Agente", dualCell(d.commVal), "-", dualCell(d.commVal * d.boxesTotal)],
-                        [{content: "(=) Precio Venta FOB", styles:{fontStyle:'bold'}}, {content:dualCell(d.fobClient), styles:{fontStyle:'bold'}}, {content:fmt(d.fobClient/d.wNet, cf.main)+"/kg", styles:{fontStyle:'bold'}}, {content:dualCell(d.fobClient * d.boxesTotal), styles:{fontStyle:'bold'}}],
-                        ["(+) Flete Internacional", dualCell(d.freightPerBox), "-", dualCell(d.freightPerBox * d.boxesTotal)],
-                        [{content: "(=) PRECIO VENTA CIF", styles:{fontStyle:'bold', fillColor:[220, 252, 231]}}, {content: dualCell(d.cifClient), styles:{fontStyle:'bold'}}, {content: `${fmt(d.cifClient/d.wNet, cf.main)}/kg`, styles:{fontStyle:'bold'}}, {content: dualCell(d.cifClient * d.boxesTotal), styles:{fontStyle:'bold', fillColor:[220, 252, 231]}}]
-                    ];
-                    doc.autoTable({ startY: startY + 8, head: [['Concepto', 'Valor Caja', 'Valor Kg Neto', 'Total']], body: detailBody, theme: 'grid', styles: { fontSize: 8 }, headStyles: { fillColor: [200, 200, 200], textColor: 50 }, margin: { left: 14 } });
-                    startY = doc.lastAutoTable.finalY + 10;
+                doc.autoTable({
+                    startY: termsY,
+                    body: termsData,
+                    theme: 'plain',
+                    columnStyles: {0: {fontStyle: 'bold', cellWidth: 50}},
+                    styles: {fontSize: 10, cellPadding: 3}
                 });
-                doc.save(`Cotizacion_Export_${now.getTime()}.pdf`);
-            };
+
+                // FOOTER
+                const footerY = doc.lastAutoTable.finalY + 20;
+                doc.setFontSize(8); doc.setTextColor(150);
+                doc.text("Patagonia Fruits | Export Division", 14, footerY);
+
+                doc.save(`Document_${now.getTime()}.pdf`);
+                closeModal();
+            }
 
             init(); toggleBaseInputs(); toggleShippingMode(); updateBaseHelpText();
         });

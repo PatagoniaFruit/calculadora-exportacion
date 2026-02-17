@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculadora de Exportación Pro v18</title>
+    <title>Calculadora de Exportación Pro v19</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
@@ -12,7 +12,6 @@
         body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
         .card { background-color: white; border-radius: 0.75rem; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); padding: 1.5rem; margin-bottom: 1.5rem; }
         
-        /* Botones */
         .btn { display: inline-block; padding: 0.75rem 1.5rem; border-radius: 0.5rem; font-weight: 600; text-align: center; cursor: pointer; transition: all 0.2s; }
         .btn-primary { background-color: #4f46e5; color: white; box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.4); }
         .btn-primary:hover { background-color: #4338ca; transform: translateY(-1px); }
@@ -22,7 +21,6 @@
         .btn-danger { color: #ef4444; font-weight: bold;} .btn-danger:hover { color: #dc2626; background-color: #fee2e2; border-radius: 4px; padding: 2px 6px;}
         .btn-dark { background-color: #1f2937; color: white; } .btn-dark:hover { background-color: #111827; }
 
-        /* Inputs */
         input, select, textarea { width: 100%; padding: 0.6rem; border-radius: 0.375rem; border: 1px solid #d1d5db; background-color: #fff; font-size: 0.9rem; }
         input:focus, select:focus, textarea:focus { outline: none; border-color: #4f46e5; ring: 2px solid #e0e7ff; z-index: 10; }
         label { font-size: 0.75rem; font-weight: 700; color: #4b5563; margin-bottom: 0.25rem; display: block; text-transform: uppercase; letter-spacing: 0.05em; }
@@ -57,7 +55,7 @@
             <div class="flex flex-col md:flex-row justify-between items-center mb-4 gap-4">
                 <div>
                     <h1 class="text-3xl font-bold text-gray-900 tracking-tight">Cotizador de Exportación</h1>
-                    <p class="text-gray-500 text-sm mt-1">Patagonia Fruits - Sistema Comercial</p>
+                    <p class="text-gray-500 text-sm mt-1">Gestión Comercial y Operativa</p>
                 </div>
             </div>
 
@@ -192,10 +190,10 @@
                     <h2 class="text-xl font-bold text-gray-800">Constructor de Cotización</h2>
                     <div class="space-x-2">
                         <button onclick="clearHistory()" class="text-red-600 text-sm hover:underline font-bold">Borrar Todo</button>
-                        <button onclick="openModal()" class="btn btn-primary bg-slate-800 hover:bg-slate-700 text-sm">Generar Oferta / Cierre</button>
+                        <button onclick="exportToPDF()" class="btn btn-primary bg-slate-800 hover:bg-slate-700 text-sm">Descargar Reporte General</button>
                     </div>
                 </div>
-                <div class="overflow-x-auto rounded-lg border border-gray-200">
+                <div class="overflow-x-auto rounded-lg border border-gray-200 mb-6">
                     <table class="min-w-full divide-y divide-gray-200 text-sm" id="quote-table">
                         <thead class="bg-gray-100">
                             <tr>
@@ -204,10 +202,16 @@
                                 <th class="px-3 py-3 text-right font-bold text-blue-700 uppercase text-xs bg-blue-50">Compra (Caja)</th>
                                 <th class="px-3 py-3 text-right font-bold text-green-700 uppercase text-xs bg-green-50">Venta (Caja)</th>
                                 <th class="px-3 py-3 text-right font-bold uppercase text-xs text-gray-700 bg-gray-50">Total Línea</th>
-                                <th class="px-2 py-3"></th>
+                                <th class="px-2 py-3 text-center uppercase text-xs text-gray-600">Acción</th>
                             </tr>
                         </thead>
                         <tbody id="results-tbody" class="bg-white divide-y divide-gray-200"></tbody>
+                        <tfoot class="bg-gray-100 font-bold">
+                            <tr>
+                                <td colspan="5" class="px-4 py-3 text-right uppercase text-gray-600">Total Cotización:</td>
+                                <td class="px-4 py-3 text-right text-lg text-green-800" id="table-total-cif">0.00</td>
+                            </tr>
+                        </tfoot>
                     </table>
                 </div>
             </div>
@@ -215,65 +219,35 @@
             <div id="pdf-modal" class="modal-overlay">
                 <div class="modal-content">
                     <div class="flex justify-between items-center mb-6">
-                        <h3 class="text-2xl font-bold text-gray-900">Generar Documento Comercial</h3>
+                        <h3 class="text-2xl font-bold text-gray-900">Generar Documento Formal</h3>
                         <button onclick="closeModal()" class="text-gray-400 hover:text-red-500 text-2xl font-bold">&times;</button>
                     </div>
 
                     <div class="mb-6">
-                        <label class="mb-2 block text-sm font-bold text-gray-700">Seleccione Tipo de Documento:</label>
+                        <label class="mb-2 block text-sm font-bold text-gray-700">Seleccione Tipo:</label>
                         <div class="grid grid-cols-2 gap-4">
                             <label class="cursor-pointer border-2 border-transparent hover:border-blue-500 bg-blue-50 rounded-lg p-4 flex items-center gap-3 transition-all has-[:checked]:border-blue-600 has-[:checked]:bg-blue-100">
                                 <input type="radio" name="doc-type" value="client" checked class="w-4 h-4 text-blue-600" onchange="updateModalTexts()">
-                                <div>
-                                    <span class="block font-bold text-blue-900">Oferta Cliente (Client Quote)</span>
-                                    <span class="block text-xs text-blue-600">Idioma: Inglés | Precios: Venta (CIF/FOB)</span>
-                                </div>
+                                <div><span class="block font-bold text-blue-900">Oferta Cliente (Client Quote)</span><span class="block text-xs text-blue-600">Idioma: Inglés | Precios: Venta</span></div>
                             </label>
                             <label class="cursor-pointer border-2 border-transparent hover:border-indigo-500 bg-indigo-50 rounded-lg p-4 flex items-center gap-3 transition-all has-[:checked]:border-indigo-600 has-[:checked]:bg-indigo-100">
                                 <input type="radio" name="doc-type" value="provider" class="w-4 h-4 text-indigo-600" onchange="updateModalTexts()">
-                                <div>
-                                    <span class="block font-bold text-indigo-900">Cierre Proveedor (Order)</span>
-                                    <span class="block text-xs text-indigo-600">Idioma: Español | Precios: Compra (FOB)</span>
-                                </div>
+                                <div><span class="block font-bold text-indigo-900">Cierre Proveedor (Order)</span><span class="block text-xs text-indigo-600">Idioma: Español | Precios: Compra</span></div>
                             </label>
                         </div>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                        <div>
-                            <label id="lbl-date">Fecha Validez</label>
-                            <input type="date" id="doc-validity" class="w-full border-gray-300 rounded">
-                        </div>
-                        <div>
-                            <label id="lbl-origin">Origen</label>
-                            <input type="text" id="doc-origin" value="Perú" class="w-full border-gray-300 rounded">
-                        </div>
-                        <div>
-                            <label id="lbl-incoterm">Incoterm</label>
-                            <select id="doc-incoterm" class="w-full border-gray-300 rounded">
-                                <option value="CIF">CIF</option>
-                                <option value="FOB">FOB</option>
-                                <option value="CFR">CFR</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label id="lbl-pod">Puerto Destino (POD)</label>
-                            <input type="text" id="doc-pod" class="w-full border-gray-300 rounded">
-                        </div>
+                        <div><label id="lbl-date">Fecha Validez</label><input type="date" id="doc-validity" class="w-full border-gray-300 rounded"></div>
+                        <div><label id="lbl-origin">Origen</label><input type="text" id="doc-origin" value="Perú" class="w-full border-gray-300 rounded"></div>
+                        <div><label id="lbl-incoterm">Incoterm</label><select id="doc-incoterm" class="w-full border-gray-300 rounded"><option value="CIF">CIF</option><option value="FOB">FOB</option><option value="CFR">CFR</option></select></div>
+                        <div><label id="lbl-pod">Puerto Destino (POD)</label><input type="text" id="doc-pod" class="w-full border-gray-300 rounded"></div>
                     </div>
 
-                    <div class="mb-6">
-                        <label id="lbl-payment">Términos de Pago</label>
-                        <textarea id="doc-payment" rows="2" class="w-full border-gray-300 rounded text-sm"></textarea>
-                    </div>
-                    <div class="mb-6">
-                        <label id="lbl-window">Ventana de Embarque</label>
-                        <textarea id="doc-window" rows="2" class="w-full border-gray-300 rounded text-sm"></textarea>
-                    </div>
+                    <div class="mb-6"><label id="lbl-payment">Términos de Pago</label><textarea id="doc-payment" rows="2" class="w-full border-gray-300 rounded text-sm"></textarea></div>
+                    <div class="mb-6"><label id="lbl-window">Ventana de Embarque</label><textarea id="doc-window" rows="2" class="w-full border-gray-300 rounded text-sm"></textarea></div>
 
-                    <button onclick="generatePDF()" class="btn btn-dark w-full py-4 text-lg shadow-xl">
-                        Descargar PDF
-                    </button>
+                    <button onclick="generatePDF()" class="btn btn-dark w-full py-4 text-lg shadow-xl">Descargar PDF</button>
                 </div>
             </div>
 
@@ -289,6 +263,7 @@
             let lastCalc = null;
             let quoteHistory = [];
             let detectedAltCurrency = null; 
+            let currentDocIndex = null;
 
             const getEl = (id) => document.getElementById(id);
             const speciesSelect = getEl('species');
@@ -305,8 +280,7 @@
                 renderRoutes();
                 updateBaseHelpText();
                 updateTmpLabels();
-                // Set Modal Defaults
-                getEl('doc-validity').valueAsDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
+                getEl('doc-validity').valueAsDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
                 updateModalTexts();
             }
 
@@ -329,7 +303,6 @@
 
                 const curr = getEl(currId) ? getEl(currId).value : 'USD'; 
                 
-                // [FIX CRÍTICO] Detección de Moneda
                 if (curr !== 'USD') {
                     if (curr === 'TMP') detectedAltCurrency = 'TMP';
                     else if (curr === 'EUR' && detectedAltCurrency !== 'TMP') detectedAltCurrency = 'EUR';
@@ -422,9 +395,8 @@
                 else txt.innerHTML = 'CIF Cliente: Partimos del precio final de venta que negociamos con el cliente.';
             }
 
-            // --- CÁLCULO ---
             function getInputs() {
-                detectedAltCurrency = null; // Reset
+                detectedAltCurrency = null; 
                 
                 const type = document.querySelector('input[name="shipping-type"]:checked').value;
                 const wNet = parseFloat(weightNetInput.value) || 0;
@@ -501,7 +473,6 @@
                 let fobShipper, fobClient, cifClient, cifShipper, commVal;
                 const C = inp.commP; const F = inp.freightPerBox; const O = inp.othersPerBox;
 
-                // CÁLCULO
                 if (inp.calcBase === 'proveedor_fob') {
                     const basePrice = getValInUSD('fob-proveedor-cost', 'fob-proveedor-currency');
                     if(basePrice < 0) return alert('Revise Costo FOB');
@@ -544,7 +515,6 @@
                 renderResults(lastCalc);
             });
 
-            // --- DISPLAY LOGIC ---
             function getDisplayConfigs(detectedCode) {
                 const mainCode = getEl('display-currency').value;
                 const eurRate = parseFloat(getEl('rate-eur').value) || 1;
@@ -568,6 +538,7 @@
             }
             
             function fmt(val, conf) {
+                if(!conf || isNaN(val)) return '';
                 return conf.s + (val * conf.r).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
             }
 
@@ -631,39 +602,45 @@
                 tbody.innerHTML = '';
                 let totalCif = 0;
 
-                quoteHistory.forEach((d, index) => {
-                    const cf = getDisplayConfigs(d.detectedAlt);
-                    const row = document.createElement('tr');
-                    row.className = "hover:bg-gray-50";
-                    totalCif += d.cifClient * d.boxesTotal;
-                    const shipIcon = d.type === 'maritime' ? '🚢' : '✈️';
+                try {
+                    quoteHistory.forEach((d, index) => {
+                        const cf = getDisplayConfigs(d.detectedAlt);
+                        const row = document.createElement('tr');
+                        row.className = "hover:bg-gray-50";
+                        totalCif += d.cifClient * d.boxesTotal;
+                        const shipIcon = d.type === 'maritime' ? '🚢' : '✈️';
 
-                    const dual = (val) => `<span class="table-dual-main">${fmt(val, cf.main)} ${cf.main.c}</span><br><span class="table-dual-sec">(${fmt(val, cf.sec)} ${cf.sec.c})</span>`;
-                    const dualKg = (val) => `<span class="table-dual-main">${fmt(val/d.wNet, cf.main)}/kg</span><br><span class="table-dual-sec">(${fmt(val/d.wNet, cf.sec)})</span>`;
+                        const dual = (val) => `<span class="font-bold text-gray-800">${fmt(val, cf.main)} ${cf.main.c}</span><br><span class="text-xs text-gray-500">(${fmt(val, cf.sec)} ${cf.sec.c})</span>`;
 
-                    row.innerHTML = `
-                        <td class="px-3 py-3 text-sm font-bold text-gray-800">${shipIcon} ${d.format.speciesName}<br><span class="text-xs font-normal text-gray-500">${d.format.name}</span></td>
-                        <td class="px-3 py-3 text-xs text-gray-600">${d.variety}<br>${d.boxesTotal} Cajas</td>
-                        <td class="px-3 py-3 text-right text-sm bg-blue-50 border-white border-r">${dual(d.fobShipper)}</td>
-                        <td class="px-3 py-3 text-right text-sm bg-blue-50 text-blue-800 font-medium">${dualKg(d.fobShipper)}</td>
-                        <td class="px-3 py-3 text-right text-sm bg-green-50 border-white border-r">${dual(d.cifClient)}</td>
-                        <td class="px-3 py-3 text-right text-sm bg-green-50 text-green-800 font-medium">${dualKg(d.cifClient)}</td>
-                        <td class="px-3 py-3 text-right text-sm font-bold text-gray-800 bg-gray-50">${fmt(d.cifClient*d.boxesTotal, cf.main)}</td>
-                        <td class="px-2 py-3 text-center"><button onclick="removeItem(${index})" class="text-red-500 font-bold hover:bg-red-100 rounded px-2">×</button></td>
-                    `;
-                    tbody.appendChild(row);
-                });
+                        row.innerHTML = `
+                            <td class="px-3 py-3 text-sm font-bold text-gray-800">${shipIcon} ${d.format.speciesName}<br><span class="text-xs font-normal text-gray-500">${d.format.name}</span></td>
+                            <td class="px-3 py-3 text-xs text-gray-600">${d.variety}<br>${d.boxesTotal} Cajas</td>
+                            <td class="px-3 py-3 text-right text-sm bg-blue-50 border-white border-r">${dual(d.fobShipper)}</td>
+                            <td class="px-3 py-3 text-right text-sm bg-green-50 border-white border-r">${dual(d.cifClient)}</td>
+                            <td class="px-3 py-3 text-right text-sm font-bold text-gray-800 bg-gray-50">${fmt(d.cifClient*d.boxesTotal, cf.main)}</td>
+                            <td class="px-2 py-3 text-center">
+                                <button onclick="openModal(${index})" class="text-blue-600 hover:text-blue-800 text-lg mr-2" title="Generar Oferta">📄</button>
+                                <button onclick="removeItem(${index})" class="text-red-500 hover:text-red-700 font-bold" title="Borrar">×</button>
+                            </td>
+                        `;
+                        tbody.appendChild(row);
+                    });
 
-                const currentMain = getDisplayConfigs(null).main;
-                getEl('table-total-cif').innerText = fmt(totalCif, currentMain);
-                getEl('results-table-card').classList.remove('hidden');
+                    const currentMain = getDisplayConfigs(null).main;
+                    getEl('table-total-cif').innerText = fmt(totalCif, currentMain);
+                    getEl('results-table-card').classList.remove('hidden');
+                } catch(e) { console.error("Error render table", e); }
             }
 
             window.removeItem = (index) => { quoteHistory.splice(index, 1); renderQuoteTable(); }
 
-            // MODAL LOGIC
-            window.openModal = () => getEl('pdf-modal').classList.add('active');
-            window.closeModal = () => getEl('pdf-modal').classList.remove('active');
+            // MODAL
+            window.openModal = (index) => {
+                currentDocIndex = index;
+                getEl('pdf-modal').classList.add('active');
+                updateModalTexts();
+            }
+            window.closeModal = () => { getEl('pdf-modal').classList.remove('active'); currentDocIndex = null; }
             
             window.updateModalTexts = () => {
                 const type = document.querySelector('input[name="doc-type"]:checked').value;
@@ -690,14 +667,11 @@
                 }
             }
 
-            // PDF GENERATION
             window.generatePDF = () => {
-                if(quoteHistory.length === 0) return alert("Tabla vacía");
-                const doc = new jsPDF();
-                const now = new Date();
+                if(currentDocIndex === null) return;
+                const d = quoteHistory[currentDocIndex];
                 const type = document.querySelector('input[name="doc-type"]:checked').value;
                 
-                // DATA FROM MODAL
                 const validDate = getEl('doc-validity').value;
                 const origin = getEl('doc-origin').value;
                 const incoterm = getEl('doc-incoterm').value;
@@ -705,54 +679,46 @@
                 const payment = getEl('doc-payment').value;
                 const shipWindow = getEl('doc-window').value;
 
+                // PDF Setup
+                const doc = new jsPDF();
+                const cf = getDisplayConfigs(d.detectedAlt);
+                const title = type === 'client' ? "COMMERCIAL QUOTATION" : "OFERTA PROVEEDOR";
+                
                 // HEADER
                 doc.setFontSize(20); doc.setTextColor(0); doc.setFont(undefined, 'bold');
                 doc.text("PATAGONIA FRUITS", 14, 20);
-                
                 doc.setFontSize(14); doc.setTextColor(type === 'client' ? 40 : 100);
-                doc.text(type === 'client' ? "COMMERCIAL QUOTATION" : "OFERTA PROVEEDOR", 14, 30);
+                doc.text(title, 14, 30);
 
-                // DATE TABLE (RIGHT)
+                // DATE TABLE
                 const headers = type === 'client' ? [['Date', 'Valid Until']] : [['Fecha', 'Validez']];
-                const dates = [[now.toLocaleDateString(), validDate]];
-                
-                doc.autoTable({
-                    startY: 15, margin: {left: 130},
-                    head: headers, body: dates,
-                    theme: 'grid', styles: {halign: 'center', fontSize: 10}
-                });
-
-                let startY = 45;
+                const dates = [[new Date().toLocaleDateString(), validDate]];
+                doc.autoTable({ startY: 15, margin: {left: 130}, head: headers, body: dates, theme: 'grid', styles: {halign: 'center', fontSize: 10} });
 
                 // MAIN TABLE
                 const tableHeaders = type === 'client' 
                     ? [['Product', 'Size', 'Pack', 'Qty', 'UoM', 'Price (Unit)', 'Total']]
                     : [['Producto', 'Calibre', 'Pack', 'Cant', 'UoM', 'Precio (Unit)', 'Total']];
                 
-                const tableBody = quoteHistory.map(d => {
-                    const cf = getDisplayConfigs(d.detectedAlt);
-                    // Select Price: Client=CIF/FOB_Client, Provider=FOB_Shipper
-                    const unitPrice = type === 'client' ? d.cifClient : d.fobShipper;
-                    const totalLine = unitPrice * d.boxesTotal;
-                    
-                    return [
-                        d.format.speciesName,
-                        d.variety,
-                        d.format.name,
-                        d.boxesTotal,
-                        'boxes',
-                        `${fmt(unitPrice, cf.main)}\n${fmt(unitPrice, cf.sec)}`,
-                        fmt(totalLine, cf.main)
-                    ];
-                });
+                // Logic: Client gets Sale Price (CIF/FOB Client), Provider gets Buy Price (FOB Shipper)
+                const unitPrice = type === 'client' ? d.cifClient : d.fobShipper; 
+                const totalLine = unitPrice * d.boxesTotal;
+                
+                const txtP = `${fmt(unitPrice, cf.main)}\n(${fmt(unitPrice, cf.sec)})`;
+                const txtT = `${fmt(totalLine, cf.main)}\n(${fmt(totalLine, cf.sec)})`;
 
-                // Grand Total
-                const grandTotal = quoteHistory.reduce((s,d) => s + ((type==='client'?d.cifClient:d.fobShipper)*d.boxesTotal), 0);
-                const mainCf = getDisplayConfigs(null).main;
-                tableBody.push([{content: 'TOTAL', colSpan: 6, styles:{halign:'right', fontStyle:'bold'}}, {content: fmt(grandTotal, mainCf), styles:{fontStyle:'bold'}}]);
+                const tableBody = [[
+                    d.format.speciesName,
+                    d.variety,
+                    d.format.name,
+                    d.boxesTotal,
+                    'boxes',
+                    txtP,
+                    txtT
+                ]];
 
                 doc.autoTable({
-                    startY: startY,
+                    startY: 45,
                     head: tableHeaders,
                     body: tableBody,
                     theme: 'striped',
@@ -760,11 +726,12 @@
                     styles: {valign: 'middle'}
                 });
 
-                // TERMS TABLE
+                // TERMS
                 const termsY = doc.lastAutoTable.finalY + 15;
-                const termsData = type === 'client' 
-                    ? [['ORIGIN', origin], ['INCOTERM', incoterm], ['POD', pod], ['PAYMENT TERMS', payment], ['SHIPMENT WINDOW', shipWindow]]
-                    : [['ORIGEN', origin], ['INCOTERM', incoterm], ['POD', pod], ['TÉRMINOS DE PAGO', payment], ['VENTANA EMBARQUE', shipWindow]];
+                const labels = type === 'client' ? ['ORIGIN', 'INCOTERM', 'POD', 'PAYMENT TERMS', 'SHIPMENT WINDOW'] : ['ORIGEN', 'INCOTERM', 'POD', 'TÉRMINOS PAGO', 'VENTANA EMBARQUE'];
+                const termsData = [
+                    [labels[0], origin], [labels[1], incoterm], [labels[2], pod], [labels[3], payment], [labels[4], shipWindow]
+                ];
 
                 doc.autoTable({
                     startY: termsY,
@@ -774,13 +741,21 @@
                     styles: {fontSize: 10, cellPadding: 3}
                 });
 
-                // FOOTER
                 const footerY = doc.lastAutoTable.finalY + 20;
                 doc.setFontSize(8); doc.setTextColor(150);
                 doc.text("Patagonia Fruits | Export Division", 14, footerY);
 
-                doc.save(`Document_${now.getTime()}.pdf`);
+                doc.save(`Document_${title}_${Date.now()}.pdf`);
                 closeModal();
+            }
+
+            window.exportToPDF = function() {
+                if(quoteHistory.length === 0) return alert("Tabla vacía");
+                const doc = new jsPDF();
+                doc.text("Reporte General", 14, 20);
+                const rows = quoteHistory.map(d => [d.format.speciesName, d.boxesTotal, fmt(d.fobShipper * d.boxesTotal, getDisplayConfigs(d.detectedAlt).main)]);
+                doc.autoTable({ startY: 30, head: [['Producto', 'Cajas', 'Total']], body: rows });
+                doc.save('Reporte_General.pdf');
             }
 
             init(); toggleBaseInputs(); toggleShippingMode(); updateBaseHelpText();

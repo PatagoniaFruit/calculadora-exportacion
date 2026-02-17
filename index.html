@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculadora de Exportación Pro v22</title>
+    <title>Calculadora de Exportación Pro v23</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
@@ -15,6 +15,7 @@
         .btn { display: inline-block; padding: 0.75rem 1.5rem; border-radius: 0.5rem; font-weight: 600; text-align: center; cursor: pointer; transition: all 0.2s; }
         .btn-primary { background-color: #4f46e5; color: white; box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.4); }
         .btn-primary:hover { background-color: #4338ca; transform: translateY(-1px); }
+        .btn-secondary { background-color: #f3f4f6; color: #374151; border: 1px solid #d1d5db; }
         .btn-success { background-color: #10b981; color: white; box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.4); } 
         .btn-success:hover { background-color: #059669; }
         .btn-dark { background-color: #1f2937; color: white; } .btn-dark:hover { background-color: #111827; }
@@ -533,25 +534,25 @@
                 const tmpRate = parseFloat(getEl('rate-tmp').value) || 1;
                 const tmpCode = getEl('code-tmp').value || 'TMP';
 
-                let main = { c: 'USD', r: 1, s: '$' };
-                if(mainCode === 'EUR') main = { c: 'EUR', r: eurRate, s: '€' };
-                if(mainCode === 'TMP') main = { c: tmpCode, r: tmpRate, s: tmpCode+' ' };
+                let main = { code: 'USD', rate: 1, sym: '$' };
+                if(mainCode === 'EUR') main = { code: 'EUR', rate: eurRate, sym: '€' };
+                if(mainCode === 'TMP') main = { code: tmpCode, rate: tmpRate, sym: tmpCode+' ' };
 
                 let sec = null;
                 if (detectedCode && detectedCode !== mainCode) {
-                    if (detectedCode === 'USD') sec = { c: 'USD', r: 1, s: '$' };
-                    if (detectedCode === 'EUR') sec = { c: 'EUR', r: eurRate, s: '€' };
-                    if (detectedCode === 'TMP') sec = { c: tmpCode, r: tmpRate, s: tmpCode+' ' };
+                    if (detectedCode === 'USD') sec = { code: 'USD', rate: 1, sym: '$' };
+                    if (detectedCode === 'EUR') sec = { code: 'EUR', rate: eurRate, sym: '€' };
+                    if (detectedCode === 'TMP') sec = { code: tmpCode, rate: tmpRate, sym: tmpCode+' ' };
                 } else {
-                    if (mainCode === 'USD') sec = { c: 'EUR', r: eurRate, s: '€' };
-                    else sec = { c: 'USD', r: 1/main.r, s: '$' };
+                    if (mainCode === 'USD') sec = { code: 'EUR', rate: eurRate, sym: '€' };
+                    else sec = { code: 'USD', rate: 1/main.rate, sym: '$' };
                 }
                 return { main, sec };
             }
             
             function fmt(val, conf) {
                 if(!conf || isNaN(val)) return '';
-                return conf.s + (val * conf.r).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                return conf.sym + (val * conf.rate).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
             }
 
             function renderResults(d) {
@@ -562,10 +563,10 @@
 
                 const showVals = (valUSD) => {
                     return `<p class="text-2xl font-black text-gray-800">${fmt(valUSD, cf.main)}</p>
-                            <p class="text-xs text-gray-400 mt-1 dual-val-sec">${fmt(valUSD, cf.sec)} ${cf.sec.c}</p>`;
+                            <p class="text-xs text-gray-400 mt-1 dual-val-sec">${fmt(valUSD, cf.sec)} ${cf.sec.code}</p>`;
                 };
                 const showKg = (valUSD) => {
-                    return `${fmt(valUSD/wNet, cf.main)} <span class="text-gray-400 font-normal">(${fmt(valUSD/wNet, cf.sec)} ${cf.sec.c})</span> /Kg`;
+                    return `${fmt(valUSD/wNet, cf.main)} <span class="text-gray-400 font-normal">(${fmt(valUSD/wNet, cf.sec)} ${cf.sec.code})</span> /Kg`;
                 };
 
                 grid.innerHTML = `
@@ -576,12 +577,12 @@
                 `;
 
                 const showLineDual = (valUSD) => {
-                    return `${fmt(valUSD, cf.main)} <span class="text-dual">(${fmt(valUSD, cf.sec)} ${cf.sec.c})</span>`;
+                    return `${fmt(valUSD, cf.main)} <span class="text-dual">(${fmt(valUSD, cf.sec)} ${cf.sec.code})</span>`;
                 };
 
                 content.innerHTML = `
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <div><p class="font-bold border-b mb-2 uppercase text-xs">Estructura por Caja (${cf.main.c})</p>
+                        <div><p class="font-bold border-b mb-2 uppercase text-xs">Estructura por Caja (${cf.main.code})</p>
                             <div class="flex justify-between"><span>Precio FOB Proveedor:</span> <span>${showLineDual(d.fobShipper)}</span></div>
                             <div class="flex justify-between text-xs text-gray-500"><span>(+) Gastos Logísticos:</span> <span>${showLineDual(d.othersPerBox)}</span></div>
                             <div class="flex justify-between text-xs text-gray-500"><span>(+) Comisión (${(d.commP*100).toFixed(2)}%):</span> <span>${showLineDual(d.commVal)}</span></div>
@@ -626,14 +627,19 @@
                         totalCif += d.cifClient * d.boxesTotal;
                         const shipIcon = d.type === 'maritime' ? '🚢' : '✈️';
 
-                        const dual = (val) => `<span class="font-bold text-gray-800">${fmt(val, cf.main)} ${cf.main.c}</span><br><span class="text-xs text-gray-500">(${fmt(val, cf.sec)} ${cf.sec.c})</span>`;
+                        // Check if sec exists to avoid crash
+                        let dual = `<span class="font-bold text-gray-800">${fmt(d.fobShipper, cf.main)} ${cf.main.code}</span>`;
+                        if(cf.sec) dual += `<br><span class="text-xs text-gray-500">(${fmt(d.fobShipper, cf.sec)} ${cf.sec.code})</span>`;
+                        
+                        let dualCif = `<span class="font-bold text-green-700">${fmt(d.cifClient, cf.main)}</span>`;
+                        if(cf.sec) dualCif += `<br><span class="text-xs text-gray-500">(${fmt(d.cifClient, cf.sec)})</span>`;
 
                         row.innerHTML = `
                             <td class="px-3 py-3 text-center"><input type="checkbox" class="row-check" value="${index}"></td>
                             <td class="px-3 py-3 text-sm font-bold text-gray-800">${shipIcon} ${d.format.speciesName}<br><span class="text-xs font-normal text-gray-500">${d.format.name}</span></td>
                             <td class="px-3 py-3 text-xs text-gray-600">${d.variety}<br>${d.boxesTotal} Cajas</td>
-                            <td class="px-3 py-3 text-right text-sm bg-blue-50 border-white border-r">${dual(d.fobShipper)}</td>
-                            <td class="px-3 py-3 text-right text-sm bg-green-50 border-white border-r">${dual(d.cifClient)}</td>
+                            <td class="px-3 py-3 text-right text-sm bg-blue-50 border-white border-r">${dual}</td>
+                            <td class="px-3 py-3 text-right text-sm bg-green-50 border-white border-r">${dualCif}</td>
                             <td class="px-3 py-3 text-right text-sm font-bold text-gray-800 bg-gray-50">${fmt(d.cifClient*d.boxesTotal, cf.main)}</td>
                             <td class="px-2 py-3 text-center">
                                 <button onclick="openModalLine(${index})" class="text-blue-600 hover:text-blue-800 text-lg mr-2" title="Generar Oferta">📄</button>
@@ -653,7 +659,6 @@
 
             // MODAL
             window.openModalLine = (index) => {
-                // Select only this line in the modal logic, but don't mess with checkboxes
                 const list = getEl('modal-items-list');
                 list.innerHTML = '';
                 createModalItem(index);
@@ -853,8 +858,8 @@
                     doc.setFontSize(10); doc.setTextColor(0, 0, 150);
                     doc.text(`#${i+1}. ${d.format.speciesName} - ${d.variety} (${d.type === 'maritime' ? 'MAR' : 'AIR'})`, 14, startY);
                     
-                    const dual = (val) => `${fmt(val, cf.main)}\n(${fmt(val, cf.sec)} ${cf.sec.c})`;
-                    const dualKg = (val) => `${fmt(val/d.wNet, cf.main)}/kg\n(${fmt(val/d.wNet, cf.sec)})`;
+                    const dual = (val) => `${fmt(val, cf.main)}\n(${fmt(val, cf.sec)} ${cf.sec ? cf.sec.code : ''})`;
+                    const dualKg = (val) => `${fmt(val/d.wNet, cf.main)}/kg\n(${fmt(val/d.wNet, cf.sec)} ${cf.sec ? cf.sec.code : ''})`;
 
                     const body = [
                         ["Precio Compra (FOB)", dual(d.fobShipper), dualKg(d.fobShipper), dual(d.fobShipper*d.boxesTotal)],

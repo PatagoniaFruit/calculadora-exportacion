@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculadora de Exportación Pro v30</title>
+    <title>Calculadora de Exportación Pro v29</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
@@ -504,6 +504,7 @@
                 let fobShipper, fobClient, cifClient, cifShipper, commVal;
                 const C = inp.commP; const F = inp.freightPerBox; const O = inp.othersPerBox;
 
+                // --- LOGICA DE PRECIOS V27 ---
                 if (inp.calcBase === 'proveedor_fob') {
                     const basePrice = getValInUSD('fob-proveedor-cost', 'fob-proveedor-currency');
                     if(basePrice < 0) return alert('Revise Costo FOB');
@@ -555,7 +556,7 @@
                 renderResults(lastCalc);
             });
 
-            // --- DISPLAY LOGIC ---
+            // --- DISPLAY LOGIC (CLEAN FIX) ---
             function getDisplayConfigs(detectedCode) {
                 const mainCode = getEl('display-currency').value;
                 const eurRate = parseFloat(getEl('rate-eur').value) || 1;
@@ -567,13 +568,16 @@
                 if(mainCode === 'TMP') main = { c: tmpCode, r: tmpRate, s: tmpCode+' ' };
 
                 let sec = null;
+                // SI DETECTAMOS MONEDA DISTINTA A LA DE PANTALLA, CREAMOS SEC
                 if (detectedCode && detectedCode !== mainCode) {
                     if (detectedCode === 'USD') sec = { c: 'USD', r: 1, s: '$' };
                     if (detectedCode === 'EUR') sec = { c: 'EUR', r: eurRate, s: '€' };
                     if (detectedCode === 'TMP') sec = { c: tmpCode, r: tmpRate, s: tmpCode+' ' };
                 } else if (!detectedCode && mainCode !== 'USD') {
+                    // Si todo es default USD pero pantalla es EUR, mostramos USD secundario
                     sec = { c: 'USD', r: 1/main.r, s: '$' };
                 }
+                // Si pantalla es USD y detectado es USD (o null), sec se queda NULL (limpio)
                 return { main, sec };
             }
             
@@ -659,6 +663,7 @@
                         totalCif += d.cifClient * d.boxesTotal;
                         const shipIcon = d.type === 'maritime' ? '🚢' : '✈️';
 
+                        // Check if sec exists to avoid crash
                         let dual = `<span class="font-bold text-gray-800">${fmt(d.fobShipper, cf.main)} ${cf.main.c}</span>`;
                         if(cf.sec) dual += `<br><span class="text-xs text-gray-500">(${fmt(d.fobShipper, cf.sec)} ${cf.sec.c})</span>`;
                         
@@ -876,7 +881,7 @@
                     const cf = getDisplayConfigs(d.detectedAlt);
                     return [d.format.speciesName, d.boxesTotal, fmt(d.fobShipper, cf.main), fmt(d.cifClient, cf.main), fmt(d.cifClient*d.boxesTotal, cf.main)];
                 });
-                doc.autoTable({ startY, head: [['Producto', 'Cajas', 'FOB Unit', 'CIF Unit', 'Total']], body: masterRows, theme:'grid', headStyles:{fillColor:[50,50,50]} });
+                doc.autoTable({ startY, head: [['Producto', 'Cajas', 'FOB Shipper', 'CIF Cliente', 'Total']], body: masterRows, theme:'grid', headStyles:{fillColor:[50,50,50]} });
                 startY = doc.lastAutoTable.finalY + 15;
 
                 doc.setFontSize(12); doc.text("DETALLE TÉCNICO POR ÍTEM", 14, startY);
@@ -904,9 +909,9 @@
                         ["FOB Shipper", dual(d.fobShipper), dualKg(d.fobShipper), dual(d.fobShipper*d.boxesTotal)],
                         ["(+) Logística", dual(d.othersPerBox), "-", dual(d.othersPerBox*d.boxesTotal)],
                         ["(+) Comisión", dual(d.commVal), "-", dual(d.commVal*d.boxesTotal)],
-                        ["(=) FOB Venta", dual(d.fobClient), dualKg(d.fobClient), dual(d.fobClient*d.boxesTotal)],
+                        ["(=) FOB Cliente", dual(d.fobClient), dualKg(d.fobClient), dual(d.fobClient*d.boxesTotal)],
                         ["(+) Flete", dual(d.freightPerBox), "-", dual(d.freightPerBox*d.boxesTotal)],
-                        [{content:"(=) CIF Venta", styles:{fillColor:[220,255,220], fontStyle:'bold'}}, dual(d.cifClient), dualKg(d.cifClient), dual(d.cifClient*d.boxesTotal)],
+                        [{content:"(=) CIF Cliente", styles:{fillColor:[220,255,220], fontStyle:'bold'}}, dual(d.cifClient), dualKg(d.cifClient), dual(d.cifClient*d.boxesTotal)],
                     ];
                     
                     doc.autoTable({

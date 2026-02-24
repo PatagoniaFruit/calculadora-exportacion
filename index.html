@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculadora de Exportación Pro v29</title>
+    <title>Calculadora de Exportación Pro v30</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
@@ -12,6 +12,7 @@
         body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
         .card { background-color: white; border-radius: 0.75rem; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); padding: 1.5rem; margin-bottom: 1.5rem; }
         
+        /* Botones */
         .btn { display: inline-block; padding: 0.75rem 1.5rem; border-radius: 0.5rem; font-weight: 600; text-align: center; cursor: pointer; transition: all 0.2s; }
         .btn-primary { background-color: #4f46e5; color: white; box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.4); }
         .btn-primary:hover { background-color: #4338ca; transform: translateY(-1px); }
@@ -21,6 +22,7 @@
         .btn-dark { background-color: #1f2937; color: white; } .btn-dark:hover { background-color: #111827; }
         .btn-danger { color: #ef4444; font-weight: bold;} .btn-danger:hover { color: #dc2626; background-color: #fee2e2; border-radius: 4px; padding: 2px 6px;}
 
+        /* Inputs */
         input, select, textarea { width: 100%; padding: 0.6rem; border-radius: 0.375rem; border: 1px solid #d1d5db; background-color: #fff; font-size: 0.9rem; }
         input:focus, select:focus, textarea:focus { outline: none; border-color: #4f46e5; ring: 2px solid #e0e7ff; z-index: 10; }
         label { font-size: 0.75rem; font-weight: 700; color: #4b5563; margin-bottom: 0.25rem; display: block; text-transform: uppercase; letter-spacing: 0.05em; }
@@ -198,7 +200,7 @@
                     <div class="flex flex-col items-end gap-2 w-full md:w-auto">
                         <input type="text" id="internal-ref" placeholder="Referencia / Cód. Interno" class="p-2 border rounded text-sm w-60">
                         <div class="flex gap-2">
-                            <button onclick="downloadTechnicalReport()" class="btn btn-dark text-sm shadow-md">Descargar Reporte Técnico</button>
+                            <button onclick="downloadTechnicalReport()" class="btn btn-dark text-sm shadow-md">Descargar Borrador Cotización</button>
                             <button onclick="openModal()" class="btn btn-primary bg-indigo-600 hover:bg-indigo-700 text-sm shadow-md">Generar Oferta / Cierre</button>
                         </div>
                     </div>
@@ -210,8 +212,8 @@
                                 <th class="px-3 py-3 text-center w-10"><input type="checkbox" id="check-all" onchange="toggleAll(this)"></th>
                                 <th class="px-3 py-3 text-left font-bold uppercase text-xs text-gray-600">Producto</th>
                                 <th class="px-3 py-3 text-left font-bold uppercase text-xs text-gray-600">Detalles</th>
-                                <th class="px-3 py-3 text-right font-bold text-blue-700 uppercase text-xs bg-blue-50">Compra (Caja)</th>
-                                <th class="px-3 py-3 text-right font-bold text-green-700 uppercase text-xs bg-green-50">Venta (Caja)</th>
+                                <th class="px-3 py-3 text-right font-bold text-blue-700 uppercase text-xs bg-blue-50">Compra (FOB Shipper)</th>
+                                <th class="px-3 py-3 text-right font-bold text-green-700 uppercase text-xs bg-green-50">Venta (CIF Cliente)</th>
                                 <th class="px-3 py-3 text-right font-bold uppercase text-xs text-gray-700 bg-gray-50">Total Línea</th>
                                 <th class="px-2 py-3 text-center uppercase text-xs text-gray-600">Acción</th>
                             </tr>
@@ -502,7 +504,6 @@
                 let fobShipper, fobClient, cifClient, cifShipper, commVal;
                 const C = inp.commP; const F = inp.freightPerBox; const O = inp.othersPerBox;
 
-                // --- LOGICA DE PRECIOS V27 ---
                 if (inp.calcBase === 'proveedor_fob') {
                     const basePrice = getValInUSD('fob-proveedor-cost', 'fob-proveedor-currency');
                     if(basePrice < 0) return alert('Revise Costo FOB');
@@ -515,7 +516,7 @@
                     const cifProv = getValInUSD('cif-proveedor-cost', 'cif-proveedor-currency');
                     if(cifProv < 0) return alert('Revise CIF Prov');
                     cifShipper = cifProv; fobShipper = cifProv - F;
-                    // Lógica desbloqueada
+                    
                     if (inp.commBase === 'fob_shipper') { commVal = fobShipper * C; fobClient = fobShipper + O + commVal; }
                     else if (inp.commBase === 'cif_cliente') { cifClient = (fobShipper + O + F) / (1 - C); fobClient = cifClient - F; commVal = cifClient * C; }
                     else if (inp.commBase === 'cif_shipper') { commVal = cifShipper * C; fobClient = fobShipper + O + commVal; }
@@ -534,8 +535,7 @@
                         commVal = cifClient * C;
                         fobShipper = fobClient - O - commVal;
                     } else if (inp.commBase === 'cif_shipper') {
-                        // Aprox inversa
-                        fobShipper = (fobClient - O) / (1 + C); // Simplificado
+                        fobShipper = (fobClient - O) / (1 + C); 
                         commVal = (fobShipper+F)*C;
                     } else { 
                         commVal = fobClient * C;
@@ -555,7 +555,7 @@
                 renderResults(lastCalc);
             });
 
-            // --- DISPLAY LOGIC (CLEAN FIX) ---
+            // --- DISPLAY LOGIC ---
             function getDisplayConfigs(detectedCode) {
                 const mainCode = getEl('display-currency').value;
                 const eurRate = parseFloat(getEl('rate-eur').value) || 1;
@@ -567,16 +567,13 @@
                 if(mainCode === 'TMP') main = { c: tmpCode, r: tmpRate, s: tmpCode+' ' };
 
                 let sec = null;
-                // SI DETECTAMOS MONEDA DISTINTA A LA DE PANTALLA, CREAMOS SEC
                 if (detectedCode && detectedCode !== mainCode) {
                     if (detectedCode === 'USD') sec = { c: 'USD', r: 1, s: '$' };
                     if (detectedCode === 'EUR') sec = { c: 'EUR', r: eurRate, s: '€' };
                     if (detectedCode === 'TMP') sec = { c: tmpCode, r: tmpRate, s: tmpCode+' ' };
                 } else if (!detectedCode && mainCode !== 'USD') {
-                    // Si todo es default USD pero pantalla es EUR, mostramos USD secundario
                     sec = { c: 'USD', r: 1/main.r, s: '$' };
                 }
-                // Si pantalla es USD y detectado es USD (o null), sec se queda NULL (limpio)
                 return { main, sec };
             }
             
@@ -611,7 +608,7 @@
 
                 const showLineDual = (valUSD) => {
                     let h = fmt(valUSD, cf.main);
-                    if(cf.sec) h += ` <span class="text-dual">(${fmt(valUSD, cf.sec)})</span>`;
+                    if(cf.sec) h += ` <span class="text-dual">(${fmt(valUSD, cf.sec)} ${cf.sec.c})</span>`;
                     return h;
                 };
 
@@ -662,7 +659,6 @@
                         totalCif += d.cifClient * d.boxesTotal;
                         const shipIcon = d.type === 'maritime' ? '🚢' : '✈️';
 
-                        // Check if sec exists
                         let dual = `<span class="font-bold text-gray-800">${fmt(d.fobShipper, cf.main)} ${cf.main.c}</span>`;
                         if(cf.sec) dual += `<br><span class="text-xs text-gray-500">(${fmt(d.fobShipper, cf.sec)} ${cf.sec.c})</span>`;
                         
@@ -863,14 +859,14 @@
                 closeModal();
             }
 
-            // RESTORED TECHNICAL REPORT
+            // BORRADOR DE COTIZACION (REPORTE TECNICO)
             window.downloadTechnicalReport = function() {
                 if(quoteHistory.length === 0) return alert("Tabla vacía");
                 const doc = new jsPDF();
                 const now = new Date();
                 const ref = getEl('internal-ref').value;
 
-                doc.setFontSize(18); doc.text("REPORTE TÉCNICO INTERNO", 14, 20);
+                doc.setFontSize(18); doc.text("BORRADOR DE COTIZACIÓN", 14, 20);
                 doc.setFontSize(10); doc.text(`Fecha: ${now.toLocaleDateString()} | REF: ${ref}`, 14, 28);
                 
                 let startY = 40;
@@ -905,7 +901,7 @@
                     };
 
                     const body = [
-                        ["Precio Compra (FOB)", dual(d.fobShipper), dualKg(d.fobShipper), dual(d.fobShipper*d.boxesTotal)],
+                        ["FOB Shipper", dual(d.fobShipper), dualKg(d.fobShipper), dual(d.fobShipper*d.boxesTotal)],
                         ["(+) Logística", dual(d.othersPerBox), "-", dual(d.othersPerBox*d.boxesTotal)],
                         ["(+) Comisión", dual(d.commVal), "-", dual(d.commVal*d.boxesTotal)],
                         ["(=) FOB Venta", dual(d.fobClient), dualKg(d.fobClient), dual(d.fobClient*d.boxesTotal)],
@@ -923,7 +919,7 @@
                     });
                     startY = doc.lastAutoTable.finalY + 10;
                 });
-                doc.save(`Reporte_Tecnico_${ref}.pdf`);
+                doc.save(`Borrador_Cotizacion_${ref}.pdf`);
             }
 
             init(); toggleBaseInputs(); toggleShippingMode(); updateBaseHelpText();

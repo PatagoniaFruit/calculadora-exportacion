@@ -884,7 +884,7 @@
                 doc.autoTable({ startY, head: [['Producto', 'Cajas', 'FOB Shipper', 'CIF Cliente', 'Total']], body: masterRows, theme:'grid', headStyles:{fillColor:[50,50,50]} });
                 startY = doc.lastAutoTable.finalY + 15;
 
-                doc.setFontSize(12); doc.text("DETALLE TÉCNICO POR ÍTEM", 14, startY);
+                doc.setFontSize(12); doc.text("DETALLE POR ÍTEM", 14, startY);
                 startY += 5;
 
                 quoteHistory.forEach((d, i) => {
